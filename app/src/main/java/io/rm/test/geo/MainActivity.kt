@@ -1,6 +1,9 @@
 package io.rm.test.geo
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.location.GnssAntennaInfo
 import android.location.LocationManager
 import android.location.OnNmeaMessageListener
@@ -46,6 +49,16 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val notificationChannel = NotificationChannel(
+            "geolocationChannelId",
+            "описание канала",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(notificationChannel)
 
         val directoryName = "logs"
         val directory = File(applicationContext.getExternalFilesDir(null), directoryName)

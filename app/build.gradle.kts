@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "io.rm.test.geo"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"

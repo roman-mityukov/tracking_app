@@ -18,26 +18,14 @@ import java.io.File
 
 class CurrentGeolocationWorker(applicationContext: Context, workerParameters: WorkerParameters) :
     CoroutineWorker(applicationContext, workerParameters) {
+    val powerManager =
+        this.applicationContext.getSystemService(PowerManager::class.java) as PowerManager
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.applicationContext)
     @SuppressLint("MissingPermission")
     override suspend fun doWork(): Result {
-        createForegroundInfo()
-        val directoryName = "logs"
-        val directory = File(applicationContext.getExternalFilesDir(null), directoryName)
-
-        if (directory.exists().not()) {
-            val isDirectoryCreated = directory.mkdir()
-            if (isDirectoryCreated.not()) {
-                error("Can not create directory with name $directoryName")
-            }
-        }
-        initLogs(directory)
-
-        val powerManager =
-            this.applicationContext.getSystemService(PowerManager::class.java) as PowerManager
+        //createForegroundInfo()
         logd("powerManager.isPowerSaveMode " + powerManager.isPowerSaveMode)
         logd("powerManager.locationPowerSaveMode " + powerManager.locationPowerSaveMode)
-
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.applicationContext)
         fusedLocationClient.getCurrentLocation(
             Priority.PRIORITY_HIGH_ACCURACY,
             null

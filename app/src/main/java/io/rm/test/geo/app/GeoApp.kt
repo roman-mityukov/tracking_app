@@ -3,16 +3,21 @@ package io.rm.test.geo.app
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import android.util.Log
+import androidx.work.Configuration
 import androidx.work.WorkManager
-import io.rm.test.geo.CurrentGeolocationWorker
+import dagger.hilt.android.HiltAndroidApp
+import io.rm.test.geo.core.data.worker.AppWorkerFactory
 import io.rm.test.geo.utils.log.initLogs
 import io.rm.test.geo.utils.log.logd
 import java.io.File
-import java.time.Duration
+import javax.inject.Inject
 
+@HiltAndroidApp
 class GeoApp : Application() {
+    @Inject
+    lateinit var appWorkerFactory: AppWorkerFactory
+
     override fun onCreate() {
         super.onCreate()
 
@@ -39,15 +44,10 @@ class GeoApp : Application() {
         )
         notificationManager.createNotificationChannel(notificationChannel)
 
-        val requestBuilder =
-            PeriodicWorkRequestBuilder<CurrentGeolocationWorker>(
-                repeatInterval = Duration.ofMinutes(5)
-            )
-        val workManager = WorkManager.getInstance(this.applicationContext)
-        workManager.enqueueUniquePeriodicWork(
-            "CurrentGeolocationWorker",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            requestBuilder.build()
-        )
+        val workManagerConfig = Configuration.Builder()
+            .setMinimumLoggingLevel(Log.INFO)
+            .setWorkerFactory(appWorkerFactory)
+            .build()
+        WorkManager.initialize(this, workManagerConfig)
     }
 }

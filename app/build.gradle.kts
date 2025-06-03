@@ -2,15 +2,24 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+    alias(libs.plugins.hilt)
 }
-
+hilt {
+    enableAggregatingTask = false
+}
+room {
+    schemaDirectory("$projectDir/schemas")
+}
 android {
     namespace = "io.rm.test.geo"
     compileSdk = 35
 
     defaultConfig {
         applicationId = "io.rm.test.geo"
-        minSdk = 29
+        minSdk = 28
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -40,6 +49,14 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.work.runtime.ktx)
@@ -47,6 +64,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)

@@ -1,4 +1,4 @@
-package io.rm.test.geo.ui.theme
+package io.rm.test.geo.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

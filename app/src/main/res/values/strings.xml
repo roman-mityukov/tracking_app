@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GeoApp</string>
+    <string name="home_navigation_map">Карта</string>
+    <string name="home_navigation_user_tracks">Треки</string>
 </resources>

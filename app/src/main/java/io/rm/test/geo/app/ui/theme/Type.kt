@@ -1,4 +1,4 @@
-package io.rm.test.geo.ui.theme
+package io.rm.test.geo.app.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

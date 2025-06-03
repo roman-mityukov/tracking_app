@@ -6,12 +6,30 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.protobuf)
 }
 hilt {
     enableAggregatingTask = false
 }
 room {
     schemaDirectory("$projectDir/schemas")
+}
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                register("java") {
+                    option("lite")
+                }
+                register("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }
 android {
     namespace = "io.rm.test.geo"
@@ -50,6 +68,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.datastore)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
@@ -69,6 +88,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.protobuf.kotlin.lite)
     implementation(libs.timber)
     implementation(libs.treessence)
     testImplementation(libs.junit)

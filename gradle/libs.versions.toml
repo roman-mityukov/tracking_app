@@ -5,6 +5,7 @@ agp = "8.10.1"
 apptracer = "1.0.4"
 composeBom = "2025.05.01"
 coreKtx = "1.16.0"
+datastore = "1.1.7"
 espressoCore = "3.6.1"
 hilt = "2.54"
 hiltNavigationCompose = "1.2.0"
@@ -17,6 +18,8 @@ ksp = "2.1.0-1.0.29"
 lifecycleRuntimeKtx = "2.9.0"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
+protobuf = "4.29.2"
+protobufPlugin = "0.9.4"
 room = "2.7.1"
 splashScreen = "1.0.1"
 timber = "5.0.1"
@@ -26,6 +29,7 @@ workRuntimeKtx = "2.10.1"
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -54,15 +58,18 @@ hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", ve
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
+protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 treessence = { group = "com.github.bastienpaulfr", name = "Treessence", version.ref = "treessence" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
 room = { id = "androidx.room", version.ref = "room" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 

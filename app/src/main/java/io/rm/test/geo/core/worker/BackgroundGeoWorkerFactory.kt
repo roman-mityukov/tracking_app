@@ -1,4 +1,4 @@
-package io.rm.test.geo.core.data.worker
+package io.rm.test.geo.core.worker
 
 import android.content.Context
 import androidx.work.ListenableWorker

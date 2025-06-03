@@ -1,4 +1,4 @@
-package io.rm.test.geo.core.data.worker
+package io.rm.test.geo.core.worker
 
 import androidx.work.DelegatingWorkerFactory
 import javax.inject.Inject

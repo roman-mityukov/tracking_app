@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import dagger.hilt.android.HiltAndroidApp
-import io.rm.test.geo.core.data.worker.AppWorkerFactory
+import io.rm.test.geo.core.worker.AppWorkerFactory
 import io.rm.test.geo.utils.log.initLogs
 import io.rm.test.geo.utils.log.logd
 import java.io.File

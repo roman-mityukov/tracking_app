@@ -22,6 +22,15 @@ data object HomeBaseRouteTrack
 @Serializable
 data object HomeRouteTracksList
 
+@Serializable
+data object HomeBaseRouteProfile
+
+@Serializable
+data object HomeRouteProfile
+
+@Serializable
+data object HomeRouteSettings
+
 @Composable
 fun HomeNavHost(navController: NavHostController) {
     NavHost(
@@ -43,5 +52,13 @@ fun HomeNavHost(navController: NavHostController) {
             },
         )
         tracksScreenNavigation()
+        profileScreenNavigation(
+            onSettingsSelected = {
+                navController.navigate(HomeRouteSettings)
+            },
+            onBack = {
+                navController.popBackStack()
+            }
+        )
     }
 }

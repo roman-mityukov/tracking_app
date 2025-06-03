@@ -1,5 +1,6 @@
 package io.rm.test.geo.feature.home
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
@@ -16,8 +17,8 @@ import javax.inject.Inject
 
 data class HomeNavigationItem(
     val route: Any,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
+    @DrawableRes val selectedIcon: Int,
+    @DrawableRes val unselectedIcon: Int,
     @StringRes val label: Int,
 )
 
@@ -32,15 +33,21 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             listOf(
                 HomeNavigationItem(
                     route = HomeBaseRouteMap,
-                    selectedIcon = Icons.Filled.Build,
-                    unselectedIcon = Icons.Outlined.Build,
+                    selectedIcon = R.drawable.home_map_filled,
+                    unselectedIcon = R.drawable.home_map_outlined,
                     label = R.string.home_navigation_map,
                 ),
                 HomeNavigationItem(
                     route = HomeBaseRouteTrack,
-                    selectedIcon = Icons.Filled.Person,
-                    unselectedIcon = Icons.Outlined.Person,
+                    selectedIcon = R.drawable.home_track_filled,
+                    unselectedIcon = R.drawable.home_track_outlined,
                     label = R.string.home_navigation_user_tracks,
+                ),
+                HomeNavigationItem(
+                    route = HomeBaseRouteProfile,
+                    selectedIcon = R.drawable.home_profile_filled,
+                    unselectedIcon = R.drawable.home_profile_outlined,
+                    label = R.string.home_navigation_user_profile,
                 ),
             )
         ),

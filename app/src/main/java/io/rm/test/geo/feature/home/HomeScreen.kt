@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,7 +39,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                imageVector = if (selectedItem == index) item.selectedIcon else item.unselectedIcon,
+                                painter = painterResource(if (selectedItem == index) item.selectedIcon else item.unselectedIcon),
                                 contentDescription = stringResource(item.label)
                             )
                         },

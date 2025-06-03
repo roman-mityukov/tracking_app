@@ -1,4 +1,4 @@
-package io.rm.test.geo.feature.map
+package io.rm.test.geo.feature.profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,15 +15,13 @@ import androidx.compose.ui.unit.dp
 import io.rm.test.geo.R
 
 @Composable
-fun MapScreen(onPoiSelected: (String) -> Unit) {
+fun ProfileScreen(onSettingsSelected: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column {
-            Text(stringResource(R.string.home_navigation_map))
+            Text(stringResource(R.string.home_navigation_user_profile))
             Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = {
-                onPoiSelected("")
-            }) {
-                Text("Детали")
+            Button(onClick = onSettingsSelected) {
+                Text("Настройки")
             }
         }
     }

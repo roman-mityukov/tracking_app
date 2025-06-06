@@ -10,6 +10,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,9 +32,12 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     var selectedItem by remember { mutableIntStateOf(0) }
     var oldItem = selectedItem
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
-
     val routes = state.value.navigationItems.map { it.route }
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         bottomBar = {
             NavigationBar {
                 state.value.navigationItems.forEachIndexed { index, item ->
@@ -79,7 +84,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 )
                 .fillMaxSize()
         ) {
-            HomeNavHost(navController)
+            HomeNavHost(navController, snackbarHostState)
         }
     }
 }

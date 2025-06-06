@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -31,6 +33,7 @@ protobuf {
         }
     }
 }
+
 android {
     namespace = "io.rm.test.geo"
     compileSdk = 35
@@ -43,6 +46,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val yandexMapKitKey = "YANDEX_MAPKIT_API_KEY"
+        buildConfigField(
+            type = "String",
+            name = yandexMapKitKey,
+            value = gradleLocalProperties(rootDir, providers).getProperty(yandexMapKitKey)
+        )
     }
 
     buildTypes {
@@ -52,6 +62,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                //noinspection ChromeOsAbiSupport
+                abiFilters += listOf("arm64-v8a")
+            }
         }
     }
     compileOptions {
@@ -62,7 +76,22 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
+    }
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("../user.keystore")
+            storePassword = "asdfasdf"
+            keyAlias = "asdf"
+            keyPassword = "asdfasdf"
+        }
+        create("release") {
+            storeFile = file("../user.keystore")
+            storePassword = "asdfasdf"
+            keyAlias = "asdf"
+            keyPassword = "asdfasdf"
+        }
     }
 }
 
@@ -91,6 +120,7 @@ dependencies {
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.timber)
     implementation(libs.treessence)
+    implementation(libs.yandex.map.kit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,5 +1,6 @@
 package io.rm.test.geo.feature.home
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
@@ -9,10 +10,14 @@ import io.rm.test.geo.feature.profile.ProfileScreen
 import io.rm.test.geo.feature.settings.AppSettingsScreen
 import io.rm.test.geo.feature.track.list.TracksListScreen
 
-fun NavGraphBuilder.mapScreenNavigation(onPoiSelected: (String) -> Unit, onBack: () -> Unit) {
+fun NavGraphBuilder.mapScreenNavigation(
+    onPoiSelected: (String) -> Unit,
+    onBack: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+) {
     navigation<HomeBaseRouteMap>(startDestination = HomeRouteMapCurrentLocation) {
         composable<HomeRouteMapCurrentLocation> {
-            MapScreen(onPoiSelected = onPoiSelected)
+            MapScreen(onPoiSelected = onPoiSelected, snackbarHostState = snackbarHostState)
         }
         composable<HomeRoutePoiDetails> {
             PoiDetailsScreen(onBack = onBack)

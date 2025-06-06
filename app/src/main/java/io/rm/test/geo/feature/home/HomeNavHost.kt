@@ -2,6 +2,7 @@ package io.rm.test.geo.feature.home
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -32,7 +33,7 @@ data object HomeRouteProfile
 data object HomeRouteSettings
 
 @Composable
-fun HomeNavHost(navController: NavHostController) {
+fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHostState) {
     NavHost(
         navController = navController,
         startDestination = HomeBaseRouteMap,
@@ -50,6 +51,7 @@ fun HomeNavHost(navController: NavHostController) {
             onBack = {
                 navController.popBackStack()
             },
+            snackbarHostState = snackbarHostState,
         )
         tracksScreenNavigation()
         profileScreenNavigation(

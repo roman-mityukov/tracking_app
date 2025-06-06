@@ -25,6 +25,7 @@ splashScreen = "1.0.1"
 timber = "5.0.1"
 treessence = "1.1.2"
 workRuntimeKtx = "2.10.1"
+yandexMapKit = "4.16.0-lite"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -37,7 +38,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-splashscreen = {group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen"}
+androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -62,6 +63,7 @@ protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protob
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 treessence = { group = "com.github.bastienpaulfr", name = "Treessence", version.ref = "treessence" }
+yandex-map-kit = { group = "com.yandex.android", name = "maps.mobile", version.ref = "yandexMapKit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.rm.test.geo.app.AppNavHost
 import io.rm.test.geo.app.ui.theme.GeoAppTheme
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MapKitFactory.initialize(this@MainActivity)
         enableEdgeToEdge()
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition {
@@ -47,5 +49,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MapKitFactory.getInstance().onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        MapKitFactory.getInstance().onStop()
     }
 }

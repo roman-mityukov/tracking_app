@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="GeoApp.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-03T03:02:02.419061612Z">
+        <DropdownSelection timestamp="2025-07-03T02:20:00.302157848Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/home/roman/.android/avd/Pixel_9.avd" />

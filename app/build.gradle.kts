@@ -35,15 +35,15 @@ protobuf {
 }
 
 android {
-    namespace = "io.rm.test.geo"
-    compileSdk = 35
+    namespace = "io.mityukov.geo.tracking"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "io.rm.test.geo"
+        applicationId = "io.mityukov.geo.tracking"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

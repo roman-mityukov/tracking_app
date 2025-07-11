@@ -5,7 +5,9 @@ import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.di.DispatcherIO
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -14,12 +16,23 @@ class TracksRepositoryImpl @Inject constructor(
     private val trackMapper: TrackMapper,
     @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : TracksRepository {
-    override fun getTracks(): Flow<List<Track>> {
+    private val mutableStateFlow = MutableStateFlow<List<Track>>(listOf())
+
+
+    override fun refreshTracks(): Flow<List<Track>> {
         return trackDao.getAllTracksWithPoints().map {
-            it.map {
+            val tracks = it.map {
                 trackMapper.trackWithPointsEntityToDomain(it)
             }
+            mutableStateFlow.update {
+                tracks
+            }
+            tracks
         }
+    }
+
+    override fun getTracks(): Flow<List<Track>> {
+        return mutableStateFlow
     }
 
     override fun getTrack(trackId: String): Flow<Track> {

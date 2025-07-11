@@ -24,6 +24,7 @@ import io.mityukov.geo.tracking.core.datastore.appSettingsDataStore
 import io.mityukov.geo.tracking.core.datastore.trackCaptureStatusDataStore
 import io.mityukov.geo.tracking.di.AppSettingsDataStore
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -37,6 +38,7 @@ interface DataModule {
     @Binds
     fun bindTrackCaptureService(impl: TrackCaptureServiceImpl): TrackCaptureService
 
+    @Singleton
     @Binds
     fun bindTracksRepository(impl: TracksRepositoryImpl): TracksRepository
 

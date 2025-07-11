@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
 import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
@@ -21,7 +20,6 @@ interface TrackDao {
     @Query("SELECT * FROM track WHERE id=:id")
     fun getTrack(id: String): TrackEntity
 
-    @Transaction
     @Query("SELECT * FROM track WHERE id=:id")
     fun getTrackWithPoints(id: String): Flow<TrackWithPoints>
 

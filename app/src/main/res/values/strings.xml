@@ -13,6 +13,9 @@
     <string name="track_details_title">Детали трека</string>
     <string name="track_details_delete_dialog_title">Внимание!</string>
     <string name="track_details_delete_dialog_text">Вы действительно хотите удалить трек?</string>
+    <string name="tracks_editing_title">Редактирование</string>
+    <string name="tracks_editing_delete_dialog_title">Внимание!</string>
+    <string name="tracks_editing_delete_dialog_text">Вы действительно хотите удалить выбранные треки?</string>
     <string name="profile_title">Профиль</string>
     <string name="settings_title">Настройки</string>
 </resources>

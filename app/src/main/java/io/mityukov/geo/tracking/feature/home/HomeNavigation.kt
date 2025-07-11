@@ -9,7 +9,8 @@ import io.mityukov.geo.tracking.feature.poi.PoiDetailsScreen
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
 import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsScreen
-import io.mityukov.geo.tracking.feature.track.list.TracksListScreen
+import io.mityukov.geo.tracking.feature.track.list.TracksScreen
+import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
 
 fun NavGraphBuilder.mapScreenNavigation(
     onPoiSelected: (String) -> Unit,
@@ -28,14 +29,21 @@ fun NavGraphBuilder.mapScreenNavigation(
 
 fun NavGraphBuilder.tracksScreenNavigation(
     onTrackSelected: (String) -> Unit,
+    onEditTracks: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     navigation<HomeBaseRouteTrack>(startDestination = HomeRouteTracksList) {
         composable<HomeRouteTracksList> {
-            TracksListScreen(onTrackSelected = onTrackSelected)
+            TracksScreen(
+                onNavigateToTrack = onTrackSelected,
+                onNavigateToTracksEditing = onEditTracks,
+            )
         }
         composable<HomeRouteTrackDetails> {
             TrackDetailsScreen(onBack = onBack)
+        }
+        composable<HomeRouteTracksEditing> {
+            TracksEditingScreen(onBack = onBack)
         }
     }
 }

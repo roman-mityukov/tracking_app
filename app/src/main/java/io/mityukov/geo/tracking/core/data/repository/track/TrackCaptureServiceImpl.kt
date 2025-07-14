@@ -42,7 +42,7 @@ class TrackCaptureServiceImpl @Inject constructor(
 
     private var currentTrack: TrackEntity? = null
     private val coroutineScope = CoroutineScope(coroutineContext)
-    private var job: Job? = null
+    private var subscriptionJob: Job? = null
 
     override suspend fun bind() = withContext(coroutineContext) {
         val currentTrackCaptureStatus = dataStore.data.first()
@@ -51,15 +51,9 @@ class TrackCaptureServiceImpl @Inject constructor(
             val intent = Intent(applicationContext, ForegroundGeolocationService::class.java)
             applicationContext.startService(intent)
 
-            trackDao.getTrackPoints(currentTrack!!.id).collect { points ->
-                mutableStateFlow.update {
-                    TrackCaptureStatus.Running(
-                        trackMapper.trackWithPointsEntityToDomain(
-                            trackDao.getTrackWithPoints(
-                                currentTrack!!.id
-                            ).first()
-                        )
-                    )
+            if (subscriptionJob == null) {
+                subscriptionJob = coroutineScope.launch {
+                    subscribePointsUpdate()
                 }
             }
         }
@@ -80,7 +74,7 @@ class TrackCaptureServiceImpl @Inject constructor(
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun start() = withContext(coroutineContext) {
-        job = coroutineScope.launch {
+        subscriptionJob = coroutineScope.launch {
             currentTrack = TrackEntity(id = Uuid.random().toString(), name = "Random name")
             trackDao.insertTrack(currentTrack!!)
 
@@ -107,23 +101,12 @@ class TrackCaptureServiceImpl @Inject constructor(
                 ExistingPeriodicWorkPolicy.KEEP, workRequest
             )
 
-            trackDao.getTrackPoints(currentTrack!!.id).collect { points ->
-                mutableStateFlow.update {
-                    logd("TrackCaptureService points update received")
-                    TrackCaptureStatus.Running(
-                        trackMapper.trackWithPointsEntityToDomain(
-                            trackDao.getTrackWithPoints(
-                                currentTrack!!.id
-                            ).first()
-                        )
-                    )
-                }
-            }
+            subscribePointsUpdate()
         }
     }
 
     override suspend fun stop() {
-        job?.cancel()
+        subscriptionJob?.cancel()
         val currentTrackCaptureStatus = dataStore.data.first()
 
         if (currentTrackCaptureStatus.trackCaptureEnabled) {
@@ -147,6 +130,23 @@ class TrackCaptureServiceImpl @Inject constructor(
 
             val workManager = WorkManager.getInstance(applicationContext)
             workManager.cancelUniqueWork(GeoAppProperties.TRACK_CAPTURE_WORK_NAME)
+        }
+    }
+
+    private suspend fun subscribePointsUpdate() {
+        trackDao.getTrackPoints(currentTrack!!.id).collect { points ->
+            if (currentTrack != null) {
+                logd("TrackCaptureService subscribePointsUpdate")
+                mutableStateFlow.update {
+                    TrackCaptureStatus.Running(
+                        trackMapper.trackWithPointsEntityToDomain(
+                            trackDao.getTrackWithPoints(
+                                currentTrack!!.id
+                            ).first()
+                        )
+                    )
+                }
+            }
         }
     }
 }

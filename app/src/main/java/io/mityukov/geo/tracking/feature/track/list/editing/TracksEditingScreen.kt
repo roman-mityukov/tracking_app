@@ -82,6 +82,7 @@ fun TracksEditingScreen(
                         TrackItem(
                             track = track,
                             isSelected = selectedTracks.any { it.id == track.id },
+                            isCapturedTrack = track.id == data.capturedTrack,
                             onClick = {
                                 viewModel.add(TracksEditingEvent.ChangeSelection(track.id))
                             })
@@ -110,6 +111,7 @@ fun TracksEditingScreen(
 private fun TrackItem(
     track: Track,
     isSelected: Boolean,
+    isCapturedTrack: Boolean,
     onClick: (String) -> Unit,
 ) {
     Row {
@@ -121,7 +123,7 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                TrackHeadline(track)
+                TrackHeadline(track, isCapturedTrack)
             },
             supportingContent = {
                 TrackProperties(track)

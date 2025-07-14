@@ -35,6 +35,7 @@ interface DataModule {
     @Binds
     fun bindCurrentLocationRepository(impl: GeolocationUpdatesRepositoryImpl): GeolocationUpdatesRepository
 
+    @Singleton
     @Binds
     fun bindTrackCaptureService(impl: TrackCaptureServiceImpl): TrackCaptureService
 

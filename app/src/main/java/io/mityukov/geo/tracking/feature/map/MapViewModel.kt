@@ -33,8 +33,7 @@ sealed interface MapState {
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
-    private val trackCaptureService: TrackCaptureService,
+    private val geolocationUpdatesRepository: GeolocationUpdatesRepository
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null

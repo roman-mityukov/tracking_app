@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureService
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.feature.home.HomeRouteTracksEditing
@@ -21,7 +23,11 @@ sealed interface TracksEditingEvent {
 }
 
 sealed interface TracksEditingState {
-    data class Data(val allTracks: List<Track>, val selectedTracks: List<Track>) :
+    data class Data(
+        val allTracks: List<Track>,
+        val selectedTracks: List<Track>,
+        val capturedTrack: String?,
+    ) :
         TracksEditingState
 
     data object DeletionComplete : TracksEditingState
@@ -30,14 +36,15 @@ sealed interface TracksEditingState {
 @HiltViewModel
 class TracksEditingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val tracksRepository: TracksRepository
+    private val tracksRepository: TracksRepository,
+    private val trackCaptureService: TrackCaptureService,
 ) :
     ViewModel() {
     private val routeTracksEditing = savedStateHandle.toRoute<HomeRouteTracksEditing>()
     private val selectedTracks = mutableListOf<String>(routeTracksEditing.trackId)
     private val mutableStateFlow = MutableStateFlow<TracksEditingState>(
         TracksEditingState.Data(
-            listOf(), listOf()
+            listOf(), listOf(), null
         )
     )
     val stateFlow = mutableStateFlow.asStateFlow()
@@ -45,11 +52,18 @@ class TracksEditingViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val tracks = tracksRepository.getTracks().first()
+            val captureStatus = trackCaptureService.status.first()
+
             mutableStateFlow.update {
                 TracksEditingState.Data(
                     allTracks = tracks,
                     selectedTracks = tracks.filter { track ->
                         selectedTracks.contains(track.id)
+                    },
+                    capturedTrack = if (captureStatus is TrackCaptureStatus.Running) {
+                        captureStatus.track.id
+                    } else {
+                        null
                     }
                 )
             }
@@ -74,7 +88,8 @@ class TracksEditingViewModel @Inject constructor(
                                 selectedTracks.any { selectedTrackId ->
                                     selectedTrackId == track.id
                                 }
-                            }
+                            },
+                            capturedTrack = (mutableStateFlow.value as? TracksEditingState.Data)?.capturedTrack
                         )
                     }
                 }
@@ -83,6 +98,9 @@ class TracksEditingViewModel @Inject constructor(
             TracksEditingEvent.Delete -> {
                 viewModelScope.launch {
                     selectedTracks.forEach {
+                        if ((mutableStateFlow.value as? TracksEditingState.Data)?.capturedTrack == it) {
+                            trackCaptureService.stop()
+                        }
                         tracksRepository.deleteTrack(it)
                     }
 

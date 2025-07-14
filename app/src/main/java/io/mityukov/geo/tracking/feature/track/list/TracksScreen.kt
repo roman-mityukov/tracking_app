@@ -23,11 +23,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
@@ -75,6 +81,8 @@ private fun TrackList(
         when (state) {
             is TracksState.Data -> {
                 val tracks = state.tracks
+                val capturedTrackId = state.capturedTrackId
+
                 LazyColumn(
                     modifier = Modifier.padding(paddingValues)
                 ) {
@@ -91,7 +99,12 @@ private fun TrackList(
                         }
                     } else {
                         items(items = tracks) {
-                            TrackItem(track = it, onClick = onClick, onLongPress = onLongPress)
+                            TrackItem(
+                                track = it,
+                                isCapturedTrack = it.id == capturedTrackId,
+                                onClick = onClick,
+                                onLongPress = onLongPress,
+                            )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
@@ -106,21 +119,32 @@ private fun TrackList(
 }
 
 @Composable
-fun TrackHeadline(track: Track) {
+fun TrackHeadline(track: Track, isCapturedTrack: Boolean) {
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
-    Text(
-        text = LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(track.points.first().geolocation.time),
-            ZoneId.systemDefault()
-        ).format(formatter),
-    )
+    val startTime = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(track.points.first().geolocation.time),
+        ZoneId.systemDefault()
+    ).format(formatter)
+
+    if (isCapturedTrack) {
+        Text(buildAnnotatedString {
+            append("$startTime ")
+            withStyle(
+                style = SpanStyle(
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                )
+            ) {
+                append(stringResource(R.string.tracks_item_title_capturing))
+            }
+        })
+    } else {
+        Text(startTime)
+    }
 }
 
 @Composable
-fun TrackItemProperty(
-    iconResource: Int,
-    text: String,
-) {
+fun TrackItemProperty(iconResource: Int, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             modifier = Modifier.size(16.dp),
@@ -154,6 +178,7 @@ fun TrackProperties(track: Track) {
 @Composable
 private fun TrackItem(
     track: Track,
+    isCapturedTrack: Boolean,
     onClick: (String) -> Unit,
     onLongPress: (String) -> Unit,
 ) {
@@ -170,7 +195,7 @@ private fun TrackItem(
             }
         ),
         headlineContent = {
-            TrackHeadline(track)
+            TrackHeadline(track, isCapturedTrack)
         },
         supportingContent = {
             TrackProperties(track)

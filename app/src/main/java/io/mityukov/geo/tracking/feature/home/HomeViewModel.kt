@@ -26,19 +26,19 @@ class HomeViewModel @Inject constructor() : ViewModel() {
         HomeState.Success(
             listOf(
                 HomeNavigationItem(
-                    route = HomeBaseRouteMap,
+                    route = HomeBaseRoute.HomeBaseRouteMap,
                     selectedIcon = R.drawable.home_map_filled,
                     unselectedIcon = R.drawable.home_map_outlined,
                     label = R.string.home_navigation_map,
                 ),
                 HomeNavigationItem(
-                    route = HomeBaseRouteTrack,
+                    route = HomeBaseRoute.HomeBaseRouteTrack,
                     selectedIcon = R.drawable.home_track_filled,
                     unselectedIcon = R.drawable.home_track_outlined,
                     label = R.string.home_navigation_user_tracks,
                 ),
                 HomeNavigationItem(
-                    route = HomeBaseRouteProfile,
+                    route = HomeBaseRoute.HomeBaseRouteProfile,
                     selectedIcon = R.drawable.home_profile_filled,
                     unselectedIcon = R.drawable.home_profile_outlined,
                     label = R.string.home_navigation_user_profile,

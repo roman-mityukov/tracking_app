@@ -3,7 +3,9 @@ package io.mityukov.geo.tracking.feature.home
 import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.feature.map.MapScreen
 import io.mityukov.geo.tracking.feature.poi.PoiDetailsScreen
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
@@ -17,7 +19,7 @@ fun NavGraphBuilder.mapScreenNavigation(
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    navigation<HomeBaseRouteMap>(startDestination = HomeRouteMapCurrentLocation) {
+    navigation<HomeBaseRoute.HomeBaseRouteMap>(startDestination = HomeRouteMapCurrentLocation) {
         composable<HomeRouteMapCurrentLocation> {
             MapScreen(onPoiSelected = onPoiSelected, snackbarHostState = snackbarHostState)
         }
@@ -32,14 +34,18 @@ fun NavGraphBuilder.tracksScreenNavigation(
     onEditTracks: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    navigation<HomeBaseRouteTrack>(startDestination = HomeRouteTracksList) {
+    navigation<HomeBaseRoute.HomeBaseRouteTrack>(startDestination = HomeRouteTracksList) {
         composable<HomeRouteTracksList> {
             TracksScreen(
                 onNavigateToTrack = onTrackSelected,
                 onNavigateToTracksEditing = onEditTracks,
             )
         }
-        composable<HomeRouteTrackDetails> {
+        composable<HomeRouteTrackDetails>(
+            deepLinks = listOf(navDeepLink {
+                uriPattern = DeepLinkProps.TRACK_DETAILS_URI_PATTERN
+            })
+        ) {
             TrackDetailsScreen(onBack = onBack)
         }
         composable<HomeRouteTracksEditing> {
@@ -49,7 +55,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
 }
 
 fun NavGraphBuilder.profileScreenNavigation(onSettingsSelected: () -> Unit, onBack: () -> Unit) {
-    navigation<HomeBaseRouteProfile>(startDestination = HomeRouteProfile) {
+    navigation<HomeBaseRoute.HomeBaseRouteProfile>(startDestination = HomeRouteProfile) {
         composable<HomeRouteProfile> {
             ProfileScreen(onSettingsSelected)
         }

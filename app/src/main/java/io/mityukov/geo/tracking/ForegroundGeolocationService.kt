@@ -2,6 +2,7 @@ package io.mityukov.geo.tracking
 
 import android.Manifest
 import android.app.ForegroundServiceStartNotAllowedException
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,7 +19,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import dagger.hilt.android.AndroidEntryPoint
-import io.mityukov.geo.tracking.app.GeoAppProperties
+import io.mityukov.geo.tracking.app.GeoAppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
@@ -90,19 +91,17 @@ class ForegroundGeolocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground()
-
+        startForeground(intent)
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private fun startForeground() {
+    private fun startForeground(intent: Intent?) {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -120,12 +119,25 @@ class ForegroundGeolocationService : Service() {
                 val builder: NotificationCompat.Builder =
                     NotificationCompat.Builder(
                         applicationContext,
-                        GeoAppProperties.TRACK_CAPTURE_CHANNEL_ID
+                        GeoAppProps.TRACK_CAPTURE_CHANNEL_ID
+                    )
+
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    setData(intent?.data)
+                }
+                val pendingIntent =
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
 
                 val notification = builder
                     .setContentTitle(resources.getString(R.string.track_capture_notification_title))
                     .setContentText(resources.getString(R.string.track_capture_notification_text))
+                    .setContentIntent(pendingIntent)
                     .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
                     .setOngoing(true)
                     .setSilent(true)

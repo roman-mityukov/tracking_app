@@ -27,12 +27,12 @@ import androidx.navigation.compose.rememberNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), currentSelectedItem: HomeBaseRoute) {
     val navController = rememberNavController()
-    var selectedItem by remember { mutableIntStateOf(0) }
-    var oldItem = selectedItem
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
     val routes = state.value.navigationItems.map { it.route }
+    var selectedItem by remember { mutableIntStateOf(routes.indexOf(currentSelectedItem)) }
+    var oldItem = selectedItem
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         snackbarHost = {

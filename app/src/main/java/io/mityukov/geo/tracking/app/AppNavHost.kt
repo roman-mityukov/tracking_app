@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
+import io.mityukov.geo.tracking.feature.home.HomeBaseRoute
 import io.mityukov.geo.tracking.feature.home.HomeScreen
 import io.mityukov.geo.tracking.feature.onboarding.OnboardingScreen
 import kotlinx.serialization.Serializable
@@ -40,8 +42,19 @@ fun AppNavHost(showOnboarding: Boolean) {
                 },
             )
         }
-        composable<RouteHome> {
-            HomeScreen()
+        composable<RouteHome>(
+            deepLinks = listOf(navDeepLink {
+                uriPattern = DeepLinkProps.TRACK_DETAILS_URI_PATTERN
+            })
+        ) { backStackEntry ->
+            val trackId = backStackEntry.arguments?.getString(DeepLinkProps.TRACK_DETAILS_PATH)
+            HomeScreen(
+                currentSelectedItem = if (trackId == null) {
+                    HomeBaseRoute.HomeBaseRouteMap
+                } else {
+                    HomeBaseRoute.HomeBaseRouteTrack
+                }
+            )
         }
     }
 }

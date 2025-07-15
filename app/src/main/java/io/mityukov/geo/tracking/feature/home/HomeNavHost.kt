@@ -8,17 +8,20 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import kotlinx.serialization.Serializable
 
-@Serializable
-data object HomeBaseRouteMap
+sealed interface HomeBaseRoute {
+    @Serializable
+    data object HomeBaseRouteMap : HomeBaseRoute
+    @Serializable
+    data object HomeBaseRouteProfile : HomeBaseRoute
+    @Serializable
+    data object HomeBaseRouteTrack : HomeBaseRoute
+}
 
 @Serializable
 data object HomeRouteMapCurrentLocation
 
 @Serializable
 data class HomeRoutePoiDetails(val poiId: String)
-
-@Serializable
-data object HomeBaseRouteTrack
 
 @Serializable
 data object HomeRouteTracksList
@@ -30,9 +33,6 @@ data class HomeRouteTrackDetails(val trackId: String)
 data class HomeRouteTracksEditing(val trackId: String)
 
 @Serializable
-data object HomeBaseRouteProfile
-
-@Serializable
 data object HomeRouteProfile
 
 @Serializable
@@ -42,7 +42,7 @@ data object HomeRouteSettings
 fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHostState) {
     NavHost(
         navController = navController,
-        startDestination = HomeBaseRouteMap,
+        startDestination = HomeBaseRoute.HomeBaseRouteMap,
         enterTransition = {
             EnterTransition.None
         },

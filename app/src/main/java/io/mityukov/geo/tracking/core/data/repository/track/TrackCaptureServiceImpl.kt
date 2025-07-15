@@ -2,6 +2,7 @@ package io.mityukov.geo.tracking.core.data.repository.track
 
 import android.content.Context
 import android.content.Intent
+import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -9,7 +10,8 @@ import androidx.work.WorkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.BackgroundGeolocationWorker
 import io.mityukov.geo.tracking.ForegroundGeolocationService
-import io.mityukov.geo.tracking.app.GeoAppProperties
+import io.mityukov.geo.tracking.app.DeepLinkProps
+import io.mityukov.geo.tracking.app.GeoAppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
@@ -48,8 +50,7 @@ class TrackCaptureServiceImpl @Inject constructor(
         val currentTrackCaptureStatus = dataStore.data.first()
         if (currentTrackCaptureStatus.trackCaptureEnabled) {
             currentTrack = trackDao.getTrack(currentTrackCaptureStatus.trackId)
-            val intent = Intent(applicationContext, ForegroundGeolocationService::class.java)
-            applicationContext.startService(intent)
+            startForegroundService(currentTrackCaptureStatus.trackId)
 
             if (subscriptionJob == null) {
                 subscriptionJob = coroutineScope.launch {
@@ -75,7 +76,8 @@ class TrackCaptureServiceImpl @Inject constructor(
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun start() = withContext(coroutineContext) {
         subscriptionJob = coroutineScope.launch {
-            currentTrack = TrackEntity(id = Uuid.random().toString(), name = "Random name")
+            val trackId = Uuid.random().toString()
+            currentTrack = TrackEntity(id = trackId, name = "Random name")
             trackDao.insertTrack(currentTrack!!)
 
             val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
@@ -87,17 +89,16 @@ class TrackCaptureServiceImpl @Inject constructor(
                 newTrackCaptureStatus
             }
 
-            val intent = Intent(applicationContext, ForegroundGeolocationService::class.java)
-            applicationContext.startService(intent)
+            startForegroundService(trackId)
 
             val workRequest = PeriodicWorkRequestBuilder<BackgroundGeolocationWorker>(
                 Duration.ofMinutes(
-                    GeoAppProperties.TRACK_CAPTURE_INTERVAL_MINUTES
+                    GeoAppProps.TRACK_CAPTURE_INTERVAL_MINUTES
                 )
             ).build()
             val workManager = WorkManager.getInstance(applicationContext)
             workManager.enqueueUniquePeriodicWork(
-                GeoAppProperties.TRACK_CAPTURE_WORK_NAME,
+                GeoAppProps.TRACK_CAPTURE_WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP, workRequest
             )
 
@@ -129,8 +130,19 @@ class TrackCaptureServiceImpl @Inject constructor(
             }
 
             val workManager = WorkManager.getInstance(applicationContext)
-            workManager.cancelUniqueWork(GeoAppProperties.TRACK_CAPTURE_WORK_NAME)
+            workManager.cancelUniqueWork(GeoAppProps.TRACK_CAPTURE_WORK_NAME)
         }
+    }
+
+    private fun startForegroundService(trackId: String) {
+        val intent = Intent(applicationContext, ForegroundGeolocationService::class.java)
+        intent.setData(
+            DeepLinkProps.TRACK_DETAILS_URI_PATTERN.replace(
+                "{${DeepLinkProps.TRACK_DETAILS_PATH}}",
+                trackId
+            ).toUri()
+        )
+        applicationContext.startService(intent)
     }
 
     private suspend fun subscribePointsUpdate() {

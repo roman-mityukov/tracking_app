@@ -1,5 +1,6 @@
 package io.mityukov.geo.tracking.feature.track.details
 
+import android.content.Context
 import android.graphics.PointF
 import android.text.format.DateUtils
 import android.view.ViewGroup
@@ -32,16 +33,21 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.yandex.mapkit.ScreenPoint
+import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.geometry.Polyline
+import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.LineStyle
+import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.TextStyle
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
+import io.mityukov.geo.tracking.core.model.track.Track
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -84,6 +90,7 @@ fun TrackDetailsScreen(
             TrackDetailsState.DeleteCompleted -> {
                 onBack()
             }
+
             is TrackDetailsState.Data -> {
                 val track = (state.value as TrackDetailsState.Data).data
                 val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
@@ -161,48 +168,7 @@ fun TrackDetailsScreen(
                         )
                     }
 
-                    val points = track.points.map {
-                        Point(it.geolocation.latitude, it.geolocation.longitude)
-                    }
-                    val polyline = Polyline(points)
-                    val polylineObject = mapView.map.mapObjects.addPolyline(polyline)
-                    polylineObject.apply {
-                        style = LineStyle().apply {
-                            strokeWidth = 2f
-                            setStrokeColor(ContextCompat.getColor(context, R.color.teal_700))
-                        }
-                    }
-
-                    val imageProvider =
-                        ImageProvider.fromResource(context, R.drawable.pin_track_point)
-
-                    val pinsCollection = mapView.map.mapObjects.addCollection()
-                    val textStyle = TextStyle().apply {
-                        size = 10f
-                        placement = TextStyle.Placement.RIGHT
-                        offset = 0f
-                    }
-                    points.forEachIndexed { index, point ->
-                        val placemark = pinsCollection.addPlacemark()
-                        placemark.apply {
-                            geometry = Point(point.latitude, point.longitude)
-                            setIcon(imageProvider)
-                            setText(
-                                index.toString(),
-                                textStyle,
-                            )
-                        }
-                        placemark.setIconStyle(
-                            IconStyle().apply {
-                                anchor = PointF(0.5f, 1.0f)
-                                scale = 0.5f
-                            }
-                        )
-                    }
-
-                    val geometry = Geometry.fromPolyline(polyline)
-                    val position = mapView.map.cameraPosition(geometry)
-                    mapView.map.move(position)
+                    mapView.showTrack(context, track, 1.2f)
                 }
             }
 
@@ -225,4 +191,60 @@ fun TrackDetailsScreen(
             )
         }
     }
+}
+
+fun MapView.showTrack(context: Context, track: Track, zoomOutCorrection: Float) {
+    map.mapObjects.clear()
+    val points = track.points.map {
+        Point(it.geolocation.latitude, it.geolocation.longitude)
+    }
+
+    if (points.isEmpty()) {
+        return
+    }
+
+    val imageProvider =
+        ImageProvider.fromResource(context, R.drawable.pin_track_point)
+
+    val pinsCollection = map.mapObjects.addCollection()
+    val textStyle = TextStyle().apply {
+        size = 10f
+        placement = TextStyle.Placement.RIGHT
+        offset = 0f
+    }
+    points.forEachIndexed { index, point ->
+        val placemark = pinsCollection.addPlacemark()
+        placemark.apply {
+            geometry = Point(point.latitude, point.longitude)
+            setIcon(imageProvider)
+            setText(
+                index.toString(),
+                textStyle,
+            )
+        }
+        placemark.setIconStyle(
+            IconStyle().apply {
+                anchor = PointF(0.5f, 1.0f)
+                scale = 0.5f
+            }
+        )
+    }
+
+    val geometry = if (track.points.size > 1) {
+        val polyline = Polyline(points)
+        val polylineObject = map.mapObjects.addPolyline(polyline)
+        polylineObject.apply {
+            style = LineStyle().apply {
+                strokeWidth = 2f
+                setStrokeColor(ContextCompat.getColor(context, R.color.teal_700))
+            }
+        }
+
+        Geometry.fromPolyline(polyline)
+    } else {
+        Geometry.fromPoint(points.first())
+    }
+
+    val position = map.cameraPosition(geometry)
+    map.move(CameraPosition(position.target, position.zoom - zoomOutCorrection, position.azimuth, position.tilt))
 }

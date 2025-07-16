@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
@@ -56,23 +57,51 @@ class ForegroundGeolocationService : Service() {
     @OptIn(ExperimentalUuidApi::class)
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-            logd("ForegroundGeolocationService locationResult.lastLocation ${locationResult.lastLocation} thread ${Thread.currentThread().name}")
             runBlocking(coroutineDispatcher) {
                 val currentTrackId = dataStore.data.first().trackId
                 val lastLocation = locationResult.lastLocation
 
                 if (currentTrackId != null) {
                     if (lastLocation != null) {
-                        trackDao.insertTrackPoint(
-                            TrackPointEntity(
-                                id = Uuid.random().toString(),
-                                trackId = currentTrackId,
-                                latitude = lastLocation.latitude,
-                                longitude = lastLocation.longitude,
-                                altitude = lastLocation.altitude,
-                                time = lastLocation.time,
+                        val diff = System.currentTimeMillis() - lastLocation.time
+
+                        logd("ForegroundGeolocationService lastLocation ${locationResult.lastLocation} diff $diff")
+
+                        if (diff > 60 * 1000) {
+                            logd("Skip old location")
+                            return@runBlocking
+                        }
+
+                        val points = trackDao.getTrackPoints(currentTrackId).first()
+
+                        val canBeAdded = if (points.isNotEmpty()) {
+                            val latestPoint = points.last()
+                            val results = floatArrayOf(0f, 0f, 0f)
+                            Location.distanceBetween(
+                                lastLocation.latitude,
+                                lastLocation.longitude,
+                                latestPoint.latitude,
+                                latestPoint.longitude,
+                                results
                             )
-                        )
+                            logd("Can be added ${results[0]}")
+                            results[0] > 1
+                        } else {
+                            true
+                        }
+
+                        if (canBeAdded) {
+                            trackDao.insertTrackPoint(
+                                TrackPointEntity(
+                                    id = Uuid.random().toString(),
+                                    trackId = currentTrackId,
+                                    latitude = lastLocation.latitude,
+                                    longitude = lastLocation.longitude,
+                                    altitude = lastLocation.altitude,
+                                    time = lastLocation.time,
+                                )
+                            )
+                        }
                     }
 
                 } else {

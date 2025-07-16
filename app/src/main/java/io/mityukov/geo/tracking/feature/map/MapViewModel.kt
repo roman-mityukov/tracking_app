@@ -54,10 +54,10 @@ class MapViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             trackCaptureService.status.collect { status ->
+                trackSubscriptionJob?.cancel()
                 if (status is TrackCaptureStatus.Running) {
                     geoUpdatesSubscriptionJob?.cancel()
                     geoUpdatesSubscriptionJob = null
-                    trackSubscriptionJob?.cancel()
                     trackSubscriptionJob = viewModelScope.launch {
                         tracksRepository.getTrack(status.track.id).collect { track ->
                             mutableStateFlow.update {

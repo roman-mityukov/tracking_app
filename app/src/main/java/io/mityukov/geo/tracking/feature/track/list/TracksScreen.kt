@@ -120,26 +120,28 @@ private fun TrackList(
 
 @Composable
 fun TrackHeadline(track: Track, isCapturedTrack: Boolean) {
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
-    val startTime = LocalDateTime.ofInstant(
-        Instant.ofEpochMilli(track.points.first().geolocation.time),
-        ZoneId.systemDefault()
-    ).format(formatter)
+    if (track.points.isNotEmpty()) {
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
+        val startTime = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(track.points.first().geolocation.time),
+            ZoneId.systemDefault()
+        ).format(formatter)
 
-    if (isCapturedTrack) {
-        Text(buildAnnotatedString {
-            append("$startTime ")
-            withStyle(
-                style = SpanStyle(
-                    color = Color.Red,
-                    fontWeight = FontWeight.Bold,
-                )
-            ) {
-                append(stringResource(R.string.tracks_item_title_capturing))
-            }
-        })
-    } else {
-        Text(startTime)
+        if (isCapturedTrack) {
+            Text(buildAnnotatedString {
+                append("$startTime ")
+                withStyle(
+                    style = SpanStyle(
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold,
+                    )
+                ) {
+                    append(stringResource(R.string.tracks_item_title_capturing))
+                }
+            })
+        } else {
+            Text(startTime)
+        }
     }
 }
 

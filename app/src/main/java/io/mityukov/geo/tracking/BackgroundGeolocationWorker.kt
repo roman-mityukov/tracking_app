@@ -35,45 +35,46 @@ class BackgroundGeolocationWorker(
     CoroutineWorker(applicationContext, workerParameters) {
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun doWork(): Result {
-        if (ActivityCompat.checkSelfPermission(
-                this.applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                this.applicationContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            try {
-                val location =
-                    getCurrentLocation(fusedLocationProviderClient, currentLocationRequest)
-                logd("BackgroundGeolocationWorker location ${location?.toString()}")
-
-                val currentTrackId = dataStore.data.first().trackId
-
-                if (currentTrackId != null) {
-                    if (location != null) {
-                        trackDao.insertTrackPoint(
-                            TrackPointEntity(
-                                id = Uuid.random().toString(),
-                                trackId = currentTrackId,
-                                latitude = location.latitude,
-                                longitude = location.longitude,
-                                altitude = location.altitude,
-                                time = location.time,
-                            )
-                        )
-                    }
-                }
-
-                return Result.success()
-            } catch (e: GetCurrentLocationException) {
-                logw("BackgroundGeolocationWorker GetCurrentLocationException ${e.cause}")
-                return Result.failure()
-            }
-        } else {
-            logw("BackgroundGeolocationWorker no permissions")
-            return Result.failure()
-        }
+//        if (ActivityCompat.checkSelfPermission(
+//                this.applicationContext,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+//                this.applicationContext,
+//                Manifest.permission.ACCESS_COARSE_LOCATION
+//            ) == PackageManager.PERMISSION_GRANTED
+//        ) {
+//            try {
+//                val location =
+//                    getCurrentLocation(fusedLocationProviderClient, currentLocationRequest)
+//                logd("BackgroundGeolocationWorker location ${location?.toString()}")
+//
+//                val currentTrackId = dataStore.data.first().trackId
+//
+//                if (currentTrackId != null) {
+//                    if (location != null) {
+//                        trackDao.insertTrackPoint(
+//                            TrackPointEntity(
+//                                id = Uuid.random().toString(),
+//                                trackId = currentTrackId,
+//                                latitude = location.latitude,
+//                                longitude = location.longitude,
+//                                altitude = location.altitude,
+//                                time = location.time,
+//                            )
+//                        )
+//                    }
+//                }
+//
+//                return Result.success()
+//            } catch (e: GetCurrentLocationException) {
+//                logw("BackgroundGeolocationWorker GetCurrentLocationException ${e.cause}")
+//                return Result.failure()
+//            }
+//        } else {
+//            logw("BackgroundGeolocationWorker no permissions")
+//            return Result.failure()
+//        }
+        return Result.success()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

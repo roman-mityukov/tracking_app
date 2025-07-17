@@ -5,6 +5,7 @@ import android.graphics.PointF
 import android.provider.Settings
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -53,117 +56,38 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.yandex.mapkit.Animation
 import com.yandex.mapkit.ScreenPoint
 import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
-import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
+import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.details.showTrack
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
-
-object YandexMapSettings {
-    const val ZOOM_STEP: Float = 1f
-}
-
-fun Map.zoom(value: Float) {
-    with(cameraPosition) {
-        move(
-            CameraPosition(target, zoom + value, azimuth, tilt),
-            Animation(Animation.Type.SMOOTH, 0.4f),
-            null,
-        )
-    }
-}
+import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
+import io.mityukov.geo.tracking.yandex.YandexMapSettings
+import io.mityukov.geo.tracking.yandex.zoom
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     viewModel: MapViewModel = hiltViewModel(),
-    onPoiSelected: (String) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         val context = LocalContext.current
         val mapView = remember { MapView(context) }
-        val lifecycle = LocalLifecycleOwner.current.lifecycle
-        val needMoveToCurrentLocation = remember { mutableStateOf(true) }
-
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-        LaunchedEffect(Unit) {
-            lifecycle.addObserver(
-                object : DefaultLifecycleObserver {
-                    override fun onResume(owner: LifecycleOwner) {
-                        super.onResume(owner)
-                        if (viewModelState.value !is MapState.CurrentTrack) {
-                            viewModel.add(MapEvent.StartUpdateCurrentLocation)
-                        }
-                    }
-
-                    override fun onStart(owner: LifecycleOwner) {
-                        super.onStart(owner)
-                        mapView.onStart()
-                    }
-
-                    override fun onStop(owner: LifecycleOwner) {
-                        super.onStop(owner)
-                        mapView.onStop()
-                        if (viewModelState.value !is MapState.CurrentTrack) {
-                            viewModel.add(MapEvent.StopUpdateCurrentLocation)
-                        }
-                    }
-                },
-            )
-        }
-
-        val multiplePermissionsState = rememberMultiplePermissionsState(
-            listOf(
-                android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-            )
-        )
-
-        val openShouldShowRationale = remember { mutableStateOf(false) }
-
-        if (openShouldShowRationale.value) {
-            BasicAlertDialog(
-                onDismissRequest = { openShouldShowRationale.value = false }
-
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .wrapContentHeight(),
-                    shape = MaterialTheme.shapes.large,
-                    tonalElevation = AlertDialogDefaults.TonalElevation
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text =
-                                "Чтобы узнать Ваше текущее местоположение нужно дать разрешение на доступ к геолокации устройства.",
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        TextButton(
-                            onClick = {
-                                openShouldShowRationale.value = false
-                                multiplePermissionsState.launchMultiplePermissionRequest()
-                            },
-                            modifier = Modifier.align(Alignment.End)
-                        ) {
-                            Text("Дать разрешение")
-                        }
-                    }
-                }
-            }
-        }
+        MapLifecycle(mapView, viewModel)
+        MapPermissions(viewModelState.value, snackbarHostState)
 
         AndroidView(
             factory = { context ->
@@ -176,6 +100,7 @@ fun MapScreen(
             }
         )
 
+        val needMoveToCurrentLocation = remember { mutableStateOf(true) }
         ButtonsPanel(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -193,139 +118,291 @@ fun MapScreen(
             },
         )
 
-        when (viewModelState.value) {
-            is MapState.CurrentTrack -> {
-                val track = (viewModelState.value as MapState.CurrentTrack).track
-                mapView.showTrack(context, track, 0.5f)
-                mapView.mapWindow.focusRect = ScreenRect(
-                    ScreenPoint(0f, 200f),
-                    ScreenPoint(
-                        mapView.mapWindow.width().toFloat() - 48,
-                        mapView.mapWindow.height().toFloat()
-                    )
-                )
+        MapContent(viewModelState.value, mapView, snackbarHostState, needMoveToCurrentLocation)
+    }
+}
 
-                if (track.points.isNotEmpty()) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter)
-                            .padding(
-                                horizontal = 16.dp,
-                                vertical = WindowInsets.safeDrawing.asPaddingValues()
-                                    .calculateTopPadding() + 16.dp
-                            )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                TrackHeadline(track, true)
-                                TrackProperties(track)
-                            }
-                        }
+@Composable
+private fun BoxScope.MapContent(
+    viewModelState: MapState,
+    mapView: MapView,
+    snackbarHostState: SnackbarHostState,
+    needMoveToCurrentLocation: MutableState<Boolean>
+) {
+    when (viewModelState) {
+        is MapState.CurrentTrack -> {
+            CurrentTrack(viewModelState.track, mapView)
+        }
+
+        is MapState.CurrentLocation -> {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            CurrentGeolocation(
+                viewModelState.data,
+                mapView,
+                needMoveToCurrentLocation
+            )
+        }
+
+        MapState.PendingLocationUpdates -> {
+            val snackbarMessage = stringResource(R.string.map_update_location)
+            LaunchedEffect(viewModelState) {
+                snackbarHostState.showSnackbar(snackbarMessage)
+            }
+        }
+
+        else -> {
+            // no op
+        }
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun MapPermissions(viewModelState: MapState, snackbarHostState: SnackbarHostState) {
+    val multiplePermissionsState = rememberMultiplePermissionsState(
+        listOf(
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        )
+    )
+    val showLocationRationale = remember { mutableStateOf(false) }
+    if (showLocationRationale.value) {
+        LocationRationaleDialog(
+            onNegative = {
+                showLocationRationale.value = false
+            },
+            onPositive = {
+                showLocationRationale.value = false
+                multiplePermissionsState.launchMultiplePermissionRequest()
+            },
+        )
+    }
+
+    if (viewModelState is MapState.NoLocation) {
+        NoLocation(
+            viewModelState,
+            snackbarHostState,
+            {
+                if (multiplePermissionsState.shouldShowRationale) {
+                    showLocationRationale.value = true
+                } else if (multiplePermissionsState.allPermissionsGranted.not()) {
+                    multiplePermissionsState.launchMultiplePermissionRequest()
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun MapLifecycle(
+    mapView: MapView,
+    viewModel: MapViewModel,
+) {
+    val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(Unit) {
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onResume(owner: LifecycleOwner) {
+                    super.onResume(owner)
+                    if (viewModelState.value !is MapState.CurrentTrack) {
+                        viewModel.add(MapEvent.StartUpdateCurrentLocation)
+                    }
+                }
+
+                override fun onStart(owner: LifecycleOwner) {
+                    super.onStart(owner)
+                    mapView.onStart()
+                }
+
+                override fun onStop(owner: LifecycleOwner) {
+                    super.onStop(owner)
+                    mapView.onStop()
+                    if (viewModelState.value !is MapState.CurrentTrack) {
+                        viewModel.add(MapEvent.StopUpdateCurrentLocation)
+                    }
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun NoLocation(
+    state: MapState.NoLocation,
+    snackbarHostState: SnackbarHostState,
+    onPermissionsNotGranted: () -> Unit,
+) {
+    val context = LocalContext.current
+    val message = stringResource(R.string.map_disabled_location_permission_description)
+    val actionLabel = stringResource(R.string.map_disabled_location_permission_consent)
+    LaunchedEffect(state) {
+        when (state.cause) {
+            GeolocationUpdateException.LocationDisabled -> {
+                val result = snackbarHostState.showSnackbar(
+                    message = message,
+                    actionLabel = actionLabel,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Indefinite,
+                )
+                when (result) {
+                    SnackbarResult.Dismissed -> {
+                        // no op
+                    }
+
+                    SnackbarResult.ActionPerformed -> {
+                        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                        context.startActivity(intent)
                     }
                 }
             }
 
-            is MapState.CurrentLocation -> {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                val geolocation = (viewModelState.value as MapState.CurrentLocation).data
-                mapView.map.mapObjects.clear()
-                val placemark = mapView.map.mapObjects.addPlacemark()
-                placemark.apply {
-                    geometry = Point(geolocation.latitude, geolocation.longitude)
-                    setIcon(ImageProvider.fromResource(context, R.drawable.pin_my_location))
-                }
-                placemark.setIconStyle(
-                    IconStyle().apply {
-                        anchor = PointF(0.5f, 1.0f)
-                        scale = 0.2f
-                    }
-                )
+            GeolocationUpdateException.PermissionsNotGranted -> {
+                onPermissionsNotGranted()
+            }
 
-                if (needMoveToCurrentLocation.value) {
-                    needMoveToCurrentLocation.value = false
-                    mapView.map.move(
-                        CameraPosition(
-                            Point(geolocation.latitude, geolocation.longitude),
-                            15f,
-                            0f,
-                            0f,
-                        )
+            else -> {
+                // no op
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.CurrentGeolocation(
+    geolocation: Geolocation,
+    mapView: MapView,
+    needMoveToCurrentLocation: MutableState<Boolean>
+) {
+    mapView.map.mapObjects.clear()
+    val placemark = mapView.map.mapObjects.addPlacemark()
+    placemark.apply {
+        geometry = Point(geolocation.latitude, geolocation.longitude)
+        setIcon(ImageProvider.fromResource(LocalContext.current, R.drawable.pin_my_location))
+    }
+    placemark.setIconStyle(
+        IconStyle().apply {
+            anchor = PointF(
+                TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
+                TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
+            )
+            scale = TrackAppearanceSettings.PLACEMARK_SCALE
+        }
+    )
+
+    if (needMoveToCurrentLocation.value) {
+        needMoveToCurrentLocation.value = false
+        mapView.map.move(
+            CameraPosition(
+                Point(geolocation.latitude, geolocation.longitude),
+                YandexMapSettings.ZOOM_DEFAULT,
+                0f,
+                0f,
+            )
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.TopCenter)
+            .padding(
+                horizontal = 16.dp,
+                vertical = WindowInsets.safeDrawing.asPaddingValues()
+                    .calculateTopPadding() + 16.dp
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val clipboardManager = LocalClipboardManager.current
+            Text(
+                modifier = Modifier.weight(1f),
+                text = "Последнее обновление ${geolocation.localDateTime}\n" +
+                        "Широта ${geolocation.latitude} Долгота ${geolocation.longitude}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            IconButton(onClick = {
+                clipboardManager.setText(
+                    AnnotatedString(
+                        text = "${geolocation.latitude},${geolocation.longitude}"
                     )
-                }
+                )
+            }) {
+                Icon(painterResource(R.drawable.icon_copy), null)
+            }
+        }
+    }
+}
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
-                        .padding(
-                            horizontal = 16.dp,
-                            vertical = WindowInsets.safeDrawing.asPaddingValues()
-                                .calculateTopPadding() + 16.dp
-                        )
+@Composable
+private fun BoxScope.CurrentTrack(
+    track: Track,
+    mapView: MapView,
+) {
+    if (track.points.isNotEmpty()) {
+        mapView.showTrack(
+            LocalContext.current,
+            track,
+            TrackAppearanceSettings.ZOOM_OUT_CORRECTION_MAP
+        )
+        mapView.mapWindow.focusRect = ScreenRect(
+            ScreenPoint(0f, TrackAppearanceSettings.UI_TOP_OFFSET),
+            ScreenPoint(
+                mapView.mapWindow.width()
+                    .toFloat() - TrackAppearanceSettings.UI_RIGHT_OFFSET,
+                mapView.mapWindow.height().toFloat()
+            )
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = WindowInsets.safeDrawing.asPaddingValues()
+                        .calculateTopPadding() + 16.dp
+                )
+        ) {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    TrackHeadline(track, true)
+                    TrackProperties(track)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LocationRationaleDialog(
+    onNegative: () -> Unit,
+    onPositive: () -> Unit,
+) {
+    BasicAlertDialog(
+        onDismissRequest = onNegative
+    ) {
+        Surface(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = AlertDialogDefaults.TonalElevation
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = stringResource(R.string.map_location_permission_description))
+                Spacer(modifier = Modifier.height(24.dp))
+                TextButton(
+                    onClick = onPositive,
+                    modifier = Modifier.align(Alignment.End)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val clipboardManager = LocalClipboardManager.current
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = "Последнее обновление ${geolocation.localDateTime}\nШирота ${geolocation.latitude} Долгота ${geolocation.longitude}",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        IconButton(onClick = {
-                            clipboardManager.setText(AnnotatedString(text = "${geolocation.latitude},${geolocation.longitude}"))
-                        }) {
-                            Icon(painterResource(R.drawable.icon_copy), null)
-                        }
-                    }
-                }
-            }
-
-            is MapState.NoLocation -> {
-                LaunchedEffect(viewModelState.value) {
-                    when ((viewModelState.value as MapState.NoLocation).cause) {
-                        GeolocationUpdateException.LocationDisabled -> {
-                            val result = snackbarHostState.showSnackbar(
-                                message = "Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы",
-                                actionLabel = "Включить",
-                                withDismissAction = true,
-                                duration = SnackbarDuration.Indefinite,
-                            )
-                            when (result) {
-                                SnackbarResult.Dismissed -> {
-                                    // no op
-                                }
-
-                                SnackbarResult.ActionPerformed -> {
-                                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                                    context.startActivity(intent)
-                                }
-                            }
-                        }
-
-                        GeolocationUpdateException.PermissionsNotGranted -> {
-                            if (multiplePermissionsState.shouldShowRationale) {
-                                openShouldShowRationale.value = true
-                            } else if (multiplePermissionsState.allPermissionsGranted.not()) {
-                                multiplePermissionsState.launchMultiplePermissionRequest()
-                            }
-                        }
-
-                        else -> {
-                            // no op
-                        }
-                    }
-                }
-            }
-
-            MapState.PendingLocationUpdates -> {
-                LaunchedEffect(viewModelState.value) {
-                    snackbarHostState.showSnackbar("Обновление местоположения...")
+                    Text(text = stringResource(R.string.map_location_permission_consent))
                 }
             }
         }

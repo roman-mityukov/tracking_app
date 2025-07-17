@@ -144,56 +144,44 @@ class ForegroundGeolocationService : Service() {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             return
         } else {
-            try {
-                val builder: NotificationCompat.Builder =
-                    NotificationCompat.Builder(
-                        applicationContext,
-                        GeoAppProps.TRACK_CAPTURE_CHANNEL_ID
-                    )
-
-                val intent = Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    setData(intent?.data)
-                }
-                val pendingIntent =
-                    PendingIntent.getActivity(
-                        this,
-                        0,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-
-                val notification = builder
-                    .setContentTitle(resources.getString(R.string.track_capture_notification_title))
-                    .setContentText(resources.getString(R.string.track_capture_notification_text))
-                    .setContentIntent(pendingIntent)
-                    .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                    .setOngoing(true)
-                    .setSilent(true)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .build()
-
-                ServiceCompat.startForeground(
-                    this,
-                    100,
-                    notification,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                    } else {
-                        0
-                    },
+            val builder: NotificationCompat.Builder =
+                NotificationCompat.Builder(
+                    applicationContext,
+                    GeoAppProps.TRACK_CAPTURE_CHANNEL_ID
                 )
-            } catch (e: Exception) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                    && e is ForegroundServiceStartNotAllowedException
-                ) {
-                    // App not in a valid state to start foreground service
-                    // (e.g. started from bg)
-                    logw("ForegroundGeolocationService $e")
-                } else {
-                    throw e
-                }
+
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                setData(intent?.data)
             }
+            val pendingIntent =
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+            val notification = builder
+                .setContentTitle(resources.getString(R.string.track_capture_notification_title))
+                .setContentText(resources.getString(R.string.track_capture_notification_text))
+                .setContentIntent(pendingIntent)
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+                .setOngoing(true)
+                .setSilent(true)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .build()
+
+            ServiceCompat.startForeground(
+                this,
+                100,
+                notification,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                } else {
+                    0
+                },
+            )
 
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,

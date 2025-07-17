@@ -46,13 +46,17 @@ interface DataModule {
     companion object {
         @Provides
         @AppSettingsDataStore
-        fun provideAppSettingsDataStore(@ApplicationContext context: Context): DataStore<ProtoLocalAppSettings> {
+        fun provideAppSettingsDataStore(
+            @ApplicationContext context: Context
+        ): DataStore<ProtoLocalAppSettings> {
             return context.appSettingsDataStore
         }
 
         @Provides
         @TrackCaptureStatusDataStore
-        fun provideTrackCaptureStatusDataStore(@ApplicationContext context: Context): DataStore<ProtoLocalTrackCaptureStatus> {
+        fun provideTrackCaptureStatusDataStore(
+            @ApplicationContext context: Context
+        ): DataStore<ProtoLocalTrackCaptureStatus> {
             return context.trackCaptureStatusDataStore
         }
 

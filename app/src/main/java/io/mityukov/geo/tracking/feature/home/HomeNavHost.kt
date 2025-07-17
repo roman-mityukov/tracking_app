@@ -21,9 +21,6 @@ sealed interface HomeBaseRoute {
 data object HomeRouteMapCurrentLocation
 
 @Serializable
-data class HomeRoutePoiDetails(val poiId: String)
-
-@Serializable
 data object HomeRouteTracksList
 
 @Serializable
@@ -50,15 +47,7 @@ fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHos
             ExitTransition.None
         },
     ) {
-        mapScreenNavigation(
-            onPoiSelected = {
-                navController.navigate(HomeRoutePoiDetails(it))
-            },
-            onBack = {
-                navController.popBackStack()
-            },
-            snackbarHostState = snackbarHostState,
-        )
+        mapScreenNavigation(snackbarHostState = snackbarHostState)
         tracksScreenNavigation(
             onTrackSelected = { trackId ->
                 navController.navigate(HomeRouteTrackDetails(trackId))

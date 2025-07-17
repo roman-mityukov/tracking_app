@@ -14,11 +14,11 @@ import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
 import javax.inject.Inject
 
 class BackgroundGeoWorkerFactory @Inject constructor(
-    private val fusedLocationProviderClient: FusedLocationProviderClient,
-    private val currentLocationRequest: CurrentLocationRequest,
-    private val trackDao: TrackDao,
-    @TrackCaptureStatusDataStore
-    private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>
+//    private val fusedLocationProviderClient: FusedLocationProviderClient,
+//    private val currentLocationRequest: CurrentLocationRequest,
+//    private val trackDao: TrackDao,
+//    @TrackCaptureStatusDataStore
+//    private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>
 ) : WorkerFactory() {
     override fun createWorker(
         appContext: Context,
@@ -27,10 +27,10 @@ class BackgroundGeoWorkerFactory @Inject constructor(
     ): ListenableWorker? {
         return when (workerClassName) {
             BackgroundGeolocationWorker::class.java.name -> BackgroundGeolocationWorker(
-                trackDao,
-                dataStore,
-                fusedLocationProviderClient,
-                currentLocationRequest,
+//                trackDao,
+//                dataStore,
+//                fusedLocationProviderClient,
+//                currentLocationRequest,
                 appContext,
                 workerParameters
             )

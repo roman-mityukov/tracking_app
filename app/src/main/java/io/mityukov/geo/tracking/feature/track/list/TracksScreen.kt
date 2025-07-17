@@ -33,15 +33,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.app.GeoAppProps
 import io.mityukov.geo.tracking.core.model.track.Track
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,11 +117,8 @@ private fun TrackList(
 @Composable
 fun TrackHeadline(track: Track, isCapturedTrack: Boolean) {
     if (track.points.isNotEmpty()) {
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
-        val startTime = LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(track.points.first().geolocation.time),
-            ZoneId.systemDefault()
-        ).format(formatter)
+        val startTime =
+            track.points.first().geolocation.localDateTime.format(GeoAppProps.UI_DATE_TIME_FORMATTER)
 
         if (isCapturedTrack) {
             Text(buildAnnotatedString {

@@ -6,6 +6,7 @@ apptracer = "1.1.0"
 composeBom = "2025.06.01"
 coreKtx = "1.16.0"
 datastore = "1.1.7"
+detektPlugin = "1.23.8"
 espressoCore = "3.6.1"
 hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
@@ -67,6 +68,7 @@ yandex-map-kit = { group = "com.yandex.android", name = "maps.mobile", version.r
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektPlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

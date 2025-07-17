@@ -5,6 +5,7 @@ import android.graphics.PointF
 import android.text.format.DateUtils
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,25 +34,20 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.yandex.mapkit.ScreenPoint
-import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.LineStyle
-import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.TextStyle
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.app.GeoAppProps
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
 import io.mityukov.geo.tracking.core.model.track.Track
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,83 +89,8 @@ fun TrackDetailsScreen(
 
             is TrackDetailsState.Data -> {
                 val track = (state.value as TrackDetailsState.Data).data
-                val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
-                Column(
-                    modifier = Modifier.padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = paddingValues.calculateTopPadding(),
-                        bottom = paddingValues.calculateBottomPadding(),
-                    )
-                ) {
-                    Text(
-                        text = "Старт ${
-                            LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(track.points.first().geolocation.time),
-                                ZoneId.systemDefault()
-                            ).format(formatter)
-                        }"
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Финиш ${
-                            LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(track.points.last().geolocation.time),
-                                ZoneId.systemDefault()
-                            ).format(formatter)
-                        }"
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Продолжительность ${
-                            DateUtils.formatElapsedTime(
-                                track.duration.toLong(
-                                    DurationUnit.SECONDS
-                                )
-                            )
-                        }"
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Расстояние ${track.distance}м")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Количество точек ${track.points.size}")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Набор высоты ${track.altitudeUp}м")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Сброс высоты ${track.altitudeDown}м")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    val context = LocalContext.current
-                    val mapView = remember { MapView(context) }
-                    AndroidView(
-                        factory = { context ->
-                            mapView.layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                            )
-                            mapView.setNoninteractive(false)
-                            mapView
-                        }
-                    )
-                    val lifecycle = LocalLifecycleOwner.current.lifecycle
-                    LaunchedEffect(Unit) {
-                        lifecycle.addObserver(
-                            object : DefaultLifecycleObserver {
-                                override fun onStart(owner: LifecycleOwner) {
-                                    super.onStart(owner)
-                                    mapView.onStart()
-                                }
-
-                                override fun onStop(owner: LifecycleOwner) {
-                                    super.onStop(owner)
-                                    mapView.onStop()
-                                }
-                            },
-                        )
-                    }
-
-                    mapView.showTrack(context, track, 1.2f)
-                }
+                TrackDetailsContent(track, paddingValues)
             }
 
             TrackDetailsState.Pending -> {
@@ -190,6 +111,90 @@ fun TrackDetailsScreen(
                 dialogText = stringResource(R.string.track_details_delete_dialog_text)
             )
         }
+    }
+}
+
+@Composable
+fun TrackDetailsContent(
+    track: Track,
+    paddingValues: PaddingValues,
+) {
+    Column(
+        modifier = Modifier.padding(
+            start = 24.dp,
+            end = 24.dp,
+            top = paddingValues.calculateTopPadding(),
+            bottom = paddingValues.calculateBottomPadding(),
+        )
+    ) {
+        Text(
+            text = "Старт ${
+                track.points.first().geolocation.localDateTime.format(
+                    GeoAppProps.UI_DATE_TIME_FORMATTER
+                )
+            }"
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Финиш ${
+                track.points.last().geolocation.localDateTime.format(
+                    GeoAppProps.UI_DATE_TIME_FORMATTER
+                )
+            }"
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Продолжительность ${
+                DateUtils.formatElapsedTime(
+                    track.duration.toLong(
+                        DurationUnit.SECONDS
+                    )
+                )
+            }"
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "Расстояние ${track.distance}м")
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "Количество точек ${track.points.size}")
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "Набор высоты ${track.altitudeUp}м")
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "Сброс высоты ${track.altitudeDown}м")
+        Spacer(modifier = Modifier.height(16.dp))
+        val context = LocalContext.current
+        val mapView = remember { MapView(context) }
+        AndroidView(
+            factory = { context ->
+                mapView.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                )
+                mapView.setNoninteractive(false)
+                mapView
+            }
+        )
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        LaunchedEffect(Unit) {
+            lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onStart(owner: LifecycleOwner) {
+                        super.onStart(owner)
+                        mapView.onStart()
+                    }
+
+                    override fun onStop(owner: LifecycleOwner) {
+                        super.onStop(owner)
+                        mapView.onStop()
+                    }
+                },
+            )
+        }
+
+        mapView.showTrack(
+            context,
+            track,
+            TrackAppearanceSettings.ZOOM_OUT_CORRECTION_DETAILS
+        )
     }
 }
 
@@ -224,8 +229,11 @@ fun MapView.showTrack(context: Context, track: Track, zoomOutCorrection: Float) 
         }
         placemark.setIconStyle(
             IconStyle().apply {
-                anchor = PointF(0.5f, 1.0f)
-                scale = 0.5f
+                anchor = PointF(
+                    TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
+                    TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
+                )
+                scale = TrackAppearanceSettings.PLACEMARK_SCALE
             }
         )
     }
@@ -246,5 +254,12 @@ fun MapView.showTrack(context: Context, track: Track, zoomOutCorrection: Float) 
     }
 
     val position = map.cameraPosition(geometry)
-    map.move(CameraPosition(position.target, position.zoom - zoomOutCorrection, position.azimuth, position.tilt))
+    map.move(
+        CameraPosition(
+            position.target,
+            position.zoom - zoomOutCorrection,
+            position.azimuth,
+            position.tilt
+        )
+    )
 }

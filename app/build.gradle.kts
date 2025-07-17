@@ -2,6 +2,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
@@ -9,6 +10,11 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.hilt)
     alias(libs.plugins.protobuf)
+}
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("../detekt/detekt.yml")
 }
 hilt {
     enableAggregatingTask = false
@@ -42,8 +48,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 28
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.4.1"
+        versionCode = 7
+        versionName = "0.4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

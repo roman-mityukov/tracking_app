@@ -7,24 +7,16 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.feature.map.MapScreen
-import io.mityukov.geo.tracking.feature.poi.PoiDetailsScreen
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
 import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsScreen
 import io.mityukov.geo.tracking.feature.track.list.TracksScreen
 import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
 
-fun NavGraphBuilder.mapScreenNavigation(
-    onPoiSelected: (String) -> Unit,
-    onBack: () -> Unit,
-    snackbarHostState: SnackbarHostState,
-) {
+fun NavGraphBuilder.mapScreenNavigation(snackbarHostState: SnackbarHostState) {
     navigation<HomeBaseRoute.HomeBaseRouteMap>(startDestination = HomeRouteMapCurrentLocation) {
         composable<HomeRouteMapCurrentLocation> {
-            MapScreen(onPoiSelected = onPoiSelected, snackbarHostState = snackbarHostState)
-        }
-        composable<HomeRoutePoiDetails> {
-            PoiDetailsScreen(onBack = onBack)
+            MapScreen(snackbarHostState = snackbarHostState)
         }
     }
 }

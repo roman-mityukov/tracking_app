@@ -99,7 +99,8 @@ class MapViewModel @Inject constructor(
                                     MapState.CurrentLocation(data = geolocationUpdateResult.geolocation)
                                 } else {
                                     when (geolocationUpdateResult.error) {
-                                        GeolocationUpdateException.LocationDisabled, GeolocationUpdateException.PermissionsNotGranted -> {
+                                        GeolocationUpdateException.LocationDisabled,
+                                        GeolocationUpdateException.PermissionsNotGranted -> {
                                             unsubscribe()
                                         }
 

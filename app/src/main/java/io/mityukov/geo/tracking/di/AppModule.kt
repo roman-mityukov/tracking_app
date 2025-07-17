@@ -12,13 +12,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.mityukov.geo.tracking.app.GeoAppProps
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AppModule {
+interface AppModule {
     companion object {
         @Provides
         fun provideFusedLocationProviderClient(@ApplicationContext context: Context): FusedLocationProviderClient {
@@ -30,14 +31,17 @@ abstract class AppModule {
             return CurrentLocationRequest.Builder()
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                .setDurationMillis(30 * 1000)
-                .setMaxUpdateAgeMillis(10 * 60 * 1000)
+                .setDurationMillis(GeoAppProps.LOCATION_REQUEST_DURATION)
+                .setMaxUpdateAgeMillis(GeoAppProps.LOCATION_MAX_UPDATE_AGE)
                 .build()
         }
 
         @Provides
-        fun provideLocationRequest() : LocationRequest {
-            return LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 60000)
+        fun provideLocationRequest(): LocationRequest {
+            return LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                GeoAppProps.LOCATION_REQUEST_INTERVAL
+            )
                 .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
                 .build()
         }

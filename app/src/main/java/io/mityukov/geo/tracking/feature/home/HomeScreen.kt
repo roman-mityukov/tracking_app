@@ -44,7 +44,13 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), currentSelectedItem: 
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                painter = painterResource(if (selectedItem == index) item.selectedIcon else item.unselectedIcon),
+                                painter = painterResource(
+                                    if (selectedItem == index) {
+                                        item.selectedIcon
+                                    } else {
+                                        item.unselectedIcon
+                                    }
+                                ),
                                 contentDescription = stringResource(item.label)
                             )
                         },

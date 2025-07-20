@@ -48,7 +48,7 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 28
         targetSdk = 36
-        versionCode = 7
+        versionCode = 8
         versionName = "0.4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -59,6 +59,27 @@ android {
             name = yandexMapKitKey,
             value = gradleLocalProperties(rootDir, providers).getProperty(yandexMapKitKey)
         )
+    }
+
+    signingConfigs {
+        val propsStorePassword =
+            gradleLocalProperties(rootDir, providers).getProperty("STORE_PASSWORD")
+        val propsKeyAlias =
+            gradleLocalProperties(rootDir, providers).getProperty("KEY_ALIAS")
+        val propsKeyPassword =
+            gradleLocalProperties(rootDir, providers).getProperty("KEY_PASSWORD")
+        getByName("debug") {
+            storeFile = file("../user.keystore")
+            storePassword = propsStorePassword
+            keyAlias = propsKeyAlias
+            keyPassword = propsKeyPassword
+        }
+        create("release") {
+            storeFile = file("../user.keystore")
+            storePassword = propsStorePassword
+            keyAlias = propsKeyAlias
+            keyPassword = propsKeyPassword
+        }
     }
 
     buildTypes {
@@ -72,6 +93,7 @@ android {
                 //noinspection ChromeOsAbiSupport
                 abiFilters += listOf("arm64-v8a")
             }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -84,20 +106,6 @@ android {
     buildFeatures {
         buildConfig = true
         compose = true
-    }
-    signingConfigs {
-        getByName("debug") {
-            storeFile = file("../user.keystore")
-            storePassword = "asdfasdf"
-            keyAlias = "asdf"
-            keyPassword = "asdfasdf"
-        }
-        create("release") {
-            storeFile = file("../user.keystore")
-            storePassword = "asdfasdf"
-            keyAlias = "asdf"
-            keyPassword = "asdfasdf"
-        }
     }
 }
 

@@ -1,0 +1,69 @@
+stages:
+  - prebuild
+  - check
+  - test
+  - build
+  - deploy
+
+prebuild:
+  stage: prebuild
+  tags:
+    - android
+  script:
+    - touch local.properties
+    - echo "YANDEX_MAPKIT_API_KEY=\"$YANDEX_MAPKIT_API_KEY\"\n" > local.properties
+    - echo "STORE_PASSWORD=\"$STORE_PASSWORD\"\n" >> local.properties
+    - echo "KEY_ALIAS=\"$KEY_ALIAS\"\n" >> local.properties
+    - echo "KEY_PASSWORD=\"$KEY_PASSWORD\"\n" >> local.properties
+  artifacts:
+    paths:
+      - local.properties
+    expire_in: 24h
+
+detekt:
+  stage: check
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - echo "running detekt..."
+    - ./gradlew :app:detekt
+
+unit_test:
+  stage: test
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - ./gradlew :app:testDebugUnitTest
+
+build_qa:
+  stage: build
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - echo "build qa..."
+    - ./gradlew :app:assembleRelease
+  artifacts:
+    paths:
+      - app/build/outputs/apk/debug/app-release.apk
+    expire_in: 24h
+
+deploy_qa:
+  stage: deploy
+  dependencies:
+    - build_qa
+  script:
+    - echo "deploy qa build..."
+    - export APK_VERSION=$(cicd/scripts/getApkVersionNameAndCode.sh 'src/app/build/outputs/apk/release/app-release.apk')
+    - mv src/app/build/outputs/apk/release/app-release.apk src/app/build/outputs/apk/release/app-release-"$APK_VERSION".apk
+    - cicd/scripts/generateChangelog.sh > changelog-"$APK_VERSION".txt
+    - export YANDEX_DISK_APK_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0-SNAPSHOT.jar' $YANDEX_DISK_API_TOKEN src/app/build/outputs/apk/release/app-release-"$APK_VERSION".apk)
+    - export YANDEX_DISK_CHANGELOG_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0-SNAPSHOT.jar' $YANDEX_DISK_API_TOKEN ./changelog-"$APK_VERSION".txt)
+    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"CI: new version $APK_VERSION was builded\nAPK link $YANDEX_DISK_APK_PUBLIC_URL\nChangelog link $YANDEX_DISK_CHANGELOG_PUBLIC_URL\"}" https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage'
+  tags:
+    - android

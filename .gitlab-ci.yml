@@ -67,6 +67,9 @@ deploy_qa:
     - export APK_VERSION=$(cicd/scripts/getApkVersionNameAndCode.sh 'src/app/build/outputs/apk/release/app-release.apk')
     - mv src/app/build/outputs/apk/release/app-release.apk src/app/build/outputs/apk/release/app-release-"$APK_VERSION".apk
     - cicd/scripts/generateChangelog.sh > changelog-"$APK_VERSION".txt
+    - cd cicd
+    - ./gradlew jar
+    - cd ../
     - export YANDEX_DISK_APK_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0-SNAPSHOT.jar' $YANDEX_DISK_API_TOKEN src/app/build/outputs/apk/release/app-release-"$APK_VERSION".apk)
     - export YANDEX_DISK_CHANGELOG_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0-SNAPSHOT.jar' $YANDEX_DISK_API_TOKEN ./changelog-"$APK_VERSION".txt)
     - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"CI: new version $APK_VERSION was builded\nAPK link $YANDEX_DISK_APK_PUBLIC_URL\nChangelog link $YANDEX_DISK_CHANGELOG_PUBLIC_URL\"}" https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage'

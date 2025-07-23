@@ -55,7 +55,7 @@ build_qa:
     - ./gradlew :app:assembleRelease
   artifacts:
     paths:
-      - app/build/outputs/apk/debug/app-release.apk
+      - src/app/build/outputs/apk/release/app-release.apk
     expire_in: 24h
 
 deploy_qa:

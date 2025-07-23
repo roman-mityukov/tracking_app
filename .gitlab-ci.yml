@@ -10,6 +10,7 @@ prebuild:
   tags:
     - android
   script:
+    - cd src
     - touch local.properties
     - echo "YANDEX_MAPKIT_API_KEY=\"$YANDEX_MAPKIT_API_KEY\"\n" > local.properties
     - echo "STORE_PASSWORD=\"$STORE_PASSWORD\"\n" >> local.properties
@@ -17,7 +18,7 @@ prebuild:
     - echo "KEY_PASSWORD=\"$KEY_PASSWORD\"\n" >> local.properties
   artifacts:
     paths:
-      - local.properties
+      - src/local.properties
     expire_in: 24h
 
 detekt:
@@ -28,6 +29,7 @@ detekt:
     - prebuild
   script:
     - echo "running detekt..."
+    - cd src
     - ./gradlew :app:detekt
 
 unit_test:
@@ -37,6 +39,8 @@ unit_test:
   dependencies:
     - prebuild
   script:
+    - echo "running tests..."
+    - cd src
     - ./gradlew :app:testDebugUnitTest
 
 build_qa:
@@ -47,6 +51,7 @@ build_qa:
     - prebuild
   script:
     - echo "build qa..."
+    - cd src
     - ./gradlew :app:assembleRelease
   artifacts:
     paths:

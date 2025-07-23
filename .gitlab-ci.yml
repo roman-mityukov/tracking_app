@@ -13,9 +13,9 @@ prebuild:
     - cd src
     - touch local.properties
     - echo "YANDEX_MAPKIT_API_KEY=\"$YANDEX_MAPKIT_API_KEY\"\n" > local.properties
-    - echo "STORE_PASSWORD=\"$STORE_PASSWORD\"\n" >> local.properties
-    - echo "KEY_ALIAS=\"$KEY_ALIAS\"\n" >> local.properties
-    - echo "KEY_PASSWORD=\"$KEY_PASSWORD\"\n" >> local.properties
+    - echo "STORE_PASSWORD=$STORE_PASSWORD" >> local.properties
+    - echo "KEY_ALIAS=$KEY_ALIAS" >> local.properties
+    - echo "KEY_PASSWORD=$KEY_PASSWORD" >> local.properties
   artifacts:
     paths:
       - src/local.properties

@@ -1,0 +1,91 @@
+stages:
+  - prebuild
+  - check
+  - test
+  - build
+  - predeploy
+  - deploy
+
+prebuild:
+  stage: prebuild
+  tags:
+    - android
+  script:
+    - cd src
+    - touch local.properties
+    - echo "YANDEX_MAPKIT_API_KEY=\"$YANDEX_MAPKIT_API_KEY\"\n" > local.properties
+    - echo "STORE_PASSWORD=$STORE_PASSWORD" >> local.properties
+    - echo "KEY_ALIAS=$KEY_ALIAS" >> local.properties
+    - echo "KEY_PASSWORD=$KEY_PASSWORD" >> local.properties
+  artifacts:
+    paths:
+      - src/local.properties
+    expire_in: 2h
+
+detekt:
+  stage: check
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - echo "running detekt..."
+    - cd src
+    - ./gradlew :app:detekt
+
+unit_test:
+  stage: test
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - echo "running tests..."
+    - cd src
+    - ./gradlew :app:testDebugUnitTest
+
+build_qa:
+  stage: build
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - cd src
+    - ./gradlew :app:assembleRelease
+  artifacts:
+    paths:
+      - src/app/build/outputs/apk/release/app-release.apk
+    expire_in: 2h
+
+build_cicd_jar:
+  stage: predeploy
+  only:
+    - master
+    - develop
+  script:
+    - cd cicd
+    - ./gradlew jar
+  artifacts:
+    paths:
+      - cicd/build/libs/cicd-1.0.jar
+    expire_in: 2h
+
+deploy_qa:
+  stage: deploy
+  only:
+    - develop
+  dependencies:
+    - build_qa
+    - build_cicd_jar
+  script:
+    - APK_VERSION=$(cicd/scripts/getApkVersionNameAndCode.sh 'src/app/build/outputs/apk/release/app-release.apk')
+    - NEW_APK_FILE_NAME=src/app/build/outputs/apk/release/qa-app-release-"$APK_VERSION".apk
+    - CHANGELOG_FILE_NAME=qa-changelog-"$APK_VERSION".txt
+    - mv src/app/build/outputs/apk/release/app-release.apk $NEW_APK_FILE_NAME
+    - cicd/scripts/generateChangelog.sh > $CHANGELOG_FILE_NAME
+    - YANDEX_DISK_APK_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0.jar' UPLOAD_TO_YANDEX_DISK $YANDEX_DISK_API_TOKEN $NEW_APK_FILE_NAME)
+    - YANDEX_DISK_CHANGELOG_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0.jar' UPLOAD_TO_YANDEX_DISK $YANDEX_DISK_API_TOKEN ./"$CHANGELOG_FILE_NAME")
+    - java -jar 'cicd/build/libs/cicd-1.0.jar' SEND_RELEASE_INFO_TO_TELEGRAM $APK_VERSION $YANDEX_DISK_APK_PUBLIC_URL $YANDEX_DISK_CHANGELOG_PUBLIC_URL $TELEGRAM_CHAT_ID $TELEGRAM_BOT_TOKEN
+  tags:
+    - android

@@ -2,14 +2,15 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.apptracer)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.room)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.room)
 }
 detekt {
     buildUponDefaultConfig = true
@@ -21,6 +22,12 @@ hilt {
 }
 room {
     schemaDirectory("$projectDir/schemas")
+}
+tracer {
+    create("defaultConfig") {
+        pluginToken = "HxrlPZRUlHnIFY25LM3l4KbL2B5buvYzwKZJ6wYZKqP"
+        appToken = "iraH9CUhf6BvaKxHvXCwM8dTMRpffoXr4aCDovFdPyh1"
+    }
 }
 protobuf {
     protoc {
@@ -48,8 +55,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 28
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.4.2"
+        versionCode = 9
+        versionName = "0.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -131,6 +138,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(platform(libs.apptracer.tracer.platform))
+    implementation(libs.apptracer.crash.report)
+    implementation(libs.apptracer.crash.report.native)
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.timber)
     implementation(libs.treessence)

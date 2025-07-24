@@ -2,7 +2,7 @@
 accompanistPermissions = "0.37.3"
 activityCompose = "1.10.1"
 agp = "8.11.0"
-apptracer = "1.1.0"
+apptracer = "1.1.1"
 composeBom = "2025.06.01"
 coreKtx = "1.16.0"
 datastore = "1.1.7"
@@ -68,6 +68,7 @@ yandex-map-kit = { group = "com.yandex.android", name = "maps.mobile", version.r
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+apptracer = { id = "ru.ok.tracer", version.ref = "apptracer" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektPlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

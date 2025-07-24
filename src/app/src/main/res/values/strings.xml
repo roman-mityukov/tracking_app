@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Запись трека</string>
+    <string name="dialog_yes">Да</string>
+    <string name="dialog_no">Нет</string>
+    <string name="home_navigation_map">Карта</string>
+    <string name="home_navigation_user_tracks">Треки</string>
+    <string name="home_navigation_user_profile">Профиль</string>
+    <string name="map_location_permission_description">Чтобы узнать Ваше текущее местоположение нужно дать разрешение на доступ к геолокации устройства.</string>
+    <string name="map_location_permission_consent">Дать разрешение</string>
+    <string name="map_disabled_location_permission_description">Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы</string>
+    <string name="map_disabled_location_permission_consent">Включить</string>
+    <string name="map_update_location">Обновление местоположения…</string>
+    <string name="track_capture_notification_channel_description">Оповещение о записи трека</string>
+    <string name="track_capture_notification_title">Построение трека</string>
+    <string name="track_capture_notification_text">Сбор геолокации…</string>
+    <string name="tracks_title">Треки</string>
+    <string name="tracks_item_title_capturing">Запись…</string>
+    <string name="tracks_empty_list_message">Пока не записано ни одного трека</string>
+    <string name="track_details_title">Детали трека</string>
+    <string name="track_details_delete_dialog_title">Внимание!</string>
+    <string name="track_details_delete_dialog_text">Вы действительно хотите удалить трек?</string>
+    <string name="tracks_editing_title">Редактирование</string>
+    <string name="tracks_editing_delete_dialog_title">Внимание!</string>
+    <string name="tracks_editing_delete_dialog_text">Вы действительно хотите удалить выбранные треки?</string>
+    <string name="profile_title">Профиль</string>
+    <string name="settings_title">Настройки</string>
+</resources>

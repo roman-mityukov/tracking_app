@@ -1,0 +1,22 @@
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
+    functionPattern: '([a-z][a-zA-Z0-9]*)|(`.*`)'
+    excludeClassPattern: '$^'
+    ignoreOverridden: true
+    ignoreAnnotated: [ 'Composable' ]
+complexity:
+  LongMethod:
+    threshold: 73
+  LongParameterList:
+    functionThreshold: 12
+    constructorThreshold: 12
+style:
+  MagicNumber:
+    ignoreNumbers: [ '-1', '0', '1', '2', '3', '4', '5', '9', '16', '100' ]
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: true
+  DestructuringDeclarationWithTooManyEntries:
+    maxDestructuringEntries: 4

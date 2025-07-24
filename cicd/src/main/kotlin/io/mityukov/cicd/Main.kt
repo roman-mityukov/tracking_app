@@ -1,5 +1,6 @@
 package io.mityukov.cicd
 
+import io.mityukov.cicd.telegram.TelegramReleaseInfoImpl
 import io.mityukov.cicd.yandex.YandexDiskUploaderImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -11,32 +12,57 @@ import okhttp3.Response
 import okhttp3.Route
 import kotlin.system.exitProcess
 
+enum class CiCdCommand(val command: String) {
+    UPLOAD_TO_YANDEX_DISK("UPLOAD_TO_YANDEX_DISK"),
+    SEND_RELEASE_INFO_TO_TELEGRAM("SEND_RELEASE_INFO_TO_TELEGRAM")
+}
+
 fun main(args: Array<String>): Unit = runBlocking {
-    var yandexDiskApiTokenEnv: String? = null
-    var fileToUploadEnv: String? = null
+    val command = args.first()
 
-    try {
-        yandexDiskApiTokenEnv = args[0]
-        fileToUploadEnv = args[1]
+    val ciCdCommand = CiCdCommand.valueOf(command)
 
-        val okHttpClient = OkHttpClient.Builder()
-            .authenticator(object : Authenticator {
-                override fun authenticate(route: Route?, response: Response): Request? {
-                    return response.request.newBuilder().header("Authorization", "OAuth $yandexDiskApiTokenEnv").build()
-                }
-            })
-            .build()
-        val coroutineContext = Dispatchers.IO
-        val json = Json {
-            ignoreUnknownKeys = true
+    val json = Json {
+        ignoreUnknownKeys = true
+    }
+
+    when (ciCdCommand) {
+        CiCdCommand.UPLOAD_TO_YANDEX_DISK -> {
+            val yandexDiskApiTokenEnv = args[1]
+            val fileToUploadEnv = args[2]
+
+            val okHttpClient = OkHttpClient.Builder()
+                .authenticator(object : Authenticator {
+                    override fun authenticate(route: Route?, response: Response): Request? {
+                        return response.request.newBuilder().header("Authorization", "OAuth $yandexDiskApiTokenEnv")
+                            .build()
+                    }
+                })
+                .build()
+
+            val yandexDiskUploader = YandexDiskUploaderImpl(okHttpClient, Dispatchers.IO, json)
+            val filePublishUrl = yandexDiskUploader.uploadFile(fileToUploadEnv)
+            println(filePublishUrl)
+            exitProcess(0)
         }
 
-        val yandexDiskUploader = YandexDiskUploaderImpl(okHttpClient, coroutineContext, json)
-        val filePublishUrl = yandexDiskUploader.uploadFile(fileToUploadEnv)
-        println(filePublishUrl)
-        exitProcess(0)
-    } catch (e: Exception) {
-        System.err.println(e)
-        exitProcess(1)
+        CiCdCommand.SEND_RELEASE_INFO_TO_TELEGRAM -> {
+            val version = args[1]
+            val apkUrl = args[2]
+            val changelogUrl = args[3]
+            val telegramChatId = args[4]
+            val telegramBotToken = args[5]
+
+            val okHttpClient = OkHttpClient.Builder().build()
+
+            val telegramReleaseInfoImpl = TelegramReleaseInfoImpl(okHttpClient, json)
+            telegramReleaseInfoImpl.sendReleaseInfo(
+                version = version,
+                apkUrl = apkUrl,
+                changelogUrl = changelogUrl,
+                chatId = telegramChatId,
+                botToken = telegramBotToken,
+            )
+        }
     }
 }

@@ -3,6 +3,7 @@ stages:
   - check
   - test
   - build
+  - predeploy
   - deploy
 
 prebuild:
@@ -19,7 +20,7 @@ prebuild:
   artifacts:
     paths:
       - src/local.properties
-    expire_in: 24h
+    expire_in: 2h
 
 detekt:
   stage: check
@@ -50,28 +51,41 @@ build_qa:
   dependencies:
     - prebuild
   script:
-    - echo "build qa..."
     - cd src
     - ./gradlew :app:assembleRelease
   artifacts:
     paths:
       - src/app/build/outputs/apk/release/app-release.apk
-    expire_in: 24h
+    expire_in: 2h
+
+build_cicd_jar:
+  stage: predeploy
+  only:
+    - master
+    - develop
+  script:
+    - cd cicd
+    - ./gradlew jar
+  artifacts:
+    paths:
+      - cicd/build/libs/cicd-1.0.jar
+    expire_in: 2h
 
 deploy_qa:
   stage: deploy
+  only:
+    - develop
   dependencies:
     - build_qa
+    - build_cicd_jar
   script:
-    - echo "deploy qa build..."
-    - export APK_VERSION=$(cicd/scripts/getApkVersionNameAndCode.sh 'src/app/build/outputs/apk/release/app-release.apk')
-    - mv src/app/build/outputs/apk/release/app-release.apk src/app/build/outputs/apk/release/app-release-"$APK_VERSION".apk
-    - cicd/scripts/generateChangelog.sh > changelog-"$APK_VERSION".txt
-    - cd cicd
-    - ./gradlew jar
-    - cd ../
-    - export YANDEX_DISK_APK_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0-SNAPSHOT.jar' $YANDEX_DISK_API_TOKEN src/app/build/outputs/apk/release/app-release-"$APK_VERSION".apk)
-    - export YANDEX_DISK_CHANGELOG_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0-SNAPSHOT.jar' $YANDEX_DISK_API_TOKEN ./changelog-"$APK_VERSION".txt)
-    - 'curl -X POST -H "Content-Type: application/json" -d "{\"chat_id\": \"$TELEGRAM_CHAT_ID\", \"text\": \"CI: new version $APK_VERSION was builded\nAPK link $YANDEX_DISK_APK_PUBLIC_URL\nChangelog link $YANDEX_DISK_CHANGELOG_PUBLIC_URL\"}" https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage'
+    - APK_VERSION=$(cicd/scripts/getApkVersionNameAndCode.sh 'src/app/build/outputs/apk/release/app-release.apk')
+    - NEW_APK_FILE_NAME=src/app/build/outputs/apk/release/qa-app-release-"$APK_VERSION".apk
+    - CHANGELOG_FILE_NAME=qa-changelog-"$APK_VERSION".txt
+    - mv src/app/build/outputs/apk/release/app-release.apk $NEW_APK_FILE_NAME
+    - cicd/scripts/generateChangelog.sh > $CHANGELOG_FILE_NAME
+    - YANDEX_DISK_APK_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0.jar' UPLOAD_TO_YANDEX_DISK $YANDEX_DISK_API_TOKEN $NEW_APK_FILE_NAME)
+    - YANDEX_DISK_CHANGELOG_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0.jar' UPLOAD_TO_YANDEX_DISK $YANDEX_DISK_API_TOKEN ./"$CHANGELOG_FILE_NAME")
+    - java -jar 'cicd/build/libs/cicd-1.0.jar' SEND_RELEASE_INFO_TO_TELEGRAM $APK_VERSION $YANDEX_DISK_APK_PUBLIC_URL $YANDEX_DISK_CHANGELOG_PUBLIC_URL $TELEGRAM_CHAT_ID $TELEGRAM_BOT_TOKEN
   tags:
     - android

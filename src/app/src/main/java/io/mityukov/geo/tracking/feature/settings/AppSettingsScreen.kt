@@ -2,10 +2,9 @@ package io.mityukov.geo.tracking.feature.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.material.icons.Icons
@@ -55,17 +54,17 @@ fun AppSettingsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+                        .padding(paddingValues)
                 ) {
                     Column {
-                        Text("Онбоардинг")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Switch(
-                            checked = (state.value as AppSettingsState.Data).localAppSettings.showOnboarding,
-                            onCheckedChange = {
-                                viewModel.add(AppSettingsEvent.SwitchOnboarding)
-                            })
+                        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            Text(modifier = Modifier.weight(1f), text = "Онбоардинг")
+                            Switch(
+                                checked = (state.value as AppSettingsState.Data).localAppSettings.showOnboarding,
+                                onCheckedChange = {
+                                    viewModel.add(AppSettingsEvent.SwitchOnboarding)
+                                })
+                        }
                     }
                 }
             }

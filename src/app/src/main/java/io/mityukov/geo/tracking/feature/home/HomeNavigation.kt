@@ -6,9 +6,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import io.mityukov.geo.tracking.app.DeepLinkProps
+import io.mityukov.geo.tracking.feature.about.AboutScreen
 import io.mityukov.geo.tracking.feature.map.MapScreen
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
 import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
+import io.mityukov.geo.tracking.feature.statistics.StatisticsScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsScreen
 import io.mityukov.geo.tracking.feature.track.list.TracksScreen
 import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
@@ -46,13 +48,25 @@ fun NavGraphBuilder.tracksScreenNavigation(
     }
 }
 
-fun NavGraphBuilder.profileScreenNavigation(onSettingsSelected: () -> Unit, onBack: () -> Unit) {
+fun NavGraphBuilder.profileScreenNavigation(
+    onStatisticsSelected: () -> Unit,
+    onSettingsSelected: () -> Unit,
+    onAboutSelected: () -> Unit,
+    onBack: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+) {
     navigation<HomeBaseRoute.HomeBaseRouteProfile>(startDestination = HomeRouteProfile) {
         composable<HomeRouteProfile> {
-            ProfileScreen(onSettingsSelected)
+            ProfileScreen(onStatisticsSelected, onSettingsSelected, onAboutSelected)
+        }
+        composable<HomeRouteStatistics> {
+            StatisticsScreen(onBack = onBack)
         }
         composable<HomeRouteSettings> {
             AppSettingsScreen(onBack = onBack)
+        }
+        composable<HomeRouteAbout> {
+            AboutScreen(onBack = onBack, snackbarHostState = snackbarHostState)
         }
     }
 }

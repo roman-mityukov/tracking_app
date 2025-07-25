@@ -58,7 +58,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel(), onNext: (
         Button(onClick = {
             viewModel.add(OnboardingEvent.ConsumeOnboarding)
         }) {
-            Text(text = "Хорошо")
+            Text(text = stringResource(R.string.onboarding_button_label))
         }
     }
 }

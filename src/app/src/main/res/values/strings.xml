@@ -10,6 +10,8 @@
     <string name="map_disabled_location_permission_description">Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы</string>
     <string name="map_disabled_location_permission_consent">Включить</string>
     <string name="map_update_location">Обновление местоположения…</string>
+    <string name="onboarding_instructions_label">Рекомендации</string>
+    <string name="onboarding_instructions_content">1.Установите для этого приложения разрешение \"Местоположение\" в \"Разрешить в любом режиме\". Это позволит записывать трек когда приложение находится в фоновом режиме. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
     <string name="track_capture_notification_channel_description">Оповещение о записи трека</string>
     <string name="track_capture_notification_title">Построение трека</string>
     <string name="track_capture_notification_text">Сбор геолокации…</string>

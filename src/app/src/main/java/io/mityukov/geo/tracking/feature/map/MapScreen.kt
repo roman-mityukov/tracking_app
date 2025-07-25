@@ -2,6 +2,7 @@ package io.mityukov.geo.tracking.feature.map
 
 import android.content.Intent
 import android.graphics.PointF
+import android.os.Build
 import android.provider.Settings
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
@@ -159,12 +160,16 @@ private fun BoxScope.MapContent(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun MapPermissions(viewModelState: MapState, snackbarHostState: SnackbarHostState) {
-    val multiplePermissionsState = rememberMultiplePermissionsState(
-        listOf(
-            android.Manifest.permission.ACCESS_COARSE_LOCATION,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-        )
+    val permissions = mutableListOf(
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.ACCESS_FINE_LOCATION
     )
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    val multiplePermissionsState = rememberMultiplePermissionsState(permissions)
     val showLocationRationale = remember { mutableStateOf(false) }
     if (showLocationRationale.value) {
         LocationRationaleDialog(

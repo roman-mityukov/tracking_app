@@ -11,8 +11,10 @@ import kotlinx.serialization.Serializable
 sealed interface HomeBaseRoute {
     @Serializable
     data object HomeBaseRouteMap : HomeBaseRoute
+
     @Serializable
     data object HomeBaseRouteProfile : HomeBaseRoute
+
     @Serializable
     data object HomeBaseRouteTrack : HomeBaseRoute
 }
@@ -33,7 +35,13 @@ data class HomeRouteTracksEditing(val trackId: String)
 data object HomeRouteProfile
 
 @Serializable
+data object HomeRouteStatistics
+
+@Serializable
 data object HomeRouteSettings
+
+@Serializable
+data object HomeRouteAbout
 
 @Composable
 fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHostState) {
@@ -60,12 +68,19 @@ fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHos
             },
         )
         profileScreenNavigation(
+            onStatisticsSelected = {
+                navController.navigate(HomeRouteStatistics)
+            },
             onSettingsSelected = {
                 navController.navigate(HomeRouteSettings)
             },
+            onAboutSelected = {
+                navController.navigate(HomeRouteAbout)
+            },
             onBack = {
                 navController.popBackStack()
-            }
+            },
+            snackbarHostState = snackbarHostState
         )
     }
 }

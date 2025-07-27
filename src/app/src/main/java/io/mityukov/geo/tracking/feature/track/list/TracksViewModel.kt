@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 sealed interface TracksState {
     data object Pending : TracksState
-    data class Data(val tracks: List<Track>, val capturedTrackId: String?) : TracksState
+    data class Data(val tracks: List<Track>, val capturedTrackId: String?, val paused: Boolean) :
+        TracksState
 }
 
 @HiltViewModel
@@ -34,7 +35,8 @@ class TracksViewModel @Inject constructor(
             tracksRepository.refreshTracks().combine(trackCaptureService.status) { tracks, status ->
                 TracksState.Data(
                     tracks = tracks,
-                    capturedTrackId = (status as? TrackCaptureStatus.Running)?.track?.id
+                    capturedTrackId = (status as? TrackCaptureStatus.Run)?.track?.id,
+                    paused = (status as? TrackCaptureStatus.Run)?.paused ?: false
                 )
             }.collect { state: TracksState.Data ->
                 mutableStateFlow.update {

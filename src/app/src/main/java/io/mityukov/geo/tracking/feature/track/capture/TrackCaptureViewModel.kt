@@ -12,7 +12,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface TrackCaptureEvent {
-    data object Switch : TrackCaptureEvent
+    data object StartCapture : TrackCaptureEvent
+    data object PlayCapture : TrackCaptureEvent
+    data object PauseCapture : TrackCaptureEvent
+    data object StopCapture : TrackCaptureEvent
 }
 
 data class TrackCaptureState(val status: TrackCaptureStatus)
@@ -38,9 +41,27 @@ class TrackCaptureViewModel @Inject constructor(
 
     fun add(event: TrackCaptureEvent) {
         when (event) {
-            TrackCaptureEvent.Switch -> {
+            TrackCaptureEvent.StartCapture -> {
                 viewModelScope.launch {
-                    trackCaptureService.switch()
+                    trackCaptureService.start()
+                }
+            }
+
+            TrackCaptureEvent.StopCapture -> {
+                viewModelScope.launch {
+                    trackCaptureService.stop()
+                }
+            }
+
+            TrackCaptureEvent.PauseCapture -> {
+                viewModelScope.launch {
+                    trackCaptureService.pause()
+                }
+            }
+
+            TrackCaptureEvent.PlayCapture -> {
+                viewModelScope.launch {
+                    trackCaptureService.resume()
                 }
             }
         }

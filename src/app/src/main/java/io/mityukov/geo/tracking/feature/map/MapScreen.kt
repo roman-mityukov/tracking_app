@@ -43,13 +43,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ShareCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -67,7 +66,6 @@ import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.details.showTrack
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
@@ -87,7 +85,7 @@ fun MapScreen(
         val mapView = remember { MapView(context) }
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-        MapLifecycle(mapView, viewModel)
+        MapLifecycle(mapView)
         MapPermissions(viewModelState.value, snackbarHostState)
 
         AndroidView(
@@ -106,7 +104,6 @@ fun MapScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 32.dp),
-            state = viewModelState.value,
             onZoomIn = {
                 mapView.map.zoom(YandexMapSettings.ZOOM_STEP)
             },
@@ -119,7 +116,9 @@ fun MapScreen(
             },
         )
 
-        MapContent(viewModelState.value, mapView, snackbarHostState, needMoveToCurrentLocation)
+        MapContent(viewModelState.value, mapView, snackbarHostState, needMoveToCurrentLocation) {
+            viewModel.add(MapEvent.CurrentLocationConsumed)
+        }
     }
 }
 
@@ -128,19 +127,23 @@ private fun BoxScope.MapContent(
     viewModelState: MapState,
     mapView: MapView,
     snackbarHostState: SnackbarHostState,
-    needMoveToCurrentLocation: MutableState<Boolean>
+    needMoveToCurrentLocation: MutableState<Boolean>,
+    onConsumeCurrentLocation: () -> Unit,
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
-            CurrentTrack(viewModelState.track, mapView)
+            CurrentTrack(viewModelState, mapView)
         }
 
         is MapState.CurrentLocation -> {
             snackbarHostState.currentSnackbarData?.dismiss()
+            LaunchedEffect(viewModelState.timestamp) {
+                onConsumeCurrentLocation()
+            }
             CurrentGeolocation(
                 viewModelState.data,
                 mapView,
-                needMoveToCurrentLocation
+                needMoveToCurrentLocation,
             )
         }
 
@@ -201,20 +204,11 @@ private fun MapPermissions(viewModelState: MapState, snackbarHostState: Snackbar
 @Composable
 private fun MapLifecycle(
     mapView: MapView,
-    viewModel: MapViewModel,
 ) {
-    val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(Unit) {
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {
-                override fun onResume(owner: LifecycleOwner) {
-                    super.onResume(owner)
-                    if (viewModelState.value !is MapState.CurrentTrack) {
-                        viewModel.add(MapEvent.StartUpdateCurrentLocation)
-                    }
-                }
-
                 override fun onStart(owner: LifecycleOwner) {
                     super.onStart(owner)
                     mapView.onStart()
@@ -223,9 +217,6 @@ private fun MapLifecycle(
                 override fun onStop(owner: LifecycleOwner) {
                     super.onStop(owner)
                     mapView.onStop()
-                    if (viewModelState.value !is MapState.CurrentTrack) {
-                        viewModel.add(MapEvent.StopUpdateCurrentLocation)
-                    }
                 }
             },
         )
@@ -274,10 +265,50 @@ private fun NoLocation(
 }
 
 @Composable
+private fun CurrentGeolocationSharing(
+    geolocation: Geolocation,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val context = LocalContext.current
+
+            Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(
+                    R.string.map_current_location_message,
+                    geolocation.localDateTime,
+                    geolocation.latitude,
+                    geolocation.longitude
+                ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            IconButton(onClick = {
+                ShareCompat.IntentBuilder(context)
+                    .setType("text/plain")
+                    .setText(
+                        context.resources.getString(
+                            R.string.map_current_location_share_text,
+                            geolocation.latitude,
+                            geolocation.longitude
+                        )
+                    )
+                    .setChooserTitle(context.resources.getString(R.string.map_current_location_share_title))
+                    .startChooser()
+            }) {
+                Icon(painterResource(R.drawable.icon_share), null)
+            }
+        }
+    }
+}
+
+@Composable
 private fun BoxScope.CurrentGeolocation(
     geolocation: Geolocation,
     mapView: MapView,
-    needMoveToCurrentLocation: MutableState<Boolean>
+    needMoveToCurrentLocation: MutableState<Boolean>,
 ) {
     mapView.map.mapObjects.clear()
     val placemark = mapView.map.mapObjects.addPlacemark()
@@ -307,7 +338,7 @@ private fun BoxScope.CurrentGeolocation(
         )
     }
 
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .align(Alignment.TopCenter)
@@ -317,39 +348,19 @@ private fun BoxScope.CurrentGeolocation(
                     .calculateTopPadding() + 16.dp
             )
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val clipboardManager = LocalClipboardManager.current
-            Text(
-                modifier = Modifier.weight(1f),
-                text = "Последнее обновление ${geolocation.localDateTime}\n" +
-                        "Широта ${geolocation.latitude} Долгота ${geolocation.longitude}",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            IconButton(onClick = {
-                clipboardManager.setText(
-                    AnnotatedString(
-                        text = "${geolocation.latitude},${geolocation.longitude}"
-                    )
-                )
-            }) {
-                Icon(painterResource(R.drawable.icon_copy), null)
-            }
-        }
+        CurrentGeolocationSharing(geolocation)
     }
 }
 
 @Composable
 private fun BoxScope.CurrentTrack(
-    track: Track,
+    viewModelState: MapState.CurrentTrack,
     mapView: MapView,
 ) {
-    if (track.points.isNotEmpty()) {
+    if (viewModelState.track.points.isNotEmpty()) {
         mapView.showTrack(
             LocalContext.current,
-            track,
+            viewModelState.track,
             TrackAppearanceSettings.ZOOM_OUT_CORRECTION_MAP
         )
         mapView.mapWindow.focusRect = ScreenRect(
@@ -361,7 +372,7 @@ private fun BoxScope.CurrentTrack(
             )
         )
 
-        Card(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
@@ -371,14 +382,21 @@ private fun BoxScope.CurrentTrack(
                         .calculateTopPadding() + 16.dp
                 )
         ) {
-            Row(
-                modifier = Modifier.padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    TrackHeadline(track, true)
-                    TrackProperties(track)
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        TrackHeadline(viewModelState.track, true, viewModelState.status.paused)
+                        TrackProperties(viewModelState.track)
+                    }
                 }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (viewModelState.currentLocation != null) {
+                CurrentGeolocationSharing(viewModelState.currentLocation)
             }
         }
     }
@@ -417,19 +435,16 @@ private fun LocationRationaleDialog(
 @Composable
 private fun ButtonsPanel(
     modifier: Modifier,
-    state: MapState,
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
     onMyLocation: () -> Unit,
 ) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.End,
     ) {
-
-
         Button(
-            modifier = Modifier.size(42.dp),
+            modifier = Modifier.size(48.dp),
             onClick = onZoomIn,
             shape = CircleShape,
             contentPadding = PaddingValues(0.dp),
@@ -438,7 +453,7 @@ private fun ButtonsPanel(
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            modifier = Modifier.size(42.dp),
+            modifier = Modifier.size(48.dp),
             onClick = onZoomOut,
             shape = CircleShape,
             contentPadding = PaddingValues(0.dp),
@@ -446,19 +461,15 @@ private fun ButtonsPanel(
             Icon(painterResource(R.drawable.icon_minus), contentDescription = null)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        TrackCaptureView()
-        if (state !is MapState.CurrentTrack) {
-            Spacer(modifier = Modifier.height(48.dp))
-            Button(
-                modifier = Modifier.size(42.dp),
-                onClick = onMyLocation,
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
-            ) {
-                Icon(painterResource(R.drawable.icon_my_location), contentDescription = null)
-            }
-        } else {
-            Spacer(modifier = Modifier.height(90.dp))
+        Button(
+            modifier = Modifier.size(48.dp),
+            onClick = onMyLocation,
+            shape = CircleShape,
+            contentPadding = PaddingValues(0.dp),
+        ) {
+            Icon(painterResource(R.drawable.icon_my_location), contentDescription = null)
         }
+        Spacer(modifier = Modifier.height(48.dp))
+        TrackCaptureView()
     }
 }

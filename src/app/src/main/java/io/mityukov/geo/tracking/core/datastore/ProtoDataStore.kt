@@ -15,5 +15,7 @@ val Context.appSettingsDataStore: DataStore<ProtoLocalAppSettings> by dataStore(
 
 val Context.trackCaptureStatusDataStore: DataStore<ProtoLocalTrackCaptureStatus> by dataStore(
     fileName = "local_track_capture_status.proto",
-    serializer = ProtoLocalTrackCaptureStatusSerializer
+    serializer = ProtoLocalTrackCaptureStatusSerializer,
 )
+
+

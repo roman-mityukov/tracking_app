@@ -123,7 +123,7 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                TrackHeadline(track, isCapturedTrack)
+                TrackHeadline(track, isCapturedTrack, false)
             },
             supportingContent = {
                 TrackProperties(track)

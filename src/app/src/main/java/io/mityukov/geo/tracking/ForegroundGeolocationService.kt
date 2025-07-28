@@ -1,7 +1,6 @@
 package io.mityukov.geo.tracking
 
 import android.Manifest
-import android.app.ForegroundServiceStartNotAllowedException
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -59,10 +58,11 @@ class ForegroundGeolocationService : Service() {
         override fun onLocationResult(locationResult: LocationResult) {
             runBlocking(coroutineDispatcher) {
                 val currentTrackId = dataStore.data.first().trackId
+                val paused = dataStore.data.first().paused
                 val lastLocation = locationResult.lastLocation
 
                 if (currentTrackId != null) {
-                    if (lastLocation != null) {
+                    if (lastLocation != null && !paused) {
                         val diff = System.currentTimeMillis() - lastLocation.time
 
                         logd("ForegroundGeolocationService lastLocation ${locationResult.lastLocation} diff $diff")
@@ -91,6 +91,7 @@ class ForegroundGeolocationService : Service() {
                         }
 
                         if (canBeAdded) {
+                            logd("Add point")
                             trackDao.insertTrackPoint(
                                 TrackPointEntity(
                                     id = Uuid.random().toString(),

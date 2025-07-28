@@ -98,6 +98,7 @@ private fun TrackList(
                             TrackItem(
                                 track = it,
                                 isCapturedTrack = it.id == capturedTrackId,
+                                paused = state.paused,
                                 onClick = onClick,
                                 onLongPress = onLongPress,
                             )
@@ -115,7 +116,7 @@ private fun TrackList(
 }
 
 @Composable
-fun TrackHeadline(track: Track, isCapturedTrack: Boolean) {
+fun TrackHeadline(track: Track, isCapturedTrack: Boolean, paused: Boolean) {
     if (track.points.isNotEmpty()) {
         val startTime =
             track.points.first().geolocation.localDateTime.format(GeoAppProps.UI_DATE_TIME_FORMATTER)
@@ -129,7 +130,11 @@ fun TrackHeadline(track: Track, isCapturedTrack: Boolean) {
                         fontWeight = FontWeight.Bold,
                     )
                 ) {
-                    append(stringResource(R.string.tracks_item_title_capturing))
+                    if (paused) {
+                        append(stringResource(R.string.tracks_item_title_pause))
+                    } else {
+                        append(stringResource(R.string.tracks_item_title_capturing))
+                    }
                 }
             })
         } else {
@@ -174,6 +179,7 @@ fun TrackProperties(track: Track) {
 private fun TrackItem(
     track: Track,
     isCapturedTrack: Boolean,
+    paused: Boolean,
     onClick: (String) -> Unit,
     onLongPress: (String) -> Unit,
 ) {
@@ -190,7 +196,7 @@ private fun TrackItem(
             }
         ),
         headlineContent = {
-            TrackHeadline(track, isCapturedTrack)
+            TrackHeadline(track, isCapturedTrack, paused)
         },
         supportingContent = {
             TrackProperties(track)

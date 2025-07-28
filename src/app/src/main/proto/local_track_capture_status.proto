@@ -6,4 +6,5 @@ option java_multiple_files = true;
 message ProtoLocalTrackCaptureStatus {
   required bool trackCaptureEnabled = 1 [default = false];
   optional string trackId = 2;
+  required bool paused = 3 [default = false];
 }

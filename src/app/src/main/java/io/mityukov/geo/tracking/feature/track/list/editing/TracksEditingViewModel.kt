@@ -60,7 +60,7 @@ class TracksEditingViewModel @Inject constructor(
                     selectedTracks = tracks.filter { track ->
                         selectedTracks.contains(track.id)
                     },
-                    capturedTrack = if (captureStatus is TrackCaptureStatus.Running) {
+                    capturedTrack = if (captureStatus is TrackCaptureStatus.Run) {
                         captureStatus.track.id
                     } else {
                         null

@@ -4,15 +4,17 @@ import io.mityukov.geo.tracking.core.model.track.Track
 import kotlinx.coroutines.flow.Flow
 
 sealed interface TrackCaptureStatus {
-    data class Running(val track: Track) : TrackCaptureStatus
+    data class Run(val track: Track, val paused: Boolean) : TrackCaptureStatus
+
     data object Error : TrackCaptureStatus
     data object Idle : TrackCaptureStatus
 }
 
 interface TrackCaptureService {
     val status: Flow<TrackCaptureStatus>
-    suspend fun switch()
     suspend fun start()
+    suspend fun resume()
+    suspend fun pause()
     suspend fun stop()
     suspend fun bind()
 }

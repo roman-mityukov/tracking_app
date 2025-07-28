@@ -9,6 +9,9 @@
     <string name="map_location_permission_consent">Дать разрешение</string>
     <string name="map_disabled_location_permission_description">Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы</string>
     <string name="map_disabled_location_permission_consent">Включить</string>
+    <string name="map_current_location_message">Текущая геопозиция %s\nШирота %f, Долгота %f</string>
+    <string name="map_current_location_share_text">Моя текущая геопозиция %f,%f</string>
+    <string name="map_current_location_share_title">Поделиться геопозицией</string>
     <string name="map_update_location">Обновление местоположения…</string>
     <string name="onboarding_instructions_label">Рекомендации</string>
     <string name="onboarding_instructions_content">1.Установите для этого приложения разрешение \"Местоположение\" в \"Разрешить в любом режиме\". Это позволит записывать трек когда приложение находится в фоновом режиме. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
@@ -18,6 +21,7 @@
     <string name="track_capture_notification_text">Сбор геолокации…</string>
     <string name="tracks_title">Треки</string>
     <string name="tracks_item_title_capturing">Запись…</string>
+    <string name="tracks_item_title_pause">Пауза…</string>
     <string name="tracks_empty_list_message">Пока не записано ни одного трека</string>
     <string name="track_details_title">Детали трека</string>
     <string name="track_details_delete_dialog_title">Внимание!</string>

@@ -9,6 +9,7 @@ import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureService
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.feature.map.MapState.*
 import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +20,8 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 sealed interface MapEvent {
+    data object PauseCurrentLocationUpdate : MapEvent
+    data object ResumeCurrentLocationUpdate : MapEvent
     data object GetCurrentLocation : MapEvent
     data object CurrentLocationConsumed : MapEvent
 }
@@ -42,7 +45,7 @@ sealed interface MapState {
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    geolocationUpdatesRepository: GeolocationUpdatesRepository,
+    private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
     trackCaptureService: TrackCaptureService,
 ) :
     ViewModel() {
@@ -55,7 +58,7 @@ class MapViewModel @Inject constructor(
             Pair(trackCaptureStatus, mutableState)
         }
         .combine(
-            geolocationUpdatesRepository.getGeolocationUpdates()
+            geolocationUpdatesRepository.currentLocation
         ) { pair, currentLocation ->
             val (trackCaptureStatus, mutableState) = pair
 
@@ -88,7 +91,7 @@ class MapViewModel @Inject constructor(
             MapEvent.GetCurrentLocation -> {
                 lastKnownLocation?.let { geolocation ->
                     mutableStateFlow.update {
-                        MapState.CurrentLocation(data = geolocation)
+                        CurrentLocation(data = geolocation)
                     }
                 }
             }
@@ -97,6 +100,13 @@ class MapViewModel @Inject constructor(
                 mutableStateFlow.update {
                     null
                 }
+            }
+
+            MapEvent.PauseCurrentLocationUpdate -> {
+                geolocationUpdatesRepository.stop()
+            }
+            MapEvent.ResumeCurrentLocationUpdate -> {
+                geolocationUpdatesRepository.start()
             }
         }
     }

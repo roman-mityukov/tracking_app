@@ -3,7 +3,7 @@ package io.mityukov.geo.tracking.feature.track.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureService
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
@@ -23,7 +23,7 @@ sealed interface TracksState {
 @HiltViewModel
 class TracksViewModel @Inject constructor(
     private val tracksRepository: TracksRepository,
-    private val trackCaptureService: TrackCaptureService,
+    private val trackCaptureController: TrackCaptureController,
 ) :
     ViewModel() {
     private val mutableStateFlow =
@@ -32,7 +32,7 @@ class TracksViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            tracksRepository.refreshTracks().combine(trackCaptureService.status) { tracks, status ->
+            tracksRepository.refreshTracks().combine(trackCaptureController.status) { tracks, status ->
                 TracksState.Data(
                     tracks = tracks,
                     capturedTrackId = (status as? TrackCaptureStatus.Run)?.track?.id,

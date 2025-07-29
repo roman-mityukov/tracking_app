@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureService
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
@@ -37,7 +37,7 @@ sealed interface TracksEditingState {
 class TracksEditingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val tracksRepository: TracksRepository,
-    private val trackCaptureService: TrackCaptureService,
+    private val trackCaptureController: TrackCaptureController,
 ) :
     ViewModel() {
     private val routeTracksEditing = savedStateHandle.toRoute<HomeRouteTracksEditing>()
@@ -52,7 +52,7 @@ class TracksEditingViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val tracks = tracksRepository.getTracks().first()
-            val captureStatus = trackCaptureService.status.first()
+            val captureStatus = trackCaptureController.status.first()
 
             mutableStateFlow.update {
                 TracksEditingState.Data(
@@ -99,7 +99,7 @@ class TracksEditingViewModel @Inject constructor(
                 viewModelScope.launch {
                     selectedTracks.forEach {
                         if ((mutableStateFlow.value as? TracksEditingState.Data)?.capturedTrack == it) {
-                            trackCaptureService.stop()
+                            trackCaptureController.stop()
                         }
                         tracksRepository.deleteTrack(it)
                     }

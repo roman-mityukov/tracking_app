@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureService
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
@@ -45,14 +45,14 @@ sealed interface MapState {
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
-    trackCaptureService: TrackCaptureService,
+    trackCaptureController: TrackCaptureController,
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
 
     private val mutableStateFlow = MutableStateFlow<MapState?>(null)
 
-    val stateFlow: StateFlow<MapState> = trackCaptureService.status
+    val stateFlow: StateFlow<MapState> = trackCaptureController.status
         .combine(mutableStateFlow) { trackCaptureStatus, mutableState ->
             Pair(trackCaptureStatus, mutableState)
         }

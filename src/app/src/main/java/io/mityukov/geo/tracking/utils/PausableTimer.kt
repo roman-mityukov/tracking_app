@@ -1,5 +1,6 @@
 package io.mityukov.geo.tracking.utils
 
+import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class PausableTimer(
     private val initialValue: Long = 0,
-    private val interval: Long = 1000L,
+    val interval: Long = 1000L,
     private val coroutineScope: CoroutineScope
 ) {
     private val _events = MutableStateFlow<Long>(0)
@@ -46,6 +47,7 @@ class PausableTimer(
     }
 
     fun start() {
+        logd("timer started")
         commandChannel.trySend(Command.Start)
     }
 

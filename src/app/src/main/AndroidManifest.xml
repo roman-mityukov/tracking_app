@@ -62,7 +62,7 @@
                 tools:node="remove" />
         </provider>
         <service
-            android:name=".ForegroundGeolocationService"
+            android:name=".ForegroundTrackCaptureService"
             android:exported="false"
             android:foregroundServiceType="location" />
     </application>

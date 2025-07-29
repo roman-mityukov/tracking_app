@@ -10,7 +10,7 @@ sealed interface TrackCaptureStatus {
     data object Idle : TrackCaptureStatus
 }
 
-interface TrackCaptureService {
+interface TrackCaptureController {
     val status: Flow<TrackCaptureStatus>
     suspend fun start()
     suspend fun resume()

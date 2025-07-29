@@ -1,6 +1,7 @@
 package io.mityukov.geo.tracking
 
 import android.Manifest
+import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -101,7 +102,7 @@ class ForegroundTrackCaptureService : Service() {
                         }
 
                         if (canBeAdded) {
-                            logd("Add point")
+                            logd("Add point $lastLocation")
                             trackDao.insertTrackPoint(
                                 TrackPointEntity(
                                     id = Uuid.random().toString(),
@@ -168,38 +169,10 @@ class ForegroundTrackCaptureService : Service() {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             return
         } else {
-            val builder: NotificationCompat.Builder =
-                NotificationCompat.Builder(
-                    applicationContext,
-                    GeoAppProps.TRACK_CAPTURE_CHANNEL_ID
-                )
-
-            val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                data = intent?.data
-            }
-            val pendingIntent =
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-
-            val notification = builder
-                .setContentTitle(resources.getString(R.string.track_capture_notification_title))
-                .setContentText(resources.getString(R.string.track_capture_notification_text))
-                .setContentIntent(pendingIntent)
-                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                .setOngoing(true)
-                .setSilent(true)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .build()
-
             ServiceCompat.startForeground(
                 this,
                 100,
-                notification,
+                buildNotification(intent),
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                 } else {
@@ -225,10 +198,45 @@ class ForegroundTrackCaptureService : Service() {
                     val oldTrack = trackDao.getTrack(currentTrackId)
                     logd("timer oldDuration ${oldTrack.duration}")
                     val newTrack =
-                        TrackEntity(oldTrack.id, oldTrack.name, oldTrack.duration + timer!!.interval)
+                        TrackEntity(
+                            oldTrack.id,
+                            oldTrack.name,
+                            oldTrack.duration + timer!!.interval
+                        )
                     trackDao.insertTrack(newTrack)
                 }
             }
         }
+    }
+
+    private fun buildNotification(intent: Intent?): Notification {
+        val builder: NotificationCompat.Builder =
+            NotificationCompat.Builder(
+                applicationContext,
+                GeoAppProps.TRACK_CAPTURE_CHANNEL_ID
+            )
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            data = intent?.data
+        }
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+        val notification = builder
+            .setContentTitle(resources.getString(R.string.track_capture_notification_title))
+            .setContentText(resources.getString(R.string.track_capture_notification_text))
+            .setContentIntent(pendingIntent)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setOngoing(true)
+            .setSilent(true)
+            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .build()
+        return notification
     }
 }

@@ -26,6 +26,8 @@
     <string name="track_details_title">Детали трека</string>
     <string name="track_details_delete_dialog_title">Внимание!</string>
     <string name="track_details_delete_dialog_text">Вы действительно хотите удалить трек?</string>
+    <string name="track_details_button_delete_label">Удалить трек</string>
+    <string name="track_details_sharing_chooser_title">Отправить трек</string>
     <string name="tracks_editing_title">Редактирование</string>
     <string name="tracks_editing_delete_dialog_title">Внимание!</string>
     <string name="tracks_editing_delete_dialog_text">Вы действительно хотите удалить выбранные треки?</string>

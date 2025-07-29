@@ -16,6 +16,8 @@ import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLoc
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControllerImpl
+import io.mityukov.geo.tracking.core.data.repository.track.TrackShareService
+import io.mityukov.geo.tracking.core.data.repository.track.TrackShareServiceImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepositoryImpl
 import io.mityukov.geo.tracking.core.database.AppDatabase
@@ -42,6 +44,9 @@ interface DataModule {
     @Singleton
     @Binds
     fun bindTracksRepository(impl: TracksRepositoryImpl): TracksRepository
+
+    @Binds
+    fun bindTrackShareService(impl: TrackShareServiceImpl): TrackShareService
 
     companion object {
         @Provides

@@ -365,19 +365,22 @@ private fun BoxScope.CurrentTrack(
     mapView: MapView,
 ) {
     if (viewModelState.track.points.isNotEmpty()) {
-        mapView.showTrack(
-            LocalContext.current,
-            viewModelState.track,
-            TrackAppearanceSettings.ZOOM_OUT_CORRECTION_MAP
-        )
-        mapView.mapWindow.focusRect = ScreenRect(
-            ScreenPoint(0f, TrackAppearanceSettings.UI_TOP_OFFSET),
-            ScreenPoint(
-                mapView.mapWindow.width()
-                    .toFloat() - TrackAppearanceSettings.UI_RIGHT_OFFSET,
-                mapView.mapWindow.height().toFloat()
+        val context = LocalContext.current
+        LaunchedEffect(viewModelState.track.points.last()) {
+            mapView.showTrack(
+                context,
+                viewModelState.track,
+                TrackAppearanceSettings.ZOOM_OUT_CORRECTION_MAP
             )
-        )
+            mapView.mapWindow.focusRect = ScreenRect(
+                ScreenPoint(0f, TrackAppearanceSettings.UI_TOP_OFFSET),
+                ScreenPoint(
+                    mapView.mapWindow.width()
+                        .toFloat() - TrackAppearanceSettings.UI_RIGHT_OFFSET,
+                    mapView.mapWindow.height().toFloat()
+                )
+            )
+        }
 
         Column(
             modifier = Modifier

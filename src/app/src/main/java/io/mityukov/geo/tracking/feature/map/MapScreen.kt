@@ -85,7 +85,7 @@ fun MapScreen(
         val mapView = remember { MapView(context) }
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-        MapLifecycle(mapView)
+        MapLifecycle(viewModel, mapView)
         MapPermissions(viewModelState.value, snackbarHostState)
 
         AndroidView(
@@ -203,12 +203,18 @@ private fun MapPermissions(viewModelState: MapState, snackbarHostState: Snackbar
 
 @Composable
 private fun MapLifecycle(
+    viewModel: MapViewModel,
     mapView: MapView,
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(Unit) {
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {
+                override fun onResume(owner: LifecycleOwner) {
+                    super.onResume(owner)
+                    viewModel.add(MapEvent.ResumeCurrentLocationUpdate)
+                }
+
                 override fun onStart(owner: LifecycleOwner) {
                     super.onStart(owner)
                     mapView.onStart()
@@ -217,6 +223,7 @@ private fun MapLifecycle(
                 override fun onStop(owner: LifecycleOwner) {
                     super.onStop(owner)
                     mapView.onStop()
+                    viewModel.add(MapEvent.PauseCurrentLocationUpdate)
                 }
             },
         )

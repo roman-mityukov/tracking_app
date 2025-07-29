@@ -1,10 +1,10 @@
-syntax = "proto2";
+syntax = "proto3";
 
 option java_package = "io.mityukov.geo.tracking.core.data.repository.settings.app.proto";
 option java_multiple_files = true;
 
 message ProtoLocalTrackCaptureStatus {
-  required bool trackCaptureEnabled = 1 [default = false];
-  optional string trackId = 2;
-  required bool paused = 3 [default = false];
+  bool trackCaptureEnabled = 1;
+  string trackId = 2;
+  bool paused = 3;
 }

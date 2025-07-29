@@ -15,5 +15,7 @@ data class GeolocationUpdateResult(
 )
 
 interface GeolocationUpdatesRepository {
-    fun getGeolocationUpdates(): Flow<GeolocationUpdateResult>
+    val currentLocation: Flow<GeolocationUpdateResult>
+    fun start()
+    fun stop()
 }

@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 sealed interface MapEvent {
+    data object PauseCurrentLocationUpdate : MapEvent
+    data object ResumeCurrentLocationUpdate : MapEvent
     data object GetCurrentLocation : MapEvent
     data object CurrentLocationConsumed : MapEvent
 }
@@ -42,7 +44,7 @@ sealed interface MapState {
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    geolocationUpdatesRepository: GeolocationUpdatesRepository,
+    private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
     trackCaptureService: TrackCaptureService,
 ) :
     ViewModel() {
@@ -55,7 +57,7 @@ class MapViewModel @Inject constructor(
             Pair(trackCaptureStatus, mutableState)
         }
         .combine(
-            geolocationUpdatesRepository.getGeolocationUpdates()
+            geolocationUpdatesRepository.currentLocation
         ) { pair, currentLocation ->
             val (trackCaptureStatus, mutableState) = pair
 
@@ -97,6 +99,14 @@ class MapViewModel @Inject constructor(
                 mutableStateFlow.update {
                     null
                 }
+            }
+
+            MapEvent.PauseCurrentLocationUpdate -> {
+                geolocationUpdatesRepository.stop()
+            }
+
+            MapEvent.ResumeCurrentLocationUpdate -> {
+                geolocationUpdatesRepository.start()
             }
         }
     }

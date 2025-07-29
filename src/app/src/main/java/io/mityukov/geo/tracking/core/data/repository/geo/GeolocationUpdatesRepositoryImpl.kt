@@ -13,18 +13,53 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class GeolocationUpdatesRepositoryImpl @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
     private val fusedLocationProviderClient: FusedLocationProviderClient,
 ) : GeolocationUpdatesRepository {
-    override fun getGeolocationUpdates(): Flow<GeolocationUpdateResult> = callbackFlow {
+
+    private val mutableStateFlow = MutableStateFlow(
+        GeolocationUpdateResult(
+            null,
+            GeolocationUpdateException.LocationIsNull
+        )
+    )
+
+    override val currentLocation = mutableStateFlow.asStateFlow()
+
+    private val locationManager =
+        applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            mutableStateFlow.update {
+                GeolocationUpdateResult(
+                    geolocation = if (locationResult.lastLocation != null) {
+                        Geolocation(
+                            latitude = locationResult.lastLocation!!.latitude,
+                            longitude = locationResult.lastLocation!!.longitude,
+                            altitude = locationResult.lastLocation!!.altitude,
+                            time = locationResult.lastLocation!!.time
+                        )
+                    } else {
+                        null
+                    },
+                    error = if (locationResult.lastLocation == null) {
+                        GeolocationUpdateException.LocationIsNull
+                    } else {
+                        null
+                    }
+                )
+            }
+        }
+    }
+
+    override fun start() {
         val accessFineLocationGranted = applicationContext.checkSelfPermission(
             android.Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
@@ -32,51 +67,22 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
             android.Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
-        val locationManager =
-            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                trySendBlocking(
-                    GeolocationUpdateResult(
-                        geolocation = if (locationResult.lastLocation != null) {
-                            Geolocation(
-                                latitude = locationResult.lastLocation!!.latitude,
-                                longitude = locationResult.lastLocation!!.longitude,
-                                altitude = locationResult.lastLocation!!.altitude,
-                                time = locationResult.lastLocation!!.time
-                            )
-                        } else {
-                            null
-                        },
-                        error = if (locationResult.lastLocation == null) {
-                            GeolocationUpdateException.LocationIsNull
-                        } else {
-                            null
-                        }
-                    )
-                )
-            }
-        }
-
-        delay(100)
-
         if (accessCoarseLocationGranted.not()
             && accessFineLocationGranted.not()
         ) {
-            trySend(
+            mutableStateFlow.update {
                 GeolocationUpdateResult(
                     geolocation = null,
                     error = GeolocationUpdateException.PermissionsNotGranted
                 )
-            )
+            }
         } else if (locationManager.isLocationEnabled.not()) {
-            trySend(
+            mutableStateFlow.update {
                 GeolocationUpdateResult(
                     geolocation = null,
                     error = GeolocationUpdateException.LocationDisabled
                 )
-            )
+            }
         } else {
             fusedLocationProviderClient.getLastLocation(
                 LastLocationRequest.Builder()
@@ -84,7 +90,7 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
             )
                 .addOnSuccessListener { lastKnownLocation ->
                     if (lastKnownLocation != null) {
-                        trySendBlocking(
+                        mutableStateFlow.update {
                             GeolocationUpdateResult(
                                 geolocation = Geolocation(
                                     latitude = lastKnownLocation.latitude,
@@ -93,7 +99,7 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
                                     time = lastKnownLocation.time,
                                 ), error = null
                             )
-                        )
+                        }
                     }
                 }
 
@@ -108,8 +114,9 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
                 Looper.getMainLooper(),
             )
         }
-        awaitClose {
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-        }
+    }
+
+    override fun stop() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
     }
 }

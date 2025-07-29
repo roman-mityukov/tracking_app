@@ -22,20 +22,24 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.app.GeoAppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
+import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
+import io.mityukov.geo.tracking.utils.PausableTimer
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.log.logw
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @AndroidEntryPoint
-class ForegroundGeolocationService : Service() {
+class ForegroundTrackCaptureService : Service() {
     @Inject
     @TrackCaptureStatusDataStore
     lateinit var dataStore: DataStore<ProtoLocalTrackCaptureStatus>
@@ -52,11 +56,17 @@ class ForegroundGeolocationService : Service() {
     @Inject
     @DispatcherIO
     lateinit var coroutineDispatcher: CoroutineDispatcher
+    private val coroutineScope by lazy {
+        CoroutineScope(coroutineDispatcher)
+    }
+
+    private var timer: PausableTimer? = null
+    private var initialized: Boolean = false
 
     @OptIn(ExperimentalUuidApi::class)
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-            runBlocking(coroutineDispatcher) {
+            coroutineScope.launch {
                 val currentTrackId = dataStore.data.first().trackId
                 val paused = dataStore.data.first().paused
                 val lastLocation = locationResult.lastLocation
@@ -69,7 +79,7 @@ class ForegroundGeolocationService : Service() {
 
                         if (diff > 60 * 1000) {
                             logd("Skip old location")
-                            return@runBlocking
+                            return@launch
                         }
 
                         val points = trackDao.getTrackPoints(currentTrackId).first()
@@ -108,7 +118,7 @@ class ForegroundGeolocationService : Service() {
                 } else {
                     stopSelf()
                     ServiceCompat.stopForeground(
-                        this@ForegroundGeolocationService,
+                        this@ForegroundTrackCaptureService,
                         ServiceCompat.STOP_FOREGROUND_REMOVE
                     )
                 }
@@ -121,12 +131,25 @@ class ForegroundGeolocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(intent)
+        val pause: Boolean? = intent?.extras?.getBoolean(GeoAppProps.EXTRA_INTENT_PAUSE)
+        if (pause != null) {
+            logd("ForegroundTrackCaptureService receives pause intent")
+            if (pause) {
+                timer?.pause()
+            } else {
+                timer?.resume()
+            }
+        } else if (initialized.not()) {
+            logd("ForegroundTrackCaptureService receives startForeground intent")
+            startForeground(intent)
+            initialized = true
+        }
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        coroutineScope.cancel()
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
@@ -153,7 +176,7 @@ class ForegroundGeolocationService : Service() {
 
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                setData(intent?.data)
+                data = intent?.data
             }
             val pendingIntent =
                 PendingIntent.getActivity(
@@ -189,6 +212,23 @@ class ForegroundGeolocationService : Service() {
                 locationCallback,
                 Looper.getMainLooper(),
             )
+
+            coroutineScope.launch {
+                val currentTrackId = dataStore.data.first().trackId
+                val track = trackDao.getTrack(currentTrackId)
+                timer = PausableTimer(
+                    initialValue = track.duration,
+                    coroutineScope = coroutineScope
+                )
+                timer?.start()
+                timer?.events?.collect {
+                    val oldTrack = trackDao.getTrack(currentTrackId)
+                    logd("timer oldDuration ${oldTrack.duration}")
+                    val newTrack =
+                        TrackEntity(oldTrack.id, oldTrack.name, oldTrack.duration + timer!!.interval)
+                    trackDao.insertTrack(newTrack)
+                }
+            }
         }
     }
 }

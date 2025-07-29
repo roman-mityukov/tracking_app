@@ -3,7 +3,7 @@ package io.mityukov.geo.tracking.feature.track.capture
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureService
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -22,9 +22,9 @@ data class TrackCaptureState(val status: TrackCaptureStatus)
 
 @HiltViewModel
 class TrackCaptureViewModel @Inject constructor(
-    private val trackCaptureService: TrackCaptureService,
+    private val trackCaptureController: TrackCaptureController,
 ) : ViewModel() {
-    val stateFlow = trackCaptureService.status
+    val stateFlow = trackCaptureController.status
         .map {
             TrackCaptureState(it)
         }
@@ -35,7 +35,7 @@ class TrackCaptureViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            trackCaptureService.bind()
+            trackCaptureController.bind()
         }
     }
 
@@ -43,25 +43,25 @@ class TrackCaptureViewModel @Inject constructor(
         when (event) {
             TrackCaptureEvent.StartCapture -> {
                 viewModelScope.launch {
-                    trackCaptureService.start()
+                    trackCaptureController.start()
                 }
             }
 
             TrackCaptureEvent.StopCapture -> {
                 viewModelScope.launch {
-                    trackCaptureService.stop()
+                    trackCaptureController.stop()
                 }
             }
 
             TrackCaptureEvent.PauseCapture -> {
                 viewModelScope.launch {
-                    trackCaptureService.pause()
+                    trackCaptureController.pause()
                 }
             }
 
             TrackCaptureEvent.PlayCapture -> {
                 viewModelScope.launch {
-                    trackCaptureService.resume()
+                    trackCaptureController.resume()
                 }
             }
         }

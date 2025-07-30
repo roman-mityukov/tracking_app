@@ -1,3 +1,8 @@
 package io.mityukov.geo.tracking.core.data.repository.settings.app
 
-data class LocalAppSettings(val showOnboarding: Boolean)
+import kotlin.time.Duration
+
+data class LocalAppSettings(
+    val showOnboarding: Boolean,
+    val geolocationUpdatesInterval: Duration,
+)

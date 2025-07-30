@@ -16,11 +16,14 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.datastore.core.DataStore
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.app.GeoAppProps
+import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
@@ -52,7 +55,7 @@ class ForegroundTrackCaptureService : Service() {
     lateinit var fusedLocationClient: FusedLocationProviderClient
 
     @Inject
-    lateinit var locationRequest: LocationRequest
+    lateinit var localAppSettingsRepository: LocalAppSettingsRepository
 
     @Inject
     @DispatcherIO
@@ -180,13 +183,20 @@ class ForegroundTrackCaptureService : Service() {
                 },
             )
 
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper(),
-            )
-
             coroutineScope.launch {
+                val localAppSettings = localAppSettingsRepository.localAppSettings.first()
+
+                fusedLocationClient.requestLocationUpdates(
+                    LocationRequest.Builder(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        localAppSettings.geolocationUpdatesInterval.inWholeMilliseconds
+                    )
+                        .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+                        .build(),
+                    locationCallback,
+                    Looper.getMainLooper(),
+                )
+
                 val currentTrackId = dataStore.data.first().trackId
                 val track = trackDao.getTrack(currentTrackId)
                 timer = PausableTimer(

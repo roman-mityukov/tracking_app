@@ -61,6 +61,10 @@ class MapViewModel @Inject constructor(
         ) { pair, currentLocation ->
             val (trackCaptureStatus, mutableState) = pair
 
+            if (currentLocation.geolocation != null) {
+                lastKnownLocation = currentLocation.geolocation
+            }
+
             val state = mutableState
                 ?: if (trackCaptureStatus is TrackCaptureStatus.Run) {
                     MapState.CurrentTrack(
@@ -70,8 +74,6 @@ class MapViewModel @Inject constructor(
                     )
                 } else {
                     if (currentLocation.geolocation != null) {
-                        lastKnownLocation = currentLocation.geolocation
-                        logd("MapViewModel lastKnownLocation $lastKnownLocation")
                         MapState.CurrentLocation(data = currentLocation.geolocation)
                     } else {
                         MapState.NoLocation(cause = currentLocation.error)

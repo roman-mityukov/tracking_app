@@ -51,7 +51,6 @@ import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.LineStyle
-import com.yandex.mapkit.map.TextStyle
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
@@ -210,11 +209,7 @@ fun TrackDetailsContent(
 
         if (track.points.isNotEmpty()) {
             LaunchedEffect(track.points.last()) {
-                mapView.showTrack(
-                    context,
-                    track,
-                    TrackAppearanceSettings.ZOOM_OUT_CORRECTION_DETAILS
-                )
+                mapView.showTrack(context, track, true)
             }
         }
     }
@@ -259,40 +254,47 @@ fun TrackDetailsList(track: Track) {
     }
 }
 
-fun MapView.showTrack(context: Context, track: Track, zoomOutCorrection: Float) {
+fun MapView.showTrack(context: Context, track: Track, moveCamera: Boolean) {
     map.mapObjects.clear()
+
     val points = track.points.map {
         Point(it.geolocation.latitude, it.geolocation.longitude)
     }
-
-    val imageProvider =
-        ImageProvider.fromResource(context, R.drawable.pin_track_point)
-
+    val startImageProvider =
+        ImageProvider.fromResource(context, R.drawable.pin_start)
+    val finishImageProvider =
+        ImageProvider.fromResource(context, R.drawable.pin_finish)
     val pinsCollection = map.mapObjects.addCollection()
-    val textStyle = TextStyle().apply {
-        size = 10f
-        placement = TextStyle.Placement.RIGHT
-        offset = 0f
+    val placemarkIconStyle = IconStyle().apply {
+        anchor = PointF(
+            TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
+            TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
+        )
+        scale = TrackAppearanceSettings.PLACEMARK_SCALE
     }
-    points.forEachIndexed { index, point ->
-        val placemark = pinsCollection.addPlacemark()
-        placemark.apply {
-            geometry = Point(point.latitude, point.longitude)
-            setIcon(imageProvider)
-            setText(
-                index.toString(),
-                textStyle,
-            )
-        }
-        placemark.setIconStyle(
-            IconStyle().apply {
-                anchor = PointF(
-                    TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
-                    TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
-                )
-                scale = TrackAppearanceSettings.PLACEMARK_SCALE
+
+    val startPoint = points.first()
+    val startPlacemark = pinsCollection.addPlacemark()
+    startPlacemark.apply {
+        geometry = Point(startPoint.latitude, startPoint.longitude)
+        setIcon(
+            if (track.points.size > 1) {
+                startImageProvider
+            } else {
+                finishImageProvider
             }
         )
+    }
+    startPlacemark.setIconStyle(placemarkIconStyle)
+
+    if (track.points.size > 1) {
+        val finishPoint = points.last()
+        val finishPlacemark = pinsCollection.addPlacemark()
+        finishPlacemark.apply {
+            geometry = Point(finishPoint.latitude, finishPoint.longitude)
+            setIcon(finishImageProvider)
+        }
+        finishPlacemark.setIconStyle(placemarkIconStyle)
     }
 
     val geometry = if (track.points.size > 1) {
@@ -310,13 +312,15 @@ fun MapView.showTrack(context: Context, track: Track, zoomOutCorrection: Float) 
         Geometry.fromPoint(points.first())
     }
 
-    val position = map.cameraPosition(geometry)
-    map.move(
-        CameraPosition(
-            position.target,
-            position.zoom - zoomOutCorrection,
-            position.azimuth,
-            position.tilt
+    if (moveCamera) {
+        val position = map.cameraPosition(geometry)
+        map.move(
+            CameraPosition(
+                position.target,
+                position.zoom - TrackAppearanceSettings.ZOOM_OUT_CORRECTION_DETAILS,
+                position.azimuth,
+                position.tilt
+            )
         )
-    )
+    }
 }

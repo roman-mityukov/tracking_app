@@ -31,10 +31,13 @@ fun ProfileScreen(
         },
         contentWindowInsets = WindowInsets.safeContent,
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(modifier = Modifier.padding(
+            top = paddingValues.calculateTopPadding(),
+            bottom = paddingValues.calculateBottomPadding()
+        )) {
             ListItem(
-                modifier = Modifier.clickable() {
-                    onStatisticsSelected.invoke()
+                modifier = Modifier.clickable {
+                    onStatisticsSelected()
                 },
                 headlineContent = {
                     Text(text = stringResource(R.string.profile_statistics_label))
@@ -47,8 +50,8 @@ fun ProfileScreen(
                 }
             )
             ListItem(
-                modifier = Modifier.clickable() {
-                    onSettingsSelected.invoke()
+                modifier = Modifier.clickable {
+                    onSettingsSelected()
                 },
                 headlineContent = {
                     Text(text = stringResource(R.string.profile_settings_label))
@@ -61,8 +64,8 @@ fun ProfileScreen(
                 }
             )
             ListItem(
-                modifier = Modifier.clickable() {
-                    onAboutSelected.invoke()
+                modifier = Modifier.clickable {
+                    onAboutSelected()
                 },
                 headlineContent = {
                     Text(text = stringResource(R.string.profile_about_label))

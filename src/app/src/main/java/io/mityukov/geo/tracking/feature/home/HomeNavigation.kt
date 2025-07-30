@@ -10,6 +10,7 @@ import io.mityukov.geo.tracking.feature.about.AboutScreen
 import io.mityukov.geo.tracking.feature.map.MapScreen
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
 import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
+import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsScreen
 import io.mityukov.geo.tracking.feature.statistics.StatisticsScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsScreen
 import io.mityukov.geo.tracking.feature.track.list.TracksScreen
@@ -52,6 +53,7 @@ fun NavGraphBuilder.profileScreenNavigation(
     onStatisticsSelected: () -> Unit,
     onSettingsSelected: () -> Unit,
     onAboutSelected: () -> Unit,
+    onInstructionsSelected: () -> Unit,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -63,10 +65,13 @@ fun NavGraphBuilder.profileScreenNavigation(
             StatisticsScreen(onBack = onBack)
         }
         composable<HomeRouteSettings> {
-            AppSettingsScreen(onBack = onBack)
+            AppSettingsScreen(onInstructionsSelected = onInstructionsSelected, onBack = onBack)
         }
         composable<HomeRouteAbout> {
             AboutScreen(onBack = onBack, snackbarHostState = snackbarHostState)
+        }
+        composable<HomeRouteInstructions> {
+            InstructionsScreen(onBack = onBack)
         }
     }
 }

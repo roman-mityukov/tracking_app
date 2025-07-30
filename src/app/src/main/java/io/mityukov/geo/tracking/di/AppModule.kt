@@ -37,16 +37,6 @@ interface AppModule {
         }
 
         @Provides
-        fun provideLocationRequest(): LocationRequest {
-            return LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                GeoAppProps.LOCATION_REQUEST_INTERVAL
-            )
-                .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                .build()
-        }
-
-        @Provides
         @DispatcherIO
         fun providesIODispatcher(): CoroutineDispatcher = Dispatchers.IO
 

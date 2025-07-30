@@ -56,8 +56,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.yandex.mapkit.ScreenPoint
-import com.yandex.mapkit.ScreenRect
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
@@ -367,19 +365,7 @@ private fun BoxScope.CurrentTrack(
     if (viewModelState.track.points.isNotEmpty()) {
         val context = LocalContext.current
         LaunchedEffect(viewModelState.track.points.last()) {
-            mapView.showTrack(
-                context,
-                viewModelState.track,
-                TrackAppearanceSettings.ZOOM_OUT_CORRECTION_MAP
-            )
-            mapView.mapWindow.focusRect = ScreenRect(
-                ScreenPoint(0f, TrackAppearanceSettings.UI_TOP_OFFSET),
-                ScreenPoint(
-                    mapView.mapWindow.width()
-                        .toFloat() - TrackAppearanceSettings.UI_RIGHT_OFFSET,
-                    mapView.mapWindow.height().toFloat()
-                )
-            )
+            mapView.showTrack(context, viewModelState.track, false)
         }
 
         Column(

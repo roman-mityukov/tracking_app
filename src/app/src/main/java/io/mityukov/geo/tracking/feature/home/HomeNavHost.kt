@@ -43,6 +43,9 @@ data object HomeRouteSettings
 @Serializable
 data object HomeRouteAbout
 
+@Serializable
+data object HomeRouteInstructions
+
 @Composable
 fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHostState) {
     NavHost(
@@ -76,6 +79,9 @@ fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHos
             },
             onAboutSelected = {
                 navController.navigate(HomeRouteAbout)
+            },
+            onInstructionsSelected = {
+                navController.navigate(HomeRouteInstructions)
             },
             onBack = {
                 navController.popBackStack()

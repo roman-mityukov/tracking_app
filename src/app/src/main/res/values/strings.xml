@@ -1,4 +1,10 @@
 <resources>
+    <string name="about_title">О приложении</string>
+    <string name="about_button_label_email">Написать разработчику</string>
+    <string name="about_developer_email">romsvm@gmail.com</string>
+    <string name="about_email_subject">Приложение Запись трека</string>
+    <string name="about_email_app_chooser">Выберите приложение для отправки письма.</string>
+    <string name="about_email_no_apps_message">На устройстве нет почтовых приложений.</string>
     <string name="app_name">Запись трека</string>
     <string name="dialog_yes">Да</string>
     <string name="dialog_no">Нет</string>
@@ -16,6 +22,10 @@
     <string name="onboarding_instructions_label">Рекомендации</string>
     <string name="onboarding_instructions_content">1.Установите для этого приложения разрешение \"Местоположение\" в \"Разрешить в любом режиме\". Это позволит записывать трек когда приложение находится в фоновом режиме. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
     <string name="onboarding_button_label">Хорошо</string>
+    <string name="instructions_view_label">Инструкции по настройке геолокации</string>
+    <string name="instructions_title">Инструкции</string>
+    <string name="instructions_description">Настройка стабильной работы геолокации</string>
+    <string name="geolocation_updates_rate_label">Интервал обновления трека, секунды</string>
     <string name="track_capture_notification_channel_description">Оповещение о записи трека</string>
     <string name="track_capture_notification_title">Построение трека</string>
     <string name="track_capture_notification_text">Сбор геолокации…</string>
@@ -37,10 +47,4 @@
     <string name="profile_about_label">О приложении</string>
     <string name="statistics_title">Статистика</string>
     <string name="settings_title">Настройки</string>
-    <string name="about_title">О приложении</string>
-    <string name="about_button_label_email">Написать разработчику</string>
-    <string name="about_developer_email">romsvm@gmail.com</string>
-    <string name="about_email_subject">Приложение Запись трека</string>
-    <string name="about_email_app_chooser">Выберите приложение для отправки письма.</string>
-    <string name="about_email_no_apps_message">На устройстве нет почтовых приложений.</string>
 </resources>

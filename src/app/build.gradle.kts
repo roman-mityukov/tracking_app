@@ -145,6 +145,7 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.treessence)
     implementation(libs.yandex.map.kit)
+    debugImplementation(libs.leak.canary)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -22,7 +22,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
-import io.mityukov.geo.tracking.app.GeoAppProps
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
@@ -135,7 +135,7 @@ class ForegroundTrackCaptureService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val pause: Boolean? = intent?.extras?.getBoolean(GeoAppProps.EXTRA_INTENT_PAUSE)
+        val pause: Boolean? = intent?.extras?.getBoolean(AppProps.EXTRA_INTENT_PAUSE)
         if (pause != null) {
             logd("ForegroundTrackCaptureService receives pause intent")
             if (pause) {
@@ -223,7 +223,7 @@ class ForegroundTrackCaptureService : Service() {
         val builder: NotificationCompat.Builder =
             NotificationCompat.Builder(
                 applicationContext,
-                GeoAppProps.TRACK_CAPTURE_CHANNEL_ID
+                AppProps.TRACK_CAPTURE_CHANNEL_ID
             )
 
         val intent = Intent(this, MainActivity::class.java).apply {

@@ -1,7 +1,7 @@
 package io.mityukov.geo.tracking.core.data.repository.settings.app
 
 import androidx.datastore.core.DataStore
-import io.mityukov.geo.tracking.app.GeoAppProps
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
 import io.mityukov.geo.tracking.di.AppSettingsDataStore
 import kotlinx.coroutines.flow.Flow
@@ -46,7 +46,7 @@ class LocalAppSettingsRepositoryImpl @Inject constructor(
         LocalAppSettings(
             showOnboarding = proto.showOnboarding,
             geolocationUpdatesInterval = if (proto.geolocationUpdatesRateSeconds == 0) {
-                GeoAppProps.DEFAULT_GEOLOCATION_UPDATES_INTERVAL
+                AppProps.DEFAULT_GEOLOCATION_UPDATES_INTERVAL
             } else {
                 proto.geolocationUpdatesRateSeconds.seconds
             },

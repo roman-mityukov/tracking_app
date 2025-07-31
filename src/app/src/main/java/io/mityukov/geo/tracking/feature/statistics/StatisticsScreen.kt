@@ -31,7 +31,7 @@ fun StatisticsScreen(onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.content_description_back_button),
                         )
                     }
                 }

@@ -27,8 +27,7 @@ sealed interface TracksEditingState {
         val allTracks: List<Track>,
         val selectedTracks: List<Track>,
         val capturedTrack: String?,
-    ) :
-        TracksEditingState
+    ) : TracksEditingState
 
     data object DeletionComplete : TracksEditingState
 }

@@ -42,7 +42,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel(), onNext: (
         Image(
             modifier = Modifier.size(192.dp),
             painter = painterResource(R.drawable.ic_launcher_round),
-            contentDescription = null
+            contentDescription = stringResource(R.string.content_description_app_icon)
         )
         Spacer(modifier = Modifier.height(48.dp))
         Text(

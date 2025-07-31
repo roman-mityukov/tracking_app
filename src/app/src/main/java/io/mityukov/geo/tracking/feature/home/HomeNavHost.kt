@@ -69,6 +69,7 @@ fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHos
             onBack = {
                 navController.popBackStack()
             },
+            snackbarHostState = snackbarHostState,
         )
         profileScreenNavigation(
             onStatisticsSelected = {

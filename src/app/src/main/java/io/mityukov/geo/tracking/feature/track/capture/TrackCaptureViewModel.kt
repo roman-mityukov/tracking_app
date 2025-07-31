@@ -3,6 +3,7 @@ package io.mityukov.geo.tracking.feature.track.capture
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +30,8 @@ class TrackCaptureViewModel @Inject constructor(
             TrackCaptureState(it)
         }
         .stateIn(
-            viewModelScope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L),
+            viewModelScope,
+            SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),
             TrackCaptureState(TrackCaptureStatus.Idle)
         )
 
@@ -40,27 +42,21 @@ class TrackCaptureViewModel @Inject constructor(
     }
 
     fun add(event: TrackCaptureEvent) {
-        when (event) {
-            TrackCaptureEvent.StartCapture -> {
-                viewModelScope.launch {
+        viewModelScope.launch {
+            when (event) {
+                TrackCaptureEvent.StartCapture -> {
                     trackCaptureController.start()
                 }
-            }
 
-            TrackCaptureEvent.StopCapture -> {
-                viewModelScope.launch {
+                TrackCaptureEvent.StopCapture -> {
                     trackCaptureController.stop()
                 }
-            }
 
-            TrackCaptureEvent.PauseCapture -> {
-                viewModelScope.launch {
+                TrackCaptureEvent.PauseCapture -> {
                     trackCaptureController.pause()
                 }
-            }
 
-            TrackCaptureEvent.PlayCapture -> {
-                viewModelScope.launch {
+                TrackCaptureEvent.PlayCapture -> {
                     trackCaptureController.resume()
                 }
             }

@@ -7,7 +7,7 @@ import androidx.datastore.core.DataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.ForegroundTrackCaptureService
 import io.mityukov.geo.tracking.app.DeepLinkProps
-import io.mityukov.geo.tracking.app.GeoAppProps
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
@@ -82,7 +82,7 @@ class TrackCaptureControllerImpl @Inject constructor(
 
     override suspend fun resume() {
         val intent = Intent(applicationContext, ForegroundTrackCaptureService::class.java)
-        intent.putExtra(GeoAppProps.EXTRA_INTENT_PAUSE, false)
+        intent.putExtra(AppProps.EXTRA_INTENT_PAUSE, false)
         applicationContext.startService(intent)
 
         val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
@@ -98,7 +98,7 @@ class TrackCaptureControllerImpl @Inject constructor(
 
     override suspend fun pause() {
         val intent = Intent(applicationContext, ForegroundTrackCaptureService::class.java)
-        intent.putExtra(GeoAppProps.EXTRA_INTENT_PAUSE, true)
+        intent.putExtra(AppProps.EXTRA_INTENT_PAUSE, true)
         applicationContext.startService(intent)
 
         val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus

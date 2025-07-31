@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,48 +29,71 @@ fun TrackCaptureView(viewModel: TrackCaptureViewModel = hiltViewModel()) {
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (state.value.status is TrackCaptureStatus.Run) {
-            Button(
-                onClick = {
-                    viewModel.add(TrackCaptureEvent.StopCapture)
-                },
-                Modifier.size(48.dp),
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
-            ) {
-                Icon(painterResource(R.drawable.icon_stop), contentDescription = null)
-            }
+            ButtonStopTrackCapture(onClick = { viewModel.add(TrackCaptureEvent.StopCapture) })
             Spacer(Modifier.width(8.dp))
         }
-        IconToggleButton(
-            modifier = Modifier.size(64.dp),
-            checked = state.value.status is TrackCaptureStatus.Run,
-            onCheckedChange = {
-                if ((state.value.status is TrackCaptureStatus.Run).not()) {
-                    viewModel.add(TrackCaptureEvent.StartCapture)
-                } else {
-                    if ((state.value.status as TrackCaptureStatus.Run).paused) {
-                        viewModel.add(TrackCaptureEvent.PlayCapture)
-                    } else {
-                        viewModel.add(TrackCaptureEvent.PauseCapture)
-                    }
-                }
-            },
-            colors = IconButtonDefaults.iconToggleButtonColors().copy(
-                containerColor = Color.Red,
-                contentColor = ButtonDefaults.buttonColors().contentColor,
-                checkedContainerColor = Color.Red,
-                checkedContentColor = ButtonDefaults.buttonColors().contentColor,
-            )
-        ) {
-            if (state.value.status is TrackCaptureStatus.Run) {
-                if ((state.value.status as TrackCaptureStatus.Run).paused) {
-                    Icon(painterResource(R.drawable.icon_play), contentDescription = null)
-                } else {
-                    Icon(painterResource(R.drawable.icon_pause), contentDescription = null)
-                }
+        ButtonStartTrackCapture(viewModel = viewModel)
+    }
+}
+
+@Composable
+private fun ButtonStopTrackCapture(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        Modifier.size(48.dp),
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp),
+    ) {
+        Icon(
+            painterResource(R.drawable.icon_stop),
+            contentDescription = stringResource(R.string.content_description_map_stop_track),
+        )
+    }
+}
+
+@Composable
+private fun ButtonStartTrackCapture(viewModel: TrackCaptureViewModel) {
+    val state = viewModel.stateFlow.collectAsStateWithLifecycle()
+    val trackCaptureStatus = state.value.status
+
+    IconToggleButton(
+        modifier = Modifier.size(64.dp),
+        checked = trackCaptureStatus is TrackCaptureStatus.Run,
+        onCheckedChange = {
+            if ((trackCaptureStatus is TrackCaptureStatus.Run).not()) {
+                viewModel.add(TrackCaptureEvent.StartCapture)
             } else {
-                Icon(painterResource(R.drawable.home_track_filled), contentDescription = null)
+                if (trackCaptureStatus.paused) {
+                    viewModel.add(TrackCaptureEvent.PlayCapture)
+                } else {
+                    viewModel.add(TrackCaptureEvent.PauseCapture)
+                }
             }
+        },
+        colors = IconButtonDefaults.iconToggleButtonColors().copy(
+            containerColor = Color.Red,
+            contentColor = ButtonDefaults.buttonColors().contentColor,
+            checkedContainerColor = Color.Red,
+            checkedContentColor = ButtonDefaults.buttonColors().contentColor,
+        )
+    ) {
+        if (trackCaptureStatus is TrackCaptureStatus.Run) {
+            if (trackCaptureStatus.paused) {
+                Icon(
+                    painterResource(R.drawable.icon_play),
+                    contentDescription = stringResource(R.string.content_description_map_resume_track),
+                )
+            } else {
+                Icon(
+                    painterResource(R.drawable.icon_pause),
+                    contentDescription = stringResource(R.string.content_description_map_pause_track),
+                )
+            }
+        } else {
+            Icon(
+                painterResource(R.drawable.home_track_filled),
+                contentDescription = stringResource(R.string.content_description_map_start_track)
+            )
         }
     }
 }

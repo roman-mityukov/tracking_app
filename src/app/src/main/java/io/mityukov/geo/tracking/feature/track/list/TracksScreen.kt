@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
-import io.mityukov.geo.tracking.app.GeoAppProps
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.model.track.Track
 import kotlin.time.DurationUnit
 
@@ -119,7 +119,7 @@ private fun TrackList(
 fun TrackHeadline(track: Track, isCapturedTrack: Boolean, paused: Boolean) {
     if (track.points.isNotEmpty()) {
         val startTime =
-            track.points.first().geolocation.localDateTime.format(GeoAppProps.UI_DATE_TIME_FORMATTER)
+            track.points.first().geolocation.localDateTime.format(AppProps.UI_DATE_TIME_FORMATTER)
 
         if (isCapturedTrack) {
             Text(buildAnnotatedString {
@@ -144,12 +144,12 @@ fun TrackHeadline(track: Track, isCapturedTrack: Boolean, paused: Boolean) {
 }
 
 @Composable
-fun TrackItemProperty(iconResource: Int, text: String) {
+fun TrackItemProperty(iconResource: Int, text: String, contentDescription: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             modifier = Modifier.size(16.dp),
             painter = painterResource(iconResource),
-            contentDescription = null
+            contentDescription = contentDescription
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(text = text)
@@ -161,17 +161,29 @@ fun TrackItemProperty(iconResource: Int, text: String) {
 fun TrackProperties(track: Track) {
     Row(verticalAlignment = Alignment.Bottom) {
         TrackItemProperty(
-            R.drawable.icon_duration,
-            DateUtils.formatElapsedTime(
+            iconResource = R.drawable.icon_duration,
+            text = DateUtils.formatElapsedTime(
                 track.duration.toLong(
                     DurationUnit.SECONDS
                 )
             ),
+            contentDescription = stringResource(R.string.content_description_track_time),
         )
-        TrackItemProperty(R.drawable.icon_distance, "${track.distance}м")
-        TrackItemProperty(R.drawable.icon_my_location, "${track.points.size}")
-        TrackItemProperty(R.drawable.icon_altitude_up, "${track.altitudeUp}")
-        TrackItemProperty(R.drawable.icon_altitude_down, "${track.altitudeDown}")
+        TrackItemProperty(
+            iconResource = R.drawable.icon_distance,
+            text = "${track.distance}м",
+            contentDescription = stringResource(R.string.content_description_track_distance),
+        )
+        TrackItemProperty(
+            iconResource = R.drawable.icon_altitude_up,
+            text = "${track.altitudeUp}",
+            contentDescription = stringResource(R.string.content_description_track_altitude_up),
+        )
+        TrackItemProperty(
+            iconResource = R.drawable.icon_altitude_down,
+            text = "${track.altitudeDown}",
+            contentDescription = stringResource(R.string.content_description_track_altitude_down),
+        )
     }
 }
 

@@ -16,6 +16,7 @@ kotlin = "2.1.0"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.8.1"
 ksp = "2.1.0-1.0.29"
+leakCanary = "2.14"
 lifecycleRuntimeKtx = "2.9.1"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
@@ -59,6 +60,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+leak-canary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakCanary"}
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }

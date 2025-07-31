@@ -30,9 +30,11 @@ import androidx.navigation.compose.rememberNavController
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), currentSelectedItem: HomeBaseRoute) {
     val navController = rememberNavController()
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
+
     val routes = state.value.navigationItems.map { it.route }
     var selectedItem by remember { mutableIntStateOf(routes.indexOf(currentSelectedItem)) }
     var oldItem = selectedItem
+
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         snackbarHost = {

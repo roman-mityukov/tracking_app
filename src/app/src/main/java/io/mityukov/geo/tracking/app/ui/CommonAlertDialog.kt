@@ -21,7 +21,7 @@ fun CommonAlertDialog(
         icon = {
             Icon(
                 painterResource(R.drawable.icon_attention),
-                contentDescription = null
+                contentDescription = stringResource(R.string.content_description_attention)
             )
         },
         title = {

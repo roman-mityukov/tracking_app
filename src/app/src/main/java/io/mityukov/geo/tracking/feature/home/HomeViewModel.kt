@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 data class HomeNavigationItem(
-    val route: Any,
+    val route: HomeBaseRoute,
     @DrawableRes val selectedIcon: Int,
     @DrawableRes val unselectedIcon: Int,
     @StringRes val label: Int,

@@ -31,52 +31,40 @@ fun ProfileScreen(
         },
         contentWindowInsets = WindowInsets.safeContent,
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(
-            top = paddingValues.calculateTopPadding(),
-            bottom = paddingValues.calculateBottomPadding()
-        )) {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onStatisticsSelected()
-                },
-                headlineContent = {
-                    Text(text = stringResource(R.string.profile_statistics_label))
-                },
-                trailingContent = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null
-                    )
-                }
+        Column(
+            modifier = Modifier.padding(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
             )
-            ListItem(
-                modifier = Modifier.clickable {
-                    onSettingsSelected()
-                },
-                headlineContent = {
-                    Text(text = stringResource(R.string.profile_settings_label))
-                },
-                trailingContent = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null
-                    )
-                }
+        ) {
+            ProfileScreenItem(
+                Modifier.clickable { onStatisticsSelected() },
+                stringResource(R.string.profile_statistics_label),
             )
-            ListItem(
-                modifier = Modifier.clickable {
-                    onAboutSelected()
-                },
-                headlineContent = {
-                    Text(text = stringResource(R.string.profile_about_label))
-                },
-                trailingContent = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null
-                    )
-                }
+            ProfileScreenItem(
+                Modifier.clickable { onSettingsSelected() },
+                stringResource(R.string.profile_settings_label),
+            )
+            ProfileScreenItem(
+                Modifier.clickable { onAboutSelected() },
+                stringResource(R.string.profile_about_label),
             )
         }
     }
+}
+
+@Composable
+private fun ProfileScreenItem(modifier: Modifier, label: String) {
+    ListItem(
+        modifier = modifier,
+        headlineContent = {
+            Text(text = label)
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(R.string.content_description_arrow_right)
+            )
+        }
+    )
 }

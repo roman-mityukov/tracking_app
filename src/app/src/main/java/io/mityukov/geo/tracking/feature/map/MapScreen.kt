@@ -1,12 +1,15 @@
+@file:Suppress("TooManyFunctions")
+
 package io.mityukov.geo.tracking.feature.map
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.PointF
 import android.os.Build
 import android.provider.Settings
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
@@ -37,10 +41,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -65,12 +71,13 @@ import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
-import io.mityukov.geo.tracking.feature.track.details.showTrack
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
 import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
+import io.mityukov.geo.tracking.yandex.showTrack
 import io.mityukov.geo.tracking.yandex.zoom
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -85,20 +92,10 @@ fun MapScreen(
 
         MapLifecycle(viewModel, mapView)
         MapPermissions(viewModelState.value, snackbarHostState)
-
-        AndroidView(
-            factory = { context ->
-                mapView.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-                mapView.setNoninteractive(false)
-                mapView
-            }
-        )
+        MapContent(mapView)
 
         val needMoveToCurrentLocation = remember { mutableStateOf(true) }
-        ButtonsPanel(
+        MapControls(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 32.dp),
@@ -114,14 +111,35 @@ fun MapScreen(
             },
         )
 
-        MapContent(viewModelState.value, mapView, snackbarHostState, needMoveToCurrentLocation) {
+        MapInfoContent(
+            Modifier.align(Alignment.TopCenter),
+            viewModelState.value,
+            mapView,
+            snackbarHostState,
+            needMoveToCurrentLocation
+        ) {
             viewModel.add(MapEvent.CurrentLocationConsumed)
         }
     }
 }
 
 @Composable
-private fun BoxScope.MapContent(
+private fun MapContent(mapView: MapView) {
+    AndroidView(
+        factory = { context ->
+            mapView.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+            mapView.setNoninteractive(false)
+            mapView
+        }
+    )
+}
+
+@Composable
+private fun MapInfoContent(
+    modifier: Modifier,
     viewModelState: MapState,
     mapView: MapView,
     snackbarHostState: SnackbarHostState,
@@ -130,7 +148,12 @@ private fun BoxScope.MapContent(
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
-            CurrentTrack(viewModelState, mapView)
+            CurrentTrack(
+                modifier = modifier,
+                viewModelState = viewModelState,
+                mapView = mapView,
+                snackbarHostState = snackbarHostState,
+            )
         }
 
         is MapState.CurrentLocation -> {
@@ -139,9 +162,11 @@ private fun BoxScope.MapContent(
                 onConsumeCurrentLocation()
             }
             CurrentGeolocation(
-                viewModelState.data,
-                mapView,
-                needMoveToCurrentLocation,
+                modifier = modifier,
+                geolocation = viewModelState.data,
+                mapView = mapView,
+                needMoveToCurrentLocation = needMoveToCurrentLocation,
+                snackbarHostState = snackbarHostState,
             )
         }
 
@@ -152,8 +177,8 @@ private fun BoxScope.MapContent(
             }
         }
 
-        else -> {
-            // no op
+        is MapState.NoLocation -> {
+            // Обработка происходит в MapPermissions
         }
     }
 }
@@ -161,17 +186,17 @@ private fun BoxScope.MapContent(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun MapPermissions(viewModelState: MapState, snackbarHostState: SnackbarHostState) {
-    val permissions = mutableListOf(
-        android.Manifest.permission.ACCESS_COARSE_LOCATION,
-        android.Manifest.permission.ACCESS_FINE_LOCATION
-    )
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+    val permissions = buildList {
+        add(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+        add(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     val multiplePermissionsState = rememberMultiplePermissionsState(permissions)
     val showLocationRationale = remember { mutableStateOf(false) }
+
     if (showLocationRationale.value) {
         LocationRationaleDialog(
             onNegative = {
@@ -186,9 +211,9 @@ private fun MapPermissions(viewModelState: MapState, snackbarHostState: Snackbar
 
     if (viewModelState is MapState.NoLocation) {
         NoLocation(
-            viewModelState,
-            snackbarHostState,
-            {
+            state = viewModelState,
+            snackbarHostState = snackbarHostState,
+            onPermissionsNotGranted = {
                 if (multiplePermissionsState.shouldShowRationale) {
                     showLocationRationale.value = true
                 } else if (multiplePermissionsState.allPermissionsGranted.not()) {
@@ -204,27 +229,157 @@ private fun MapLifecycle(
     viewModel: MapViewModel,
     mapView: MapView,
 ) {
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(Unit) {
-        lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onResume(owner: LifecycleOwner) {
-                    super.onResume(owner)
-                    viewModel.add(MapEvent.ResumeCurrentLocationUpdate)
-                }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-                override fun onStart(owner: LifecycleOwner) {
-                    super.onStart(owner)
-                    mapView.onStart()
-                }
+    DisposableEffect(lifecycleOwner) {
+        val observer = object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                viewModel.add(MapEvent.ResumeCurrentLocationUpdate)
+            }
 
-                override fun onStop(owner: LifecycleOwner) {
-                    super.onStop(owner)
-                    mapView.onStop()
-                    viewModel.add(MapEvent.PauseCurrentLocationUpdate)
-                }
-            },
+            override fun onStart(owner: LifecycleOwner) {
+                super.onStart(owner)
+                mapView.onStart()
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                super.onStop(owner)
+                mapView.onStop()
+                viewModel.add(MapEvent.PauseCurrentLocationUpdate)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}
+
+@Composable
+private fun MapControls(
+    modifier: Modifier,
+    onZoomIn: () -> Unit,
+    onZoomOut: () -> Unit,
+    onMyLocation: () -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.End,
+    ) {
+        MapControlButton(
+            onClick = onZoomIn,
+            icon = R.drawable.icon_plus,
+            contentDescription = stringResource(R.string.content_description_map_zoom_in),
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        MapControlButton(
+            onClick = onZoomOut,
+            icon = R.drawable.icon_minus,
+            contentDescription = stringResource(R.string.content_description_map_zoom_out),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        MapControlButton(
+            onClick = onMyLocation,
+            icon = R.drawable.icon_my_location,
+            contentDescription = stringResource(R.string.content_description_map_my_location),
+        )
+        Spacer(modifier = Modifier.height(48.dp))
+        TrackCaptureView()
+    }
+}
+
+@Composable
+private fun CurrentGeolocation(
+    modifier: Modifier,
+    geolocation: Geolocation,
+    mapView: MapView,
+    needMoveToCurrentLocation: MutableState<Boolean>,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(geolocation) {
+        mapView.map.mapObjects.clear()
+        val placemark = mapView.map.mapObjects.addPlacemark()
+        placemark.apply {
+            geometry = Point(geolocation.latitude, geolocation.longitude)
+            setIcon(ImageProvider.fromResource(context, R.drawable.pin_my_location))
+        }
+        placemark.setIconStyle(
+            IconStyle().apply {
+                anchor = PointF(
+                    TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
+                    TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
+                )
+                scale = TrackAppearanceSettings.PLACEMARK_SCALE
+            }
+        )
+
+        if (needMoveToCurrentLocation.value) {
+            needMoveToCurrentLocation.value = false
+            mapView.map.move(
+                CameraPosition(
+                    Point(geolocation.latitude, geolocation.longitude),
+                    YandexMapSettings.ZOOM_DEFAULT,
+                    0f,
+                    0f,
+                )
+            )
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 16.dp,
+                vertical = WindowInsets.safeDrawing.asPaddingValues()
+                    .calculateTopPadding() + 16.dp
+            )
+    ) {
+        CurrentGeolocationSharing(geolocation, snackbarHostState)
+    }
+}
+
+@Composable
+private fun CurrentTrack(
+    modifier: Modifier,
+    viewModelState: MapState.CurrentTrack,
+    mapView: MapView,
+    snackbarHostState: SnackbarHostState,
+) {
+    if (viewModelState.track.points.isNotEmpty()) {
+        val context = LocalContext.current
+        LaunchedEffect(viewModelState.track.points.last()) {
+            mapView.showTrack(context, viewModelState.track, false)
+        }
+
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = WindowInsets.safeDrawing.asPaddingValues()
+                        .calculateTopPadding() + 16.dp
+                )
+        ) {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        TrackHeadline(viewModelState.track, true, viewModelState.status.paused)
+                        TrackProperties(viewModelState.track)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (viewModelState.currentLocation != null) {
+                CurrentGeolocationSharing(viewModelState.currentLocation, snackbarHostState)
+            }
+        }
     }
 }
 
@@ -262,8 +417,12 @@ private fun NoLocation(
                 onPermissionsNotGranted()
             }
 
-            else -> {
-                // no op
+            GeolocationUpdateException.LocationIsNull -> {
+                // Валидное состояние - ничего не делаем
+            }
+
+            null -> {
+                // Валидное состояние если локация не пришла без ошибки
             }
         }
     }
@@ -272,6 +431,7 @@ private fun NoLocation(
 @Composable
 private fun CurrentGeolocationSharing(
     geolocation: Geolocation,
+    snackbarHostState: SnackbarHostState,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -279,6 +439,8 @@ private fun CurrentGeolocationSharing(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val context = LocalContext.current
+            val coroutineScope = rememberCoroutineScope()
+            val errorMessage = stringResource(R.string.error_sharing)
 
             Text(
                 modifier = Modifier.weight(1f),
@@ -290,109 +452,28 @@ private fun CurrentGeolocationSharing(
                 ),
                 style = MaterialTheme.typography.bodySmall,
             )
-            IconButton(onClick = {
-                ShareCompat.IntentBuilder(context)
-                    .setType("text/plain")
-                    .setText(
-                        context.resources.getString(
-                            R.string.map_current_location_share_text,
-                            geolocation.latitude,
-                            geolocation.longitude
-                        )
-                    )
-                    .setChooserTitle(context.resources.getString(R.string.map_current_location_share_title))
-                    .startChooser()
-            }) {
-                Icon(painterResource(R.drawable.icon_share), null)
-            }
-        }
-    }
-}
-
-@Composable
-private fun BoxScope.CurrentGeolocation(
-    geolocation: Geolocation,
-    mapView: MapView,
-    needMoveToCurrentLocation: MutableState<Boolean>,
-) {
-    mapView.map.mapObjects.clear()
-    val placemark = mapView.map.mapObjects.addPlacemark()
-    placemark.apply {
-        geometry = Point(geolocation.latitude, geolocation.longitude)
-        setIcon(ImageProvider.fromResource(LocalContext.current, R.drawable.pin_my_location))
-    }
-    placemark.setIconStyle(
-        IconStyle().apply {
-            anchor = PointF(
-                TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
-                TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
-            )
-            scale = TrackAppearanceSettings.PLACEMARK_SCALE
-        }
-    )
-
-    if (needMoveToCurrentLocation.value) {
-        needMoveToCurrentLocation.value = false
-        mapView.map.move(
-            CameraPosition(
-                Point(geolocation.latitude, geolocation.longitude),
-                YandexMapSettings.ZOOM_DEFAULT,
-                0f,
-                0f,
-            )
-        )
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .align(Alignment.TopCenter)
-            .padding(
-                horizontal = 16.dp,
-                vertical = WindowInsets.safeDrawing.asPaddingValues()
-                    .calculateTopPadding() + 16.dp
-            )
-    ) {
-        CurrentGeolocationSharing(geolocation)
-    }
-}
-
-@Composable
-private fun BoxScope.CurrentTrack(
-    viewModelState: MapState.CurrentTrack,
-    mapView: MapView,
-) {
-    if (viewModelState.track.points.isNotEmpty()) {
-        val context = LocalContext.current
-        LaunchedEffect(viewModelState.track.points.last()) {
-            mapView.showTrack(context, viewModelState.track, false)
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = WindowInsets.safeDrawing.asPaddingValues()
-                        .calculateTopPadding() + 16.dp
-                )
-        ) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        TrackHeadline(viewModelState.track, true, viewModelState.status.paused)
-                        TrackProperties(viewModelState.track)
+            IconButton(
+                onClick = {
+                    try {
+                        ShareCompat.IntentBuilder(context)
+                            .setType("text/plain")
+                            .setText(
+                                context.resources.getString(
+                                    R.string.map_current_location_share_text,
+                                    geolocation.latitude,
+                                    geolocation.longitude
+                                )
+                            )
+                            .setChooserTitle(context.resources.getString(R.string.map_current_location_share_title))
+                            .startChooser()
+                    } catch (_: ActivityNotFoundException) {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message = errorMessage)
+                        }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (viewModelState.currentLocation != null) {
-                CurrentGeolocationSharing(viewModelState.currentLocation)
+            ) {
+                Icon(painterResource(R.drawable.icon_share), null)
             }
         }
     }
@@ -415,13 +496,22 @@ private fun LocationRationaleDialog(
             tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.map_location_permission_description))
+                Text(
+                    text = stringResource(R.string.map_location_permission_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 Spacer(modifier = Modifier.height(24.dp))
-                TextButton(
-                    onClick = onPositive,
-                    modifier = Modifier.align(Alignment.End)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
                 ) {
-                    Text(text = stringResource(R.string.map_location_permission_consent))
+                    TextButton(onClick = onNegative) {
+                        Text(text = stringResource(R.string.dialog_no))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = onPositive) {
+                        Text(text = stringResource(R.string.map_location_permission_consent))
+                    }
                 }
             }
         }
@@ -429,43 +519,17 @@ private fun LocationRationaleDialog(
 }
 
 @Composable
-private fun ButtonsPanel(
-    modifier: Modifier,
-    onZoomIn: () -> Unit,
-    onZoomOut: () -> Unit,
-    onMyLocation: () -> Unit,
+private fun MapControlButton(
+    onClick: () -> Unit,
+    icon: Int,
+    contentDescription: String,
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.End,
+    Button(
+        modifier = Modifier.size(48.dp),
+        onClick = onClick,
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp),
     ) {
-        Button(
-            modifier = Modifier.size(48.dp),
-            onClick = onZoomIn,
-            shape = CircleShape,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Icon(painterResource(R.drawable.icon_plus), contentDescription = null)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            modifier = Modifier.size(48.dp),
-            onClick = onZoomOut,
-            shape = CircleShape,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Icon(painterResource(R.drawable.icon_minus), contentDescription = null)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            modifier = Modifier.size(48.dp),
-            onClick = onMyLocation,
-            shape = CircleShape,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Icon(painterResource(R.drawable.icon_my_location), contentDescription = null)
-        }
-        Spacer(modifier = Modifier.height(48.dp))
-        TrackCaptureView()
+        Icon(painterResource(icon), contentDescription = contentDescription)
     }
 }

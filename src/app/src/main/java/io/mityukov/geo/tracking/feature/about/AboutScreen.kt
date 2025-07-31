@@ -1,5 +1,6 @@
 package io.mityukov.geo.tracking.feature.about
 
+import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -28,9 +29,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.MailTo
 import androidx.core.net.toUri
 import io.mityukov.geo.tracking.BuildConfig
 import io.mityukov.geo.tracking.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,67 +44,105 @@ fun AboutScreen(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.about_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                        )
-                    }
-                }
-            )
+            AboutTopBar(onBack)
         },
         contentWindowInsets = WindowInsets.safeContent
     ) { paddingValues ->
-        val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_round),
-                contentDescription = null
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = stringResource(R.string.app_name))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = "mailto:".toUri()
-                    putExtra(
-                        Intent.EXTRA_EMAIL,
-                        arrayOf(context.resources.getString(R.string.about_developer_email))
-                    )
-                    putExtra(
-                        Intent.EXTRA_SUBJECT,
-                        context.resources.getString(R.string.about_email_subject)
-                    )
-                }
-                if (intent.resolveActivity(context.packageManager) != null) {
-                    context.startActivity(
-                        Intent.createChooser(
-                            intent,
-                            context.resources.getString(R.string.about_email_app_chooser)
-                        )
-                    )
-                } else {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = context.resources.getString(R.string.about_email_no_apps_message)
-                        )
-                    }
-                }
-            }) {
-                Text(text = stringResource(R.string.about_button_label_email))
+        AboutContent(Modifier.padding(paddingValues), snackbarHostState)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutTopBar(onBack: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = { Text(text = stringResource(R.string.about_title)) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.content_description_back_button),
+                )
             }
         }
+    )
+}
+
+@Composable
+fun AboutContent(modifier: Modifier, snackbarHostState: SnackbarHostState) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        AppIcon()
+        Spacer(modifier = Modifier.height(16.dp))
+        AppInfo()
+        Spacer(modifier = Modifier.height(16.dp))
+        ContactButton(onClick = {
+            sendEmail(context, coroutineScope, snackbarHostState)
+        })
+    }
+}
+
+@Composable
+private fun AppIcon() {
+    Image(
+        painter = painterResource(R.drawable.ic_launcher_round),
+        contentDescription = stringResource(R.string.content_description_app_icon),
+    )
+}
+
+@Composable
+private fun AppInfo() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = stringResource(R.string.app_name))
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
+    }
+}
+
+@Composable
+private fun ContactButton(onClick: () -> Unit) {
+    Button(onClick = onClick) {
+        Text(text = stringResource(R.string.about_button_label_email))
+    }
+}
+
+private fun sendEmail(
+    context: Context,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+) {
+    val intent = createEmailIntent(context)
+    if (intent.resolveActivity(context.packageManager) != null) {
+        context.startActivity(
+            Intent.createChooser(
+                intent,
+                context.resources.getString(R.string.about_email_app_chooser)
+            )
+        )
+    } else {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(
+                message = context.resources.getString(R.string.about_email_no_apps_message)
+            )
+        }
+    }
+}
+
+private fun createEmailIntent(context: Context): Intent {
+    return Intent(Intent.ACTION_SENDTO).apply {
+        data = MailTo.MAILTO_SCHEME.toUri()
+        putExtra(
+            Intent.EXTRA_EMAIL,
+            arrayOf(context.resources.getString(R.string.about_developer_email))
+        )
+        putExtra(
+            Intent.EXTRA_SUBJECT,
+            context.resources.getString(R.string.about_email_subject)
+        )
     }
 }

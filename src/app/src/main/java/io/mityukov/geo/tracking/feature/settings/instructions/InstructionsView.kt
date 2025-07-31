@@ -23,7 +23,7 @@ fun InstructionsView(onInstructionsSelected: () -> Unit) {
         trailingContent = {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null
+                contentDescription = stringResource(R.string.content_description_arrow_right)
             )
         }
     )

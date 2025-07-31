@@ -28,6 +28,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
     onTrackSelected: (String) -> Unit,
     onEditTracks: (String) -> Unit,
     onBack: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     navigation<HomeBaseRoute.HomeBaseRouteTrack>(startDestination = HomeRouteTracksList) {
         composable<HomeRouteTracksList> {
@@ -41,7 +42,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
                 uriPattern = DeepLinkProps.TRACK_DETAILS_URI_PATTERN
             })
         ) {
-            TrackDetailsScreen(onBack = onBack)
+            TrackDetailsScreen(onBack = onBack, snackbarHostState = snackbarHostState)
         }
         composable<HomeRouteTracksEditing> {
             TracksEditingScreen(onBack = onBack)

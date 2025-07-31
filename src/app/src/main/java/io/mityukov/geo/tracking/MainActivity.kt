@@ -14,7 +14,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.app.AppNavHost
-import io.mityukov.geo.tracking.app.GeoAppProps
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.theme.GeoAppTheme
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettings
 import io.mityukov.geo.tracking.feature.splash.SplashViewModel
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val notificationChannel = NotificationChannel(
-            GeoAppProps.TRACK_CAPTURE_CHANNEL_ID,
+            AppProps.TRACK_CAPTURE_CHANNEL_ID,
             resources.getString(R.string.track_capture_notification_channel_description),
             NotificationManager.IMPORTANCE_DEFAULT
         )

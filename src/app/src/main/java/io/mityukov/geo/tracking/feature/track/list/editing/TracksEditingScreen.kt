@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -57,24 +58,7 @@ fun TracksEditingScreen(
         } else {
             Scaffold(
                 topBar = {
-                    CenterAlignedTopAppBar(
-                        title = { Text(text = stringResource(R.string.tracks_editing_title)) },
-                        navigationIcon = {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = null,
-                                )
-                            }
-                        },
-                        actions = {
-                            IconButton(onClick = {
-                                openDeleteDialog.value = true
-                            }) {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
-                            }
-                        }
-                    )
+                    TracksEditingTopBar(openDeleteDialog = openDeleteDialog, onBack = onBack)
                 },
             ) { paddingValues ->
                 LazyColumn(modifier = Modifier.padding(paddingValues)) {
@@ -107,6 +91,35 @@ fun TracksEditingScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TracksEditingTopBar(
+    openDeleteDialog: MutableState<Boolean>,
+    onBack: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(text = stringResource(R.string.tracks_editing_title)) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.content_description_back_button),
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = {
+                openDeleteDialog.value = true
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.content_description_delete)
+                )
+            }
+        }
+    )
+}
+
 @Composable
 private fun TrackItem(
     track: Track,
@@ -130,10 +143,12 @@ private fun TrackItem(
             },
             trailingContent = {
                 if (isSelected) {
-                    Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(R.string.content_description_checked)
+                    )
                 }
             }
         )
-
     }
 }

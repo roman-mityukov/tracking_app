@@ -3,6 +3,7 @@ package io.mityukov.geo.tracking.feature.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
@@ -83,7 +84,7 @@ class MapViewModel @Inject constructor(
             state
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),
             initialValue = MapState.PendingLocationUpdates
         )
 

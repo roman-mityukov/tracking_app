@@ -3,6 +3,7 @@ package io.mityukov.geo.tracking.feature.settings.geolocation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -41,7 +42,7 @@ class GeolocationUpdatesIntervalViewModel @Inject constructor(
         )
     }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L),
+        SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),
         GeolocationUpdatesIntervalState.Pending
     )
 

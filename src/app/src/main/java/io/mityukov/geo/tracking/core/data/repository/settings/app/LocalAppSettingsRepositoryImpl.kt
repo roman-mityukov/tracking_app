@@ -4,44 +4,22 @@ import androidx.datastore.core.DataStore
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
 import io.mityukov.geo.tracking.di.AppSettingsDataStore
+import io.mityukov.geo.tracking.di.DispatcherIO
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class LocalAppSettingsRepositoryImpl @Inject constructor(
-    @AppSettingsDataStore private val dataStore: DataStore<ProtoLocalAppSettings>
+    @AppSettingsDataStore private val dataStore: DataStore<ProtoLocalAppSettings>,
+    @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : LocalAppSettingsRepository {
-    override suspend fun switchOnboarding() {
-        val proto = dataStore.data.first()
-
-        val newLocalAppSettings = ProtoLocalAppSettings
-            .newBuilder()
-            .setShowOnboarding(!proto.showOnboarding)
-            .setGeolocationUpdatesRateSeconds(proto.geolocationUpdatesRateSeconds)
-            .build()
-
-        dataStore.updateData {
-            newLocalAppSettings
-        }
-    }
-
-    override suspend fun setGeolocationUpdatesRate(duration: Duration) {
-        val proto = dataStore.data.first()
-
-        val newLocalAppSettings = ProtoLocalAppSettings
-            .newBuilder()
-            .setShowOnboarding(proto.showOnboarding)
-            .setGeolocationUpdatesRateSeconds(duration.inWholeSeconds.toInt())
-            .build()
-
-        dataStore.updateData {
-            newLocalAppSettings
-        }
-    }
-
     override val localAppSettings: Flow<LocalAppSettings> = dataStore.data.map { proto ->
         LocalAppSettings(
             showOnboarding = proto.showOnboarding,
@@ -52,4 +30,38 @@ class LocalAppSettingsRepositoryImpl @Inject constructor(
             },
         )
     }
+    private val mutex = Mutex()
+
+    override suspend fun switchOnboarding() = withContext(coroutineDispatcher) {
+        mutex.withLock {
+            val proto = dataStore.data.first()
+
+            val newLocalAppSettings = ProtoLocalAppSettings
+                .newBuilder(proto)
+                .setShowOnboarding(!proto.showOnboarding)
+                .build()
+
+            dataStore.updateData {
+                newLocalAppSettings
+            }
+            Unit
+        }
+    }
+
+    override suspend fun setGeolocationUpdatesRate(duration: Duration) =
+        withContext(coroutineDispatcher) {
+            mutex.withLock {
+                val proto = dataStore.data.first()
+
+                val newLocalAppSettings = ProtoLocalAppSettings
+                    .newBuilder(proto)
+                    .setGeolocationUpdatesRateSeconds(duration.inWholeSeconds.toInt())
+                    .build()
+
+                dataStore.updateData {
+                    newLocalAppSettings
+                }
+                Unit
+            }
+        }
 }

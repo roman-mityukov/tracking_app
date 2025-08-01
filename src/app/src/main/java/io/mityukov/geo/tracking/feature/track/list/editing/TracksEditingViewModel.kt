@@ -50,7 +50,7 @@ class TracksEditingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val tracks = tracksRepository.getTracks().first()
+            val tracks = tracksRepository.tracks.first()
             val captureStatus = trackCaptureController.status.first()
 
             mutableStateFlow.update {
@@ -79,7 +79,7 @@ class TracksEditingViewModel @Inject constructor(
                         selectedTracks.add(event.trackId)
                     }
 
-                    val tracks = tracksRepository.getTracks().first()
+                    val tracks = tracksRepository.tracks.first()
                     mutableStateFlow.update {
                         TracksEditingState.Data(
                             allTracks = tracks,

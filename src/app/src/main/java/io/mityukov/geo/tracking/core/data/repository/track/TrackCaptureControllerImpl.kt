@@ -6,8 +6,8 @@ import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.ForegroundTrackCaptureService
-import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.app.AppProps
+import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
@@ -15,6 +15,7 @@ import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
 import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.utils.log.logw
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -24,6 +25,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
@@ -43,14 +46,14 @@ class TrackCaptureControllerImpl @Inject constructor(
     private var currentTrack: TrackEntity? = null
     private val coroutineScope = CoroutineScope(coroutineContext)
     private var subscriptionJob: Job? = null
+    private val mutex = Mutex()
 
     override suspend fun bind() = withContext(coroutineContext) {
-        val currentTrackCaptureStatus = dataStore.data.first()
-        if (currentTrackCaptureStatus.trackCaptureEnabled) {
-            currentTrack = trackDao.getTrack(currentTrackCaptureStatus.trackId)
-            startForegroundService(currentTrackCaptureStatus.trackId)
-
-            if (subscriptionJob == null) {
+        mutex.withLock {
+            val currentTrackCaptureStatus = dataStore.data.first()
+            if (currentTrackCaptureStatus.trackCaptureEnabled && subscriptionJob == null) {
+                currentTrack = trackDao.getTrack(currentTrackCaptureStatus.trackId)
+                startForegroundService(currentTrackCaptureStatus.trackId)
                 subscriptionJob = coroutineScope.launch {
                     subscribe()
                 }
@@ -60,10 +63,37 @@ class TrackCaptureControllerImpl @Inject constructor(
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun start() = withContext(coroutineContext) {
-        subscriptionJob = coroutineScope.launch {
-            val trackId = Uuid.random().toString()
-            currentTrack = TrackEntity(id = trackId, name = "Random name", duration = 0)
-            trackDao.insertTrack(currentTrack!!)
+        mutex.withLock {
+            if (subscriptionJob != null) {
+                logw("Stop current track capture before start")
+                return@withContext
+            }
+            subscriptionJob = coroutineScope.launch {
+                val trackId = Uuid.random().toString()
+                currentTrack = TrackEntity(id = trackId, name = "Random name", duration = 0)
+                trackDao.insertTrack(currentTrack!!)
+
+                val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
+                    .newBuilder()
+                    .setTrackId(currentTrack!!.id)
+                    .setTrackCaptureEnabled(true)
+                    .setPaused(false)
+                    .build()
+                dataStore.updateData {
+                    newTrackCaptureStatus
+                }
+
+                startForegroundService(trackId)
+                subscribe()
+            }
+        }
+    }
+
+    override suspend fun resume() = withContext(coroutineContext) {
+        mutex.withLock {
+            val intent = Intent(applicationContext, ForegroundTrackCaptureService::class.java)
+            intent.putExtra(AppProps.EXTRA_INTENT_PAUSE, false)
+            applicationContext.startService(intent)
 
             val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
                 .newBuilder()
@@ -74,61 +104,49 @@ class TrackCaptureControllerImpl @Inject constructor(
             dataStore.updateData {
                 newTrackCaptureStatus
             }
-
-            startForegroundService(trackId)
-            subscribe()
+            Unit
         }
     }
 
-    override suspend fun resume() {
-        val intent = Intent(applicationContext, ForegroundTrackCaptureService::class.java)
-        intent.putExtra(AppProps.EXTRA_INTENT_PAUSE, false)
-        applicationContext.startService(intent)
+    override suspend fun pause() = withContext(coroutineContext) {
+        mutex.withLock {
+            val intent = Intent(applicationContext, ForegroundTrackCaptureService::class.java)
+            intent.putExtra(AppProps.EXTRA_INTENT_PAUSE, true)
+            applicationContext.startService(intent)
 
-        val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
-            .newBuilder()
-            .setTrackId(currentTrack!!.id)
-            .setTrackCaptureEnabled(true)
-            .setPaused(false)
-            .build()
-        dataStore.updateData {
-            newTrackCaptureStatus
-        }
-    }
-
-    override suspend fun pause() {
-        val intent = Intent(applicationContext, ForegroundTrackCaptureService::class.java)
-        intent.putExtra(AppProps.EXTRA_INTENT_PAUSE, true)
-        applicationContext.startService(intent)
-
-        val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
-            .newBuilder()
-            .setTrackId(currentTrack!!.id)
-            .setTrackCaptureEnabled(true)
-            .setPaused(true)
-            .build()
-        dataStore.updateData {
-            newTrackCaptureStatus
-        }
-    }
-
-    override suspend fun stop() {
-        subscriptionJob?.cancel()
-        val currentTrackCaptureStatus = dataStore.data.first()
-
-        if (currentTrackCaptureStatus.trackCaptureEnabled) {
-            stopForegroundService()
+            val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
+                .newBuilder()
+                .setTrackId(currentTrack!!.id)
+                .setTrackCaptureEnabled(true)
+                .setPaused(true)
+                .build()
             dataStore.updateData {
-                ProtoLocalTrackCaptureStatus
-                    .newBuilder()
-                    .setTrackCaptureEnabled(false)
-                    .setPaused(false)
-                    .build()
+                newTrackCaptureStatus
             }
+            Unit
+        }
+    }
 
-            currentTrack = null
-            mutableStateFlow.update {
-                TrackCaptureStatus.Idle
+    override suspend fun stop() = withContext(coroutineContext) {
+        mutex.withLock {
+            subscriptionJob?.cancel()
+            subscriptionJob = null
+            val currentTrackCaptureStatus = dataStore.data.first()
+
+            if (currentTrackCaptureStatus.trackCaptureEnabled) {
+                stopForegroundService()
+                dataStore.updateData {
+                    ProtoLocalTrackCaptureStatus
+                        .newBuilder()
+                        .setTrackCaptureEnabled(false)
+                        .setPaused(false)
+                        .build()
+                }
+
+                currentTrack = null
+                mutableStateFlow.update {
+                    TrackCaptureStatus.Idle
+                }
             }
         }
     }

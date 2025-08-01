@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface MapEvent {
@@ -63,6 +64,7 @@ class MapViewModel @Inject constructor(
             val (trackCaptureStatus, mutableState) = pair
 
             if (currentLocation.geolocation != null) {
+                logd("MapViewModel currentLocation $currentLocation")
                 lastKnownLocation = currentLocation.geolocation
             }
 
@@ -105,11 +107,15 @@ class MapViewModel @Inject constructor(
             }
 
             MapEvent.PauseCurrentLocationUpdate -> {
-                geolocationUpdatesRepository.stop()
+                viewModelScope.launch {
+                    geolocationUpdatesRepository.stop()
+                }
             }
 
             MapEvent.ResumeCurrentLocationUpdate -> {
-                geolocationUpdatesRepository.start()
+                viewModelScope.launch {
+                    geolocationUpdatesRepository.start()
+                }
             }
         }
     }

@@ -67,7 +67,7 @@ interface DataModule {
 
         @Provides
         fun providesDb(@ApplicationContext context: Context): AppDatabase {
-            return AppDatabase.buildDatabase(context)
+            return AppDatabase.getInstance(context)
         }
 
         @Provides

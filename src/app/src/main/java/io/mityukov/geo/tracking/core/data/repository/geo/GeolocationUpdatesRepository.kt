@@ -16,6 +16,6 @@ data class GeolocationUpdateResult(
 
 interface GeolocationUpdatesRepository {
     val currentLocation: Flow<GeolocationUpdateResult>
-    fun start()
-    fun stop()
+    suspend fun start()
+    suspend fun stop()
 }

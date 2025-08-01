@@ -25,7 +25,7 @@ class TracksViewModel @Inject constructor(
     trackCaptureController: TrackCaptureController,
 ) : ViewModel() {
     val stateFlow =
-        tracksRepository.refreshTracks()
+        tracksRepository.tracks
             .combine(trackCaptureController.status) { tracks, status ->
                 TracksState.Data(
                     tracks = tracks,

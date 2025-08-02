@@ -94,10 +94,12 @@ fun TracksEditingScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TracksEditingTopBar(
+    modifier: Modifier = Modifier,
     openDeleteDialog: MutableState<Boolean>,
     onBack: () -> Unit
 ) {
     CenterAlignedTopAppBar(
+        modifier = modifier,
         title = { Text(text = stringResource(R.string.tracks_editing_title)) },
         navigationIcon = {
             IconButton(onClick = onBack) {
@@ -122,12 +124,13 @@ private fun TracksEditingTopBar(
 
 @Composable
 private fun TrackItem(
+    modifier: Modifier = Modifier,
     track: Track,
     isSelected: Boolean,
     isCapturedTrack: Boolean,
     onClick: (String) -> Unit,
 ) {
-    Row {
+    Row(modifier = modifier) {
         ListItem(
             modifier = Modifier.clickable(
                 enabled = true,
@@ -136,10 +139,10 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                TrackHeadline(track, isCapturedTrack, false)
+                TrackHeadline(track = track, isCapturedTrack = isCapturedTrack, paused = false)
             },
             supportingContent = {
-                TrackProperties(track)
+                TrackProperties(track = track)
             },
             trailingContent = {
                 if (isSelected) {

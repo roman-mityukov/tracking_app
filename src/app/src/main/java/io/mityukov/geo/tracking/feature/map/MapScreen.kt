@@ -90,9 +90,9 @@ fun MapScreen(
         val mapView = remember { MapView(context) }
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-        MapLifecycle(viewModel, mapView)
-        MapPermissions(viewModelState.value, snackbarHostState)
-        MapContent(mapView)
+        MapLifecycle(viewModel = viewModel, mapView = mapView)
+        MapPermissions(viewModelState = viewModelState.value, snackbarHostState = snackbarHostState)
+        MapContent(mapView = mapView)
 
         val needMoveToCurrentLocation = remember { mutableStateOf(true) }
         MapControls(
@@ -124,8 +124,9 @@ fun MapScreen(
 }
 
 @Composable
-private fun MapContent(mapView: MapView) {
+private fun MapContent(modifier: Modifier = Modifier, mapView: MapView) {
     AndroidView(
+        modifier = modifier,
         factory = { context ->
             mapView.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -185,7 +186,10 @@ private fun MapInfoContent(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun MapPermissions(viewModelState: MapState, snackbarHostState: SnackbarHostState) {
+private fun MapPermissions(
+    viewModelState: MapState,
+    snackbarHostState: SnackbarHostState
+) {
     val permissions = buildList {
         add(android.Manifest.permission.ACCESS_COARSE_LOCATION)
         add(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -337,7 +341,7 @@ private fun CurrentGeolocation(
                     .calculateTopPadding() + 16.dp
             )
     ) {
-        CurrentGeolocationSharing(geolocation, snackbarHostState)
+        CurrentGeolocationSharing(geolocation = geolocation, snackbarHostState = snackbarHostState)
     }
 }
 
@@ -369,15 +373,22 @@ private fun CurrentTrack(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        TrackHeadline(viewModelState.track, true, viewModelState.status.paused)
-                        TrackProperties(viewModelState.track)
+                        TrackHeadline(
+                            track = viewModelState.track,
+                            isCapturedTrack = true,
+                            paused = viewModelState.status.paused
+                        )
+                        TrackProperties(track = viewModelState.track)
                     }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
 
             if (viewModelState.currentLocation != null) {
-                CurrentGeolocationSharing(viewModelState.currentLocation, snackbarHostState)
+                CurrentGeolocationSharing(
+                    geolocation = viewModelState.currentLocation,
+                    snackbarHostState = snackbarHostState
+                )
             }
         }
     }
@@ -430,10 +441,11 @@ private fun NoLocation(
 
 @Composable
 private fun CurrentGeolocationSharing(
+    modifier: Modifier = Modifier,
     geolocation: Geolocation,
     snackbarHostState: SnackbarHostState,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -482,6 +494,7 @@ private fun CurrentGeolocationSharing(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationRationaleDialog(
+    modifier: Modifier = Modifier,
     onNegative: () -> Unit,
     onPositive: () -> Unit,
 ) {
@@ -489,7 +502,7 @@ private fun LocationRationaleDialog(
         onDismissRequest = onNegative
     ) {
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .wrapContentWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
@@ -520,12 +533,13 @@ private fun LocationRationaleDialog(
 
 @Composable
 private fun MapControlButton(
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     icon: Int,
     contentDescription: String,
 ) {
     Button(
-        modifier = Modifier.size(48.dp),
+        modifier = modifier.size(48.dp),
         onClick = onClick,
         shape = CircleShape,
         contentPadding = PaddingValues(0.dp),

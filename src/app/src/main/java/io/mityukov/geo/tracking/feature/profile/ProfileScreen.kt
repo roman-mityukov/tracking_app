@@ -54,7 +54,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileScreenItem(modifier: Modifier, label: String) {
+private fun ProfileScreenItem(modifier: Modifier = Modifier, label: String) {
     ListItem(
         modifier = modifier,
         headlineContent = {

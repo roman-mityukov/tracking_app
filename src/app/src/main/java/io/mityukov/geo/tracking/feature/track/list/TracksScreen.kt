@@ -63,6 +63,7 @@ fun TracksScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TrackList(
+    modifier: Modifier = Modifier,
     state: TracksState,
     onClick: (String) -> Unit,
     onLongPress: (String) -> Unit,
@@ -80,7 +81,7 @@ private fun TrackList(
                 val capturedTrackId = state.capturedTrackId
 
                 LazyColumn(
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = modifier.padding(paddingValues)
                 ) {
                     if (tracks.isEmpty()) {
                         items(count = 1) {
@@ -109,43 +110,50 @@ private fun TrackList(
             }
 
             TracksState.Pending -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = modifier)
             }
         }
     }
 }
 
 @Composable
-fun TrackHeadline(track: Track, isCapturedTrack: Boolean, paused: Boolean) {
+fun TrackHeadline(
+    modifier: Modifier = Modifier,
+    track: Track,
+    isCapturedTrack: Boolean,
+    paused: Boolean
+) {
     if (track.points.isNotEmpty()) {
         val startTime =
             track.points.first().geolocation.localDateTime.format(AppProps.UI_DATE_TIME_FORMATTER)
 
         if (isCapturedTrack) {
-            Text(buildAnnotatedString {
-                append("$startTime ")
-                withStyle(
-                    style = SpanStyle(
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold,
-                    )
-                ) {
-                    if (paused) {
-                        append(stringResource(R.string.tracks_item_title_pause))
-                    } else {
-                        append(stringResource(R.string.tracks_item_title_capturing))
+            Text(
+                modifier = modifier,
+                text = buildAnnotatedString {
+                    append("$startTime ")
+                    withStyle(
+                        style = SpanStyle(
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    ) {
+                        if (paused) {
+                            append(stringResource(R.string.tracks_item_title_pause))
+                        } else {
+                            append(stringResource(R.string.tracks_item_title_capturing))
+                        }
                     }
-                }
-            })
+                })
         } else {
-            Text(startTime)
+            Text(modifier = modifier, text = startTime)
         }
     }
 }
 
 @Composable
-fun TrackItemProperty(iconResource: Int, text: String, contentDescription: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun TrackItemProperty(modifier: Modifier = Modifier, iconResource: Int, text: String, contentDescription: String) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
             modifier = Modifier.size(16.dp),
             painter = painterResource(iconResource),
@@ -158,8 +166,8 @@ fun TrackItemProperty(iconResource: Int, text: String, contentDescription: Strin
 }
 
 @Composable
-fun TrackProperties(track: Track) {
-    Row(verticalAlignment = Alignment.Bottom) {
+fun TrackProperties(modifier: Modifier = Modifier, track: Track) {
+    Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         TrackItemProperty(
             iconResource = R.drawable.icon_duration,
             text = DateUtils.formatElapsedTime(
@@ -189,6 +197,7 @@ fun TrackProperties(track: Track) {
 
 @Composable
 private fun TrackItem(
+    modifier: Modifier = Modifier,
     track: Track,
     isCapturedTrack: Boolean,
     paused: Boolean,
@@ -197,7 +206,7 @@ private fun TrackItem(
 ) {
     val haptics = LocalHapticFeedback.current
     ListItem(
-        modifier = Modifier.combinedClickable(
+        modifier = modifier.combinedClickable(
             enabled = true,
             onClick = {
                 onClick(track.id)
@@ -208,10 +217,10 @@ private fun TrackItem(
             }
         ),
         headlineContent = {
-            TrackHeadline(track, isCapturedTrack, paused)
+            TrackHeadline(track = track, isCapturedTrack = isCapturedTrack, paused = paused)
         },
         supportingContent = {
-            TrackProperties(track)
+            TrackProperties(track = track)
         },
     )
 }

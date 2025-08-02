@@ -44,7 +44,7 @@ fun AboutScreen(
 ) {
     Scaffold(
         topBar = {
-            AboutTopBar(onBack)
+            AboutTopBar(onBack = onBack)
         },
         contentWindowInsets = WindowInsets.safeContent
     ) { paddingValues ->
@@ -54,8 +54,12 @@ fun AboutScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutTopBar(onBack: () -> Unit) {
+fun AboutTopBar(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+) {
     CenterAlignedTopAppBar(
+        modifier = modifier,
         title = { Text(text = stringResource(R.string.about_title)) },
         navigationIcon = {
             IconButton(onClick = onBack) {
@@ -88,16 +92,17 @@ fun AboutContent(modifier: Modifier, snackbarHostState: SnackbarHostState) {
 }
 
 @Composable
-private fun AppIcon() {
+private fun AppIcon(modifier: Modifier = Modifier) {
     Image(
+        modifier = modifier,
         painter = painterResource(R.drawable.ic_launcher_round),
         contentDescription = stringResource(R.string.content_description_app_icon),
     )
 }
 
 @Composable
-private fun AppInfo() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun AppInfo(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = stringResource(R.string.app_name))
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
@@ -105,8 +110,8 @@ private fun AppInfo() {
 }
 
 @Composable
-private fun ContactButton(onClick: () -> Unit) {
-    Button(onClick = onClick) {
+private fun ContactButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Button(modifier = modifier, onClick = onClick) {
         Text(text = stringResource(R.string.about_button_label_email))
     }
 }

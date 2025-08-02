@@ -94,7 +94,7 @@ fun TrackDetailsScreen(
 
     Scaffold(
         topBar = {
-            TrackDetailsTopBar(viewModel, onBack)
+            TrackDetailsTopBar(viewModel = viewModel, onBack = onBack)
         },
     ) { paddingValues ->
         val state = viewModel.stateFlow.collectAsStateWithLifecycle()
@@ -140,10 +140,12 @@ fun TrackDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TrackDetailsTopBar(
+    modifier: Modifier = Modifier,
     viewModel: TrackDetailsViewModel,
     onBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
+        modifier = modifier,
         title = { Text(text = stringResource(R.string.track_details_title)) },
         navigationIcon = {
             IconButton(onClick = onBack) {
@@ -168,13 +170,14 @@ private fun TrackDetailsTopBar(
 
 @Composable
 private fun TrackDetailsContent(
+    modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     track: Track,
     onDelete: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     Column(
-        modifier = Modifier
+        modifier = modifier
             .padding(
                 start = 24.dp,
                 end = 24.dp,
@@ -183,9 +186,9 @@ private fun TrackDetailsContent(
             .verticalScroll(scrollState)
     ) {
 
-        TrackDetailsList(track)
+        TrackDetailsList(track = track)
         Spacer(modifier = Modifier.height(16.dp))
-        TrackDetailsMap(track)
+        TrackDetailsMap(track = track)
         Spacer(modifier = Modifier.height(16.dp))
         ButtonDeleteTrack(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -195,12 +198,12 @@ private fun TrackDetailsContent(
 }
 
 @Composable
-private fun TrackDetailsMap(track: Track) {
+private fun TrackDetailsMap(modifier: Modifier = Modifier, track: Track) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
     AndroidView(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .aspectRatio(ratio = 1f),
         factory = { context ->
@@ -240,8 +243,8 @@ private fun TrackDetailsMap(track: Track) {
 }
 
 @Composable
-private fun TrackDetailsList(track: Track) {
-    Column {
+private fun TrackDetailsList(modifier: Modifier = Modifier, track: Track) {
+    Column(modifier = modifier) {
         Text(
             text = stringResource(
                 R.string.track_details_start,

@@ -37,10 +37,10 @@ fun TrackCaptureView(viewModel: TrackCaptureViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun ButtonStopTrackCapture(onClick: () -> Unit) {
+private fun ButtonStopTrackCapture(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        Modifier.size(48.dp),
+        modifier.size(48.dp),
         shape = CircleShape,
         contentPadding = PaddingValues(0.dp),
     ) {
@@ -52,12 +52,12 @@ private fun ButtonStopTrackCapture(onClick: () -> Unit) {
 }
 
 @Composable
-private fun ButtonStartTrackCapture(viewModel: TrackCaptureViewModel) {
+private fun ButtonStartTrackCapture(modifier: Modifier = Modifier, viewModel: TrackCaptureViewModel) {
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
     val trackCaptureStatus = state.value.status
 
     IconToggleButton(
-        modifier = Modifier.size(64.dp),
+        modifier = modifier.size(64.dp),
         checked = trackCaptureStatus is TrackCaptureStatus.Run,
         onCheckedChange = {
             if ((trackCaptureStatus is TrackCaptureStatus.Run).not()) {

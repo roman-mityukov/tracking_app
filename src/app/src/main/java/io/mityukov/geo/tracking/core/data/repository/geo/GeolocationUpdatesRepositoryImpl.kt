@@ -1,7 +1,7 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Looper
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -14,6 +14,8 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.di.DispatcherIO
+import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.utils.permission.PermissionChecker
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +29,7 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
     private val fusedLocationProviderClient: FusedLocationProviderClient,
     @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    private val permissionChecker: PermissionChecker,
 ) : GeolocationUpdatesRepository {
     private val mutableStateFlow = MutableStateFlow(
         GeolocationUpdateResult(
@@ -43,23 +46,26 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             mutableStateFlow.update {
-                GeolocationUpdateResult(
-                    geolocation = if (locationResult.lastLocation != null) {
+                val lastLocation = locationResult.lastLocation
+                val result = GeolocationUpdateResult(
+                    geolocation = if (lastLocation != null) {
                         Geolocation(
-                            latitude = locationResult.lastLocation!!.latitude,
-                            longitude = locationResult.lastLocation!!.longitude,
-                            altitude = locationResult.lastLocation!!.altitude,
-                            time = locationResult.lastLocation!!.time
+                            latitude = lastLocation.latitude,
+                            longitude = lastLocation.longitude,
+                            altitude = lastLocation.altitude,
+                            time = lastLocation.time
                         )
                     } else {
                         null
                     },
-                    error = if (locationResult.lastLocation == null) {
+                    error = if (lastLocation == null) {
                         GeolocationUpdateException.LocationIsNull
                     } else {
                         null
                     }
                 )
+                logd("GeolocationUpdatesRepository result $result")
+                result
             }
         }
     }
@@ -67,19 +73,11 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
     private var isStarted: Boolean = false
     private val mutex = Mutex()
 
+    @SuppressLint("MissingPermission")
     override suspend fun start() = withContext(coroutineDispatcher) {
         mutex.withLock {
             if (isStarted.not()) {
-                val accessFineLocationGranted = applicationContext.checkSelfPermission(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-                val accessCoarseLocationGranted = applicationContext.checkSelfPermission(
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-                if (accessCoarseLocationGranted.not()
-                    && accessFineLocationGranted.not()
-                ) {
+                if (permissionChecker.locationGranted.not()) {
                     mutableStateFlow.update {
                         GeolocationUpdateResult(
                             geolocation = null,

@@ -17,7 +17,7 @@ kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.8.1"
 ksp = "2.1.0-1.0.29"
 leakCanary = "2.14"
-lifecycleRuntimeKtx = "2.9.1"
+lifecycle = "2.9.2"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
 protobuf = "4.29.2"
@@ -37,7 +37,8 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycle" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }

@@ -49,9 +49,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ShareCompat
@@ -73,6 +76,7 @@ import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
+import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
 import io.mityukov.geo.tracking.yandex.showTrack
@@ -155,6 +159,10 @@ private fun MapInfoContent(
                 mapView = mapView,
                 snackbarHostState = snackbarHostState,
             )
+        }
+
+        MapState.CurrentTrackError -> {
+            CurrentTrackError(modifier = modifier)
         }
 
         is MapState.CurrentLocation -> {
@@ -390,6 +398,29 @@ private fun CurrentTrack(
                     snackbarHostState = snackbarHostState
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CurrentTrackError(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 16.dp,
+                vertical = WindowInsets.safeDrawing.asPaddingValues()
+                    .calculateTopPadding() + 16.dp
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.error_track_capture),
+                style = TextStyle(color = Color.Red, fontWeight = FontWeight.Bold),
+            )
         }
     }
 }

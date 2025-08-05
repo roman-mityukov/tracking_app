@@ -42,51 +42,57 @@ fun TracksEditingScreen(
     val openDeleteDialog = remember { mutableStateOf(false) }
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-    if (state.value is TracksEditingState.DeletionComplete) {
-        LaunchedEffect(Unit) {
-            onBack()
-        }
-    } else {
-        val data = state.value as TracksEditingState.Data
-        val allTracks = data.allTracks
-        val selectedTracks = data.selectedTracks
+    when (state.value) {
+        is TracksEditingState.Data -> {
+            val data = state.value as TracksEditingState.Data
+            val allTracks = data.allTracks
+            val selectedTracks = data.selectedTracks
 
-        if (selectedTracks.isEmpty()) {
+            if (selectedTracks.isEmpty()) {
+                LaunchedEffect(Unit) {
+                    onBack()
+                }
+            } else {
+                Scaffold(
+                    topBar = {
+                        TracksEditingTopBar(openDeleteDialog = openDeleteDialog, onBack = onBack)
+                    },
+                ) { paddingValues ->
+                    LazyColumn(modifier = Modifier.padding(paddingValues)) {
+                        items(items = allTracks) { track ->
+                            TrackItem(
+                                track = track,
+                                isSelected = selectedTracks.any { it.id == track.id },
+                                isCapturedTrack = track.id == data.capturedTrack,
+                                onClick = {
+                                    viewModel.add(TracksEditingEvent.ChangeSelection(track.id))
+                                })
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        }
+                    }
+                }
+
+                if (openDeleteDialog.value) {
+                    CommonAlertDialog(
+                        onDismiss = {
+                            openDeleteDialog.value = false
+                        },
+                        onConfirm = {
+                            viewModel.add(TracksEditingEvent.Delete)
+                        },
+                        dialogTitle = stringResource(R.string.tracks_editing_delete_dialog_title),
+                        dialogText = stringResource(R.string.tracks_editing_delete_dialog_text)
+                    )
+                }
+            }
+        }
+        TracksEditingState.DeletionComplete -> {
             LaunchedEffect(Unit) {
                 onBack()
             }
-        } else {
-            Scaffold(
-                topBar = {
-                    TracksEditingTopBar(openDeleteDialog = openDeleteDialog, onBack = onBack)
-                },
-            ) { paddingValues ->
-                LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                    items(items = allTracks) { track ->
-                        TrackItem(
-                            track = track,
-                            isSelected = selectedTracks.any { it.id == track.id },
-                            isCapturedTrack = track.id == data.capturedTrack,
-                            onClick = {
-                                viewModel.add(TracksEditingEvent.ChangeSelection(track.id))
-                            })
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    }
-                }
-            }
-
-            if (openDeleteDialog.value) {
-                CommonAlertDialog(
-                    onDismiss = {
-                        openDeleteDialog.value = false
-                    },
-                    onConfirm = {
-                        viewModel.add(TracksEditingEvent.Delete)
-                    },
-                    dialogTitle = stringResource(R.string.tracks_editing_delete_dialog_title),
-                    dialogText = stringResource(R.string.tracks_editing_delete_dialog_text)
-                )
-            }
+        }
+        TracksEditingState.Pending -> {
+            // no op
         }
     }
 }

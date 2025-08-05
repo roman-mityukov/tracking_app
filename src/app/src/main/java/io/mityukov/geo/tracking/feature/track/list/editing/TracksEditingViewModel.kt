@@ -23,6 +23,7 @@ sealed interface TracksEditingEvent {
 }
 
 sealed interface TracksEditingState {
+    data object Pending : TracksEditingState
     data class Data(
         val allTracks: List<Track>,
         val selectedTracks: List<Track>,
@@ -41,11 +42,7 @@ class TracksEditingViewModel @Inject constructor(
     ViewModel() {
     private val routeTracksEditing = savedStateHandle.toRoute<HomeRouteTracksEditing>()
     private val selectedTracks = mutableListOf<String>(routeTracksEditing.trackId)
-    private val mutableStateFlow = MutableStateFlow<TracksEditingState>(
-        TracksEditingState.Data(
-            listOf(), listOf(), null
-        )
-    )
+    private val mutableStateFlow = MutableStateFlow<TracksEditingState>(TracksEditingState.Pending)
     val stateFlow = mutableStateFlow.asStateFlow()
 
     init {

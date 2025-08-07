@@ -15,7 +15,7 @@ complexity:
     constructorThreshold: 12
 style:
   MagicNumber:
-    ignoreNumbers: [ '-1', '0', '1', '2', '3', '4', '5', '9', '16', '100', '180' ]
+    ignoreNumbers: [ '-1', '0', '1', '2', '3', '4', '5', '9', '16', '100', '180', '60', '1000' ]
     ignorePropertyDeclaration: true
     ignoreLocalVariableDeclaration: true
   DestructuringDeclarationWithTooManyEntries:

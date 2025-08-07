@@ -4,6 +4,7 @@ import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import kotlinx.coroutines.flow.Flow
 
 sealed interface GeolocationUpdateException {
+    data object Initialization : GeolocationUpdateException
     data object LocationDisabled : GeolocationUpdateException
     data object LocationIsNull : GeolocationUpdateException
     data object PermissionsNotGranted : GeolocationUpdateException

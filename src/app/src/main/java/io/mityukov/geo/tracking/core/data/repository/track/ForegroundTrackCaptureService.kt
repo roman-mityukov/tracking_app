@@ -58,7 +58,9 @@ class ForegroundTrackCaptureService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        trackCaptureRepository.stop()
+        lifecycleScope.launch {
+            trackCaptureRepository.stop()
+        }
     }
 
     @OptIn(ExperimentalUuidApi::class)

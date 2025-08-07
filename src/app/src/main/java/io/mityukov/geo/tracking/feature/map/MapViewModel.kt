@@ -10,6 +10,7 @@ import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControlle
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

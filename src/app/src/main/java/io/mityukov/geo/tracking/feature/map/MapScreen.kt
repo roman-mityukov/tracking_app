@@ -76,7 +76,6 @@ import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
-import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
 import io.mityukov.geo.tracking.yandex.showTrack
@@ -459,7 +458,7 @@ private fun NoLocation(
                 onPermissionsNotGranted()
             }
 
-            GeolocationUpdateException.LocationIsNull -> {
+            GeolocationUpdateException.LocationIsNull, GeolocationUpdateException.Initialization -> {
                 // Валидное состояние - ничего не делаем
             }
 

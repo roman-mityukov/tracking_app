@@ -5,13 +5,8 @@ import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import javax.inject.Inject
-import kotlin.math.PI
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 import kotlin.time.Duration.Companion.milliseconds
 
 class TrackMapper @Inject constructor() {
@@ -82,26 +77,12 @@ class TrackMapper @Inject constructor() {
 }
 
 private fun TrackPointEntity.distanceTo(other: TrackPointEntity): Int {
-    val earthRadius = 6_371_008
-
-    val lat1Rad = this.latitude.toRadians()
-    val lon1Rad = this.longitude.toRadians()
-    val lat2Rad = other.latitude.toRadians()
-    val lon2Rad = other.longitude.toRadians()
-
-    val deltaLat = lat2Rad - lat1Rad
-    val deltaLon = lon2Rad - lon1Rad
-
-    // Формула гаверсинусов (2D расстояние по поверхности)
-    val a = sin(deltaLat / 2).pow(2) +
-            cos(lat1Rad) * cos(lat2Rad) * sin(deltaLon / 2).pow(2)
-    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    val horizontalDistance = earthRadius * c
-
-    val deltaAlt = other.altitude - this.altitude
-
-    // Полное расстояние (3D)
-    return sqrt(horizontalDistance.pow(2) + deltaAlt.pow(2)).toInt()
+    return distanceTo(
+        this.latitude,
+        this.longitude,
+        this.altitude,
+        other.latitude,
+        other.longitude,
+        other.altitude
+    )
 }
-
-private fun Double.toRadians() = this * PI / 180

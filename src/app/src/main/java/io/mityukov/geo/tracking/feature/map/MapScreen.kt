@@ -362,7 +362,7 @@ private fun CurrentTrack(
     if (viewModelState.track.points.isNotEmpty()) {
         val context = LocalContext.current
         LaunchedEffect(viewModelState.track.points.last()) {
-            mapView.showTrack(context, viewModelState.track, false)
+            mapView.showTrack(context, viewModelState.track.points, false)
         }
 
         Column(
@@ -381,11 +381,16 @@ private fun CurrentTrack(
                 ) {
                     Column {
                         TrackHeadline(
-                            track = viewModelState.track,
+                            startTime = viewModelState.track.start,
                             isCapturedTrack = true,
                             paused = viewModelState.status.paused
                         )
-                        TrackProperties(track = viewModelState.track)
+                        TrackProperties(
+                            duration = viewModelState.track.duration,
+                            distance = viewModelState.track.distance,
+                            altitudeUp = viewModelState.track.altitudeUp,
+                            altitudeDown = viewModelState.track.altitudeDown,
+                        )
                     }
                 }
             }

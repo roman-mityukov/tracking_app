@@ -7,13 +7,13 @@ import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 class TrackMapper @Inject constructor() {
     fun trackWithPointsEntityToDomain(entity: TrackWithPoints): Track {
         return Track(
             id = entity.track.id,
-            duration = entity.track.duration.milliseconds,
+            start = entity.track.start,
+            end = entity.track.end,
             distance = if (entity.points.size > 1) {
                 var result = 0
                 entity.points.forEachIndexed { index, point ->

@@ -69,7 +69,7 @@ class TrackCaptureRepositoryTest {
             newTrackCaptureStatus
         }
 
-        dao.insertTrack(TrackEntity(id = trackId, name = "Random name", duration = 0))
+        dao.insertTrack(TrackEntity(id = trackId, name = "Random name", start = "", end = ""))
 
         val repositoryUnderTest = TrackCaptureRepositoryImpl(
             dataStore = dataStore,

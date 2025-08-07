@@ -7,8 +7,9 @@ import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.data.repository.track.TrackShareService
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
-import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.feature.home.HomeRouteTrackDetails
+import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
+import io.mityukov.geo.tracking.feature.track.list.toCompletedTrack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +26,7 @@ sealed interface TrackDetailsEvent {
 
 sealed interface TrackDetailsState {
     data object Pending : TrackDetailsState
-    data class Data(val data: Track) : TrackDetailsState
+    data class Data(val data: CompletedTrack) : TrackDetailsState
     data object DeleteCompleted : TrackDetailsState
 }
 
@@ -46,7 +47,7 @@ class TrackDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val track = tracksRepository.getTrack(routeTrackDetails.trackId).first()
             mutableStateFlow.update {
-                TrackDetailsState.Data(track)
+                TrackDetailsState.Data(track.toCompletedTrack())
             }
         }
     }
@@ -71,6 +72,7 @@ class TrackDetailsViewModel @Inject constructor(
                     }
                 }
             }
+
             TrackDetailsEvent.ConsumeShare -> {
                 sharingMutableStateFlow.update {
                     null

@@ -98,11 +98,6 @@ class GooglePlayGeolocationProviderImpl @Inject constructor(
                 logd("GooglePlayGeolocationProviderImpl requestLocationUpdates onLocationResult $result")
                 trySendBlocking(result)
             }
-
-            override fun onLocationAvailability(p0: LocationAvailability) {
-                super.onLocationAvailability(p0)
-                logd("GooglePlayGeolocationProviderImpl requestLocationUpdates onLocationAvailability $p0")
-            }
         }
 
         fusedLocationProviderClient.requestLocationUpdates(

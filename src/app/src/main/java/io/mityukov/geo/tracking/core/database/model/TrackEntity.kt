@@ -4,4 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "track")
-data class TrackEntity(@PrimaryKey  val id: String, val name: String, val duration: Long)
+data class TrackEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val start: String,
+    val end: String,
+)

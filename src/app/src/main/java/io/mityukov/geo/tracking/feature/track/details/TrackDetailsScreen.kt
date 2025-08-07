@@ -50,7 +50,8 @@ import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
-import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 import io.mityukov.geo.tracking.yandex.showTrack
 import kotlinx.coroutines.launch
 import kotlin.time.DurationUnit
@@ -172,7 +173,7 @@ private fun TrackDetailsTopBar(
 private fun TrackDetailsContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    track: Track,
+    track: CompletedTrack,
     onDelete: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -198,7 +199,7 @@ private fun TrackDetailsContent(
 }
 
 @Composable
-private fun TrackDetailsMap(modifier: Modifier = Modifier, track: Track) {
+private fun TrackDetailsMap(modifier: Modifier = Modifier, track: CompletedTrack) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
@@ -237,25 +238,25 @@ private fun TrackDetailsMap(modifier: Modifier = Modifier, track: Track) {
 
     if (track.points.isNotEmpty()) {
         LaunchedEffect(track.points.last()) {
-            mapView.showTrack(context, track, true)
+            mapView.showTrack(context, track.points, true)
         }
     }
 }
 
 @Composable
-private fun TrackDetailsList(modifier: Modifier = Modifier, track: Track) {
+private fun TrackDetailsList(modifier: Modifier = Modifier, track: CompletedTrack) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(
                 R.string.track_details_start,
-                track.points.first().geolocation.localDateTime.format(AppProps.UI_DATE_TIME_FORMATTER)
+                TimeUtils.getFormattedLocalFromUTC(track.start, AppProps.UI_DATE_TIME_FORMATTER)
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
                 R.string.track_details_finish,
-                track.points.last().geolocation.localDateTime.format(AppProps.UI_DATE_TIME_FORMATTER)
+                TimeUtils.getFormattedLocalFromUTC(track.end, AppProps.UI_DATE_TIME_FORMATTER)
             )
         )
         Spacer(modifier = Modifier.height(4.dp))

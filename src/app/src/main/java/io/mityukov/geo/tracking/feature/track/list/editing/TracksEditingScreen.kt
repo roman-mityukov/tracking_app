@@ -29,9 +29,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
-import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,11 +87,13 @@ fun TracksEditingScreen(
                 }
             }
         }
+
         TracksEditingState.DeletionComplete -> {
             LaunchedEffect(Unit) {
                 onBack()
             }
         }
+
         TracksEditingState.Pending -> {
             // no op
         }
@@ -131,7 +134,7 @@ private fun TracksEditingTopBar(
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
-    track: Track,
+    track: CompletedTrack,
     isSelected: Boolean,
     isCapturedTrack: Boolean,
     onClick: (String) -> Unit,
@@ -145,10 +148,19 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                TrackHeadline(track = track, isCapturedTrack = isCapturedTrack, paused = false)
+                TrackHeadline(
+                    startTime = track.start,
+                    isCapturedTrack = isCapturedTrack,
+                    paused = false
+                )
             },
             supportingContent = {
-                TrackProperties(track = track)
+                TrackProperties(
+                    duration = track.duration,
+                    distance = track.distance,
+                    altitudeUp = track.altitudeUp,
+                    altitudeDown = track.altitudeDown,
+                )
             },
             trailingContent = {
                 if (isSelected) {

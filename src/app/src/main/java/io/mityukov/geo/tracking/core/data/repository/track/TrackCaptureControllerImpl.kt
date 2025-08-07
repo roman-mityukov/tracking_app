@@ -13,6 +13,7 @@ import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.log.logw
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -25,6 +26,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -63,8 +66,14 @@ class TrackCaptureControllerImpl @Inject constructor(
                 logw("Stop current track capture before start")
                 return@withContext
             }
-            val trackId = Uuid.random().toString()
-            currentTrack = TrackEntity(id = trackId, name = "Random name", duration = 0)
+            val startTime = TimeUtils.getCurrentUtcTime()
+            currentTrack =
+                TrackEntity(
+                    id = Uuid.random().toString(),
+                    name = startTime,
+                    start = startTime,
+                    end = ""
+                )
             trackDao.insertTrack(currentTrack!!)
 
             val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
@@ -125,6 +134,17 @@ class TrackCaptureControllerImpl @Inject constructor(
                         .setTrackCaptureEnabled(false)
                         .setPaused(false)
                         .build()
+                }
+
+                currentTrack?.let {
+                    val track =
+                        TrackEntity(
+                            id = it.id,
+                            name = it.name,
+                            start = it.start,
+                            end = TimeUtils.getCurrentUtcTime()
+                        )
+                    trackDao.insertTrack(track)
                 }
 
                 currentTrack = null

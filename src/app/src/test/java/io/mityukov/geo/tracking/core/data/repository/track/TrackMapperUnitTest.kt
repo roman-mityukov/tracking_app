@@ -14,7 +14,8 @@ class TrackMapperUnitTest {
         track = TrackEntity(
             id = trackId,
             name = trackName,
-            duration = 1000L,
+            start = "",
+            end = ""
         ),
         points = listOf(
             TrackPointEntity(
@@ -68,7 +69,8 @@ class TrackMapperUnitTest {
         assert(track.distance == 3197)
         assert(track.altitudeUp == 63)
         assert(track.altitudeDown == 103)
-        assert(track.duration == trackWithPoints.track.duration.milliseconds)
+        assert(track.start == trackWithPoints.track.start)
+        assert(track.end == trackWithPoints.track.end)
         assert(track.points.size == trackWithPoints.points.size)
     }
 

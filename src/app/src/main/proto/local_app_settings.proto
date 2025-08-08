@@ -4,6 +4,6 @@ option java_package = "io.mityukov.geo.tracking.core.data.repository.settings.ap
 option java_multiple_files = true;
 
 message ProtoLocalAppSettings {
-  bool showOnboarding = 1;
+  int32 showOnboarding = 1;
   int32 geolocationUpdatesRateSeconds = 2;
 }

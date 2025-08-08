@@ -22,7 +22,7 @@ class LocalAppSettingsRepositoryImpl @Inject constructor(
 ) : LocalAppSettingsRepository {
     override val localAppSettings: Flow<LocalAppSettings> = dataStore.data.map { proto ->
         LocalAppSettings(
-            showOnboarding = proto.showOnboarding,
+            showOnboarding = proto.showOnboarding == 0,
             geolocationUpdatesInterval = if (proto.geolocationUpdatesRateSeconds == 0) {
                 AppProps.DEFAULT_GEOLOCATION_UPDATES_INTERVAL
             } else {
@@ -38,7 +38,13 @@ class LocalAppSettingsRepositoryImpl @Inject constructor(
 
             val newLocalAppSettings = ProtoLocalAppSettings
                 .newBuilder(proto)
-                .setShowOnboarding(!proto.showOnboarding)
+                .setShowOnboarding(
+                    if (proto.showOnboarding == 0) {
+                        1
+                    } else {
+                        0
+                    }
+                )
                 .build()
 
             dataStore.updateData {

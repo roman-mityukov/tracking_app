@@ -49,9 +49,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ShareCompat
@@ -155,6 +158,10 @@ private fun MapInfoContent(
                 mapView = mapView,
                 snackbarHostState = snackbarHostState,
             )
+        }
+
+        MapState.CurrentTrackError -> {
+            CurrentTrackError(modifier = modifier)
         }
 
         is MapState.CurrentLocation -> {
@@ -355,7 +362,7 @@ private fun CurrentTrack(
     if (viewModelState.track.points.isNotEmpty()) {
         val context = LocalContext.current
         LaunchedEffect(viewModelState.track.points.last()) {
-            mapView.showTrack(context, viewModelState.track, false)
+            mapView.showTrack(context, viewModelState.track.points, false)
         }
 
         Column(
@@ -374,11 +381,16 @@ private fun CurrentTrack(
                 ) {
                     Column {
                         TrackHeadline(
-                            track = viewModelState.track,
+                            startTime = viewModelState.track.start,
                             isCapturedTrack = true,
                             paused = viewModelState.status.paused
                         )
-                        TrackProperties(track = viewModelState.track)
+                        TrackProperties(
+                            duration = viewModelState.track.duration,
+                            distance = viewModelState.track.distance,
+                            altitudeUp = viewModelState.track.altitudeUp,
+                            altitudeDown = viewModelState.track.altitudeDown,
+                        )
                     }
                 }
             }
@@ -390,6 +402,29 @@ private fun CurrentTrack(
                     snackbarHostState = snackbarHostState
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CurrentTrackError(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 16.dp,
+                vertical = WindowInsets.safeDrawing.asPaddingValues()
+                    .calculateTopPadding() + 16.dp
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.error_track_capture),
+                style = TextStyle(color = Color.Red, fontWeight = FontWeight.Bold),
+            )
         }
     }
 }
@@ -428,7 +463,7 @@ private fun NoLocation(
                 onPermissionsNotGranted()
             }
 
-            GeolocationUpdateException.LocationIsNull -> {
+            GeolocationUpdateException.LocationIsNull, GeolocationUpdateException.Initialization -> {
                 // Валидное состояние - ничего не делаем
             }
 

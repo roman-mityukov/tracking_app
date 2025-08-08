@@ -8,14 +8,45 @@ import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControlle
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import kotlin.time.Duration
+
+fun Track.toCompletedTrack(): CompletedTrack {
+    return CompletedTrack(
+        id = id,
+        start = start,
+        end = end,
+        distance = distance,
+        altitudeUp = altitudeUp,
+        altitudeDown = altitudeDown,
+        points = points,
+        duration = TimeUtils.durationBetween(start, end)
+    )
+}
+
+data class CompletedTrack(
+    val id: String,
+    val start: String,
+    val end: String,
+    val distance: Int,
+    val altitudeUp: Int,
+    val altitudeDown: Int,
+    val points: List<TrackPoint>,
+    val duration: Duration
+)
 
 sealed interface TracksState {
     data object Pending : TracksState
-    data class Data(val tracks: List<Track>, val capturedTrackId: String?, val paused: Boolean) :
+    data class Data(
+        val tracks: List<CompletedTrack>,
+        val capturedTrackId: String?,
+        val paused: Boolean
+    ) :
         TracksState
 }
 
@@ -28,7 +59,7 @@ class TracksViewModel @Inject constructor(
         tracksRepository.tracks
             .combine(trackCaptureController.status) { tracks, status ->
                 TracksState.Data(
-                    tracks = tracks,
+                    tracks = tracks.filter { it.isCompleted }.map { it.toCompletedTrack() },
                     capturedTrackId = (status as? TrackCaptureStatus.Run)?.track?.id,
                     paused = (status as? TrackCaptureStatus.Run)?.paused ?: false
                 )

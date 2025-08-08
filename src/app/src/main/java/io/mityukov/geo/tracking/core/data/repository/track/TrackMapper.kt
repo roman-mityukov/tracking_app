@@ -1,36 +1,29 @@
 package io.mityukov.geo.tracking.core.data.repository.track
 
-import android.location.Location
+import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
 import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 class TrackMapper @Inject constructor() {
     fun trackWithPointsEntityToDomain(entity: TrackWithPoints): Track {
         return Track(
             id = entity.track.id,
-            duration = entity.track.duration.milliseconds,
+            start = entity.track.start,
+            end = entity.track.end,
             distance = if (entity.points.size > 1) {
-                var result = 0.0f
-                val floatArray = FloatArray(1)
+                var result = 0
                 entity.points.forEachIndexed { index, point ->
                     if (index > 0) {
                         val firstPoint = entity.points[index - 1]
                         val secondPoint = entity.points[index]
-                        Location.distanceBetween(
-                            firstPoint.latitude,
-                            firstPoint.longitude,
-                            secondPoint.latitude,
-                            secondPoint.longitude,
-                            floatArray
-                        )
-                        result += floatArray[0]
+                        result += firstPoint.distanceTo(secondPoint)
                     }
                 }
-                result.toInt()
+                result
             } else {
                 0
             },
@@ -66,17 +59,30 @@ class TrackMapper @Inject constructor() {
             } else {
                 0
             },
-            points = entity.points.map {
-                TrackPoint(
-                    id = it.id,
-                    geolocation = Geolocation(
-                        latitude = it.latitude,
-                        longitude = it.longitude,
-                        altitude = it.altitude,
-                        time = it.time
-                    )
-                )
-            }
+            points = entity.points.map(::trackPointEntityToDomain)
         )
     }
+
+    fun trackPointEntityToDomain(entity: TrackPointEntity): TrackPoint {
+        return TrackPoint(
+            id = entity.id,
+            geolocation = Geolocation(
+                latitude = entity.latitude,
+                longitude = entity.longitude,
+                altitude = entity.altitude,
+                time = entity.time
+            )
+        )
+    }
+}
+
+private fun TrackPointEntity.distanceTo(other: TrackPointEntity): Int {
+    return distanceTo(
+        this.latitude,
+        this.longitude,
+        this.altitude,
+        other.latitude,
+        other.longitude,
+        other.altitude
+    )
 }

@@ -29,9 +29,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
-import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
 import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,51 +43,59 @@ fun TracksEditingScreen(
     val openDeleteDialog = remember { mutableStateOf(false) }
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-    if (state.value is TracksEditingState.DeletionComplete) {
-        LaunchedEffect(Unit) {
-            onBack()
-        }
-    } else {
-        val data = state.value as TracksEditingState.Data
-        val allTracks = data.allTracks
-        val selectedTracks = data.selectedTracks
+    when (state.value) {
+        is TracksEditingState.Data -> {
+            val data = state.value as TracksEditingState.Data
+            val allTracks = data.allTracks
+            val selectedTracks = data.selectedTracks
 
-        if (selectedTracks.isEmpty()) {
+            if (selectedTracks.isEmpty()) {
+                LaunchedEffect(Unit) {
+                    onBack()
+                }
+            } else {
+                Scaffold(
+                    topBar = {
+                        TracksEditingTopBar(openDeleteDialog = openDeleteDialog, onBack = onBack)
+                    },
+                ) { paddingValues ->
+                    LazyColumn(modifier = Modifier.padding(paddingValues)) {
+                        items(items = allTracks) { track ->
+                            TrackItem(
+                                track = track,
+                                isSelected = selectedTracks.any { it.id == track.id },
+                                isCapturedTrack = track.id == data.capturedTrack,
+                                onClick = {
+                                    viewModel.add(TracksEditingEvent.ChangeSelection(track.id))
+                                })
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        }
+                    }
+                }
+
+                if (openDeleteDialog.value) {
+                    CommonAlertDialog(
+                        onDismiss = {
+                            openDeleteDialog.value = false
+                        },
+                        onConfirm = {
+                            viewModel.add(TracksEditingEvent.Delete)
+                        },
+                        dialogTitle = stringResource(R.string.tracks_editing_delete_dialog_title),
+                        dialogText = stringResource(R.string.tracks_editing_delete_dialog_text)
+                    )
+                }
+            }
+        }
+
+        TracksEditingState.DeletionComplete -> {
             LaunchedEffect(Unit) {
                 onBack()
             }
-        } else {
-            Scaffold(
-                topBar = {
-                    TracksEditingTopBar(openDeleteDialog = openDeleteDialog, onBack = onBack)
-                },
-            ) { paddingValues ->
-                LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                    items(items = allTracks) { track ->
-                        TrackItem(
-                            track = track,
-                            isSelected = selectedTracks.any { it.id == track.id },
-                            isCapturedTrack = track.id == data.capturedTrack,
-                            onClick = {
-                                viewModel.add(TracksEditingEvent.ChangeSelection(track.id))
-                            })
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    }
-                }
-            }
+        }
 
-            if (openDeleteDialog.value) {
-                CommonAlertDialog(
-                    onDismiss = {
-                        openDeleteDialog.value = false
-                    },
-                    onConfirm = {
-                        viewModel.add(TracksEditingEvent.Delete)
-                    },
-                    dialogTitle = stringResource(R.string.tracks_editing_delete_dialog_title),
-                    dialogText = stringResource(R.string.tracks_editing_delete_dialog_text)
-                )
-            }
+        TracksEditingState.Pending -> {
+            // no op
         }
     }
 }
@@ -125,7 +134,7 @@ private fun TracksEditingTopBar(
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
-    track: Track,
+    track: CompletedTrack,
     isSelected: Boolean,
     isCapturedTrack: Boolean,
     onClick: (String) -> Unit,
@@ -139,10 +148,19 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                TrackHeadline(track = track, isCapturedTrack = isCapturedTrack, paused = false)
+                TrackHeadline(
+                    startTime = track.start,
+                    isCapturedTrack = isCapturedTrack,
+                    paused = false
+                )
             },
             supportingContent = {
-                TrackProperties(track = track)
+                TrackProperties(
+                    duration = track.duration,
+                    distance = track.distance,
+                    altitudeUp = track.altitudeUp,
+                    altitudeDown = track.altitudeDown,
+                )
             },
             trailingContent = {
                 if (isSelected) {

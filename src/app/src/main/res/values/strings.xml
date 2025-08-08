@@ -67,6 +67,7 @@
     <string name="statistics_title">Статистика</string>
     <string name="settings_title">Настройки</string>
     <string name="error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
+    <string name="error_track_capture">Ошибка записи трека. Дайте разрешение Местоположение и перезапустите приложение.</string>
     <string name="track_details_start">Старт %1$s</string>
     <string name="track_details_finish">Финиш %1$s</string>
     <string name="track_details_duration">Продолжительность %1$s</string>

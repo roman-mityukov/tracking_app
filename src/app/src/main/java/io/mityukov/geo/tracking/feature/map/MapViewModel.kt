@@ -10,15 +10,43 @@ import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControlle
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
-import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.utils.PausableTimer
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration
+
+fun Track.toTrackInProgress(): TrackInProgress {
+    return TrackInProgress(
+        id = id,
+        start = start,
+        end = end,
+        distance = distance,
+        altitudeUp = altitudeUp,
+        altitudeDown = altitudeDown,
+        points = points,
+        duration = TimeUtils.durationSince(start)
+    )
+}
+
+data class TrackInProgress(
+    val id: String,
+    val start: String,
+    val end: String,
+    val distance: Int,
+    val altitudeUp: Int,
+    val altitudeDown: Int,
+    val points: List<TrackPoint>,
+    val duration: Duration
+)
 
 sealed interface MapEvent {
     data object PauseCurrentLocationUpdate : MapEvent
@@ -35,11 +63,13 @@ sealed interface MapState {
     ) : MapState
 
     data class CurrentTrack(
-        val track: Track,
+        val track: TrackInProgress,
         val status: TrackCaptureStatus.Run,
         val currentLocation: Geolocation?,
         val timestamp: Long = System.currentTimeMillis()
     ) : MapState
+
+    data object CurrentTrackError : MapState
 
     data class NoLocation(val cause: GeolocationUpdateException?) : MapState
 }
@@ -47,34 +77,43 @@ sealed interface MapState {
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
-    trackCaptureController: TrackCaptureController,
+    private val trackCaptureController: TrackCaptureController,
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
 
     private val mutableStateFlow = MutableStateFlow<MapState?>(null)
+    private val timer = PausableTimer(coroutineScope = viewModelScope)
+
+    init {
+        timer.start()
+    }
 
     val stateFlow: StateFlow<MapState> = trackCaptureController.status
         .combine(mutableStateFlow) { trackCaptureStatus, mutableState ->
             Pair(trackCaptureStatus, mutableState)
         }
+        .combine(timer.events) { pair, timerEvent ->
+            Triple(pair.first, pair.second, timerEvent)
+        }
         .combine(
             geolocationUpdatesRepository.currentLocation
-        ) { pair, currentLocation ->
-            val (trackCaptureStatus, mutableState) = pair
+        ) { triple, currentLocation ->
+            val (trackCaptureStatus, mutableState, timerEvent) = triple
 
             if (currentLocation.geolocation != null) {
-                logd("MapViewModel currentLocation $currentLocation")
                 lastKnownLocation = currentLocation.geolocation
             }
 
             val state = mutableState
                 ?: if (trackCaptureStatus is TrackCaptureStatus.Run) {
                     MapState.CurrentTrack(
-                        trackCaptureStatus.track,
+                        trackCaptureStatus.track.toTrackInProgress(),
                         trackCaptureStatus,
                         currentLocation.geolocation
                     )
+                } else if (trackCaptureStatus is TrackCaptureStatus.Error) {
+                    MapState.CurrentTrackError
                 } else {
                     if (currentLocation.geolocation != null) {
                         MapState.CurrentLocation(data = currentLocation.geolocation)
@@ -82,7 +121,6 @@ class MapViewModel @Inject constructor(
                         MapState.NoLocation(cause = currentLocation.error)
                     }
                 }
-            logd("current state $state")
             state
         }.stateIn(
             scope = viewModelScope,
@@ -109,12 +147,17 @@ class MapViewModel @Inject constructor(
             MapEvent.PauseCurrentLocationUpdate -> {
                 viewModelScope.launch {
                     geolocationUpdatesRepository.stop()
+                    timer.stop()
                 }
             }
 
             MapEvent.ResumeCurrentLocationUpdate -> {
                 viewModelScope.launch {
                     geolocationUpdatesRepository.start()
+                    if (trackCaptureController.status.first() is TrackCaptureStatus.Error) {
+                        trackCaptureController.bind()
+                    }
+                    timer.start()
                 }
             }
         }

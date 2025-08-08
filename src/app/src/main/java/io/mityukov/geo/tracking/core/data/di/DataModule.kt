@@ -8,14 +8,20 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.geo.GooglePlayGeolocationProviderImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
+import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControllerImpl
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureRepository
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TrackShareService
 import io.mityukov.geo.tracking.core.data.repository.track.TrackShareServiceImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
@@ -26,6 +32,8 @@ import io.mityukov.geo.tracking.core.datastore.appSettingsDataStore
 import io.mityukov.geo.tracking.core.datastore.trackCaptureStatusDataStore
 import io.mityukov.geo.tracking.di.AppSettingsDataStore
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
+import io.mityukov.geo.tracking.utils.permission.PermissionChecker
+import io.mityukov.geo.tracking.utils.permission.PermissionCheckerImpl
 import javax.inject.Singleton
 
 @Module
@@ -37,6 +45,15 @@ interface DataModule {
     @Binds
     fun bindCurrentLocationRepository(impl: GeolocationUpdatesRepositoryImpl): GeolocationUpdatesRepository
 
+    @Binds
+    fun bindGeolocationProvider(impl: GooglePlayGeolocationProviderImpl): GeolocationProvider
+
+    @Binds
+    fun bindLocationSettingsRepository(impl: LocationSettingsRepositoryImpl): LocationSettingsRepository
+
+    @Binds
+    fun bindPermissionChecker(impl: PermissionCheckerImpl): PermissionChecker
+
     @Singleton
     @Binds
     fun bindTrackCaptureController(impl: TrackCaptureControllerImpl): TrackCaptureController
@@ -44,6 +61,10 @@ interface DataModule {
     @Singleton
     @Binds
     fun bindTracksRepository(impl: TracksRepositoryImpl): TracksRepository
+
+    @Singleton
+    @Binds
+    fun bindTrackCaptureRepository(impl: TrackCaptureRepositoryImpl): TrackCaptureRepository
 
     @Binds
     fun bindTrackShareService(impl: TrackShareServiceImpl): TrackShareService

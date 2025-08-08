@@ -8,8 +8,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
-import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.feature.home.HomeRouteTracksEditing
+import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
+import io.mityukov.geo.tracking.feature.track.list.toCompletedTrack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -23,9 +24,10 @@ sealed interface TracksEditingEvent {
 }
 
 sealed interface TracksEditingState {
+    data object Pending : TracksEditingState
     data class Data(
-        val allTracks: List<Track>,
-        val selectedTracks: List<Track>,
+        val allTracks: List<CompletedTrack>,
+        val selectedTracks: List<CompletedTrack>,
         val capturedTrack: String?,
     ) : TracksEditingState
 
@@ -41,16 +43,14 @@ class TracksEditingViewModel @Inject constructor(
     ViewModel() {
     private val routeTracksEditing = savedStateHandle.toRoute<HomeRouteTracksEditing>()
     private val selectedTracks = mutableListOf<String>(routeTracksEditing.trackId)
-    private val mutableStateFlow = MutableStateFlow<TracksEditingState>(
-        TracksEditingState.Data(
-            listOf(), listOf(), null
-        )
-    )
+    private val mutableStateFlow = MutableStateFlow<TracksEditingState>(TracksEditingState.Pending)
     val stateFlow = mutableStateFlow.asStateFlow()
 
     init {
         viewModelScope.launch {
             val tracks = tracksRepository.tracks.first()
+                .filter { it.isCompleted }
+                .map { it.toCompletedTrack() }
             val captureStatus = trackCaptureController.status.first()
 
             mutableStateFlow.update {
@@ -79,7 +79,7 @@ class TracksEditingViewModel @Inject constructor(
                         selectedTracks.add(event.trackId)
                     }
 
-                    val tracks = tracksRepository.tracks.first()
+                    val tracks = tracksRepository.tracks.first().map { it.toCompletedTrack() }
                     mutableStateFlow.update {
                         TracksEditingState.Data(
                             allTracks = tracks,

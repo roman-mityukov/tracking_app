@@ -37,7 +37,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.utils.time.TimeUtils
+import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,40 +120,43 @@ private fun TrackList(
 @Composable
 fun TrackHeadline(
     modifier: Modifier = Modifier,
-    track: Track,
+    startTime: String,
     isCapturedTrack: Boolean,
     paused: Boolean
 ) {
-    if (track.points.isNotEmpty()) {
-        val startTime =
-            track.points.first().geolocation.localDateTime.format(AppProps.UI_DATE_TIME_FORMATTER)
+    val formattedStartTime =
+        TimeUtils.getFormattedLocalFromUTC(startTime, AppProps.UI_DATE_TIME_FORMATTER)
 
-        if (isCapturedTrack) {
-            Text(
-                modifier = modifier,
-                text = buildAnnotatedString {
-                    append("$startTime ")
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    ) {
-                        if (paused) {
-                            append(stringResource(R.string.tracks_item_title_pause))
-                        } else {
-                            append(stringResource(R.string.tracks_item_title_capturing))
-                        }
+    if (isCapturedTrack) {
+        Text(
+            modifier = modifier,
+            text = buildAnnotatedString {
+                append("$formattedStartTime ")
+                withStyle(
+                    style = SpanStyle(
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold,
+                    )
+                ) {
+                    if (paused) {
+                        append(stringResource(R.string.tracks_item_title_pause))
+                    } else {
+                        append(stringResource(R.string.tracks_item_title_capturing))
                     }
-                })
-        } else {
-            Text(modifier = modifier, text = startTime)
-        }
+                }
+            })
+    } else {
+        Text(modifier = modifier, text = formattedStartTime)
     }
 }
 
 @Composable
-fun TrackItemProperty(modifier: Modifier = Modifier, iconResource: Int, text: String, contentDescription: String) {
+fun TrackItemProperty(
+    modifier: Modifier = Modifier,
+    iconResource: Int,
+    text: String,
+    contentDescription: String
+) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
             modifier = Modifier.size(16.dp),
@@ -166,12 +170,18 @@ fun TrackItemProperty(modifier: Modifier = Modifier, iconResource: Int, text: St
 }
 
 @Composable
-fun TrackProperties(modifier: Modifier = Modifier, track: Track) {
+fun TrackProperties(
+    modifier: Modifier = Modifier,
+    duration: Duration,
+    distance: Int,
+    altitudeUp: Int,
+    altitudeDown: Int,
+) {
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         TrackItemProperty(
             iconResource = R.drawable.icon_duration,
             text = DateUtils.formatElapsedTime(
-                track.duration.toLong(
+                duration.toLong(
                     DurationUnit.SECONDS
                 )
             ),
@@ -179,17 +189,17 @@ fun TrackProperties(modifier: Modifier = Modifier, track: Track) {
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_distance,
-            text = "${track.distance}м",
+            text = "${distance}м",
             contentDescription = stringResource(R.string.content_description_track_distance),
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_altitude_up,
-            text = "${track.altitudeUp}",
+            text = "$altitudeUp",
             contentDescription = stringResource(R.string.content_description_track_altitude_up),
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_altitude_down,
-            text = "${track.altitudeDown}",
+            text = "$altitudeDown",
             contentDescription = stringResource(R.string.content_description_track_altitude_down),
         )
     }
@@ -198,7 +208,7 @@ fun TrackProperties(modifier: Modifier = Modifier, track: Track) {
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
-    track: Track,
+    track: CompletedTrack,
     isCapturedTrack: Boolean,
     paused: Boolean,
     onClick: (String) -> Unit,
@@ -217,10 +227,19 @@ private fun TrackItem(
             }
         ),
         headlineContent = {
-            TrackHeadline(track = track, isCapturedTrack = isCapturedTrack, paused = paused)
+            TrackHeadline(
+                startTime = track.start,
+                isCapturedTrack = isCapturedTrack,
+                paused = paused,
+            )
         },
         supportingContent = {
-            TrackProperties(track = track)
+            TrackProperties(
+                duration = track.duration,
+                distance = track.distance,
+                altitudeUp = track.altitudeUp,
+                altitudeDown = track.altitudeDown,
+            )
         },
     )
 }

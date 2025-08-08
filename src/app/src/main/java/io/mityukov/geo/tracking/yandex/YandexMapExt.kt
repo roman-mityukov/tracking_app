@@ -14,7 +14,8 @@ import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
-import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.feature.map.TrackInProgress
 
 fun Map.zoom(value: Float) {
     with(cameraPosition) {
@@ -26,10 +27,10 @@ fun Map.zoom(value: Float) {
     }
 }
 
-fun MapView.showTrack(context: Context, track: Track, moveCamera: Boolean) {
+fun MapView.showTrack(context: Context, trackPoints: List<TrackPoint>, moveCamera: Boolean) {
     map.mapObjects.clear()
 
-    val points = track.points.map {
+    val points = trackPoints.map {
         Point(it.geolocation.latitude, it.geolocation.longitude)
     }
     val startImageProvider =
@@ -50,7 +51,7 @@ fun MapView.showTrack(context: Context, track: Track, moveCamera: Boolean) {
     startPlacemark.apply {
         geometry = Point(startPoint.latitude, startPoint.longitude)
         setIcon(
-            if (track.points.size > 1) {
+            if (points.size > 1) {
                 startImageProvider
             } else {
                 finishImageProvider
@@ -59,7 +60,7 @@ fun MapView.showTrack(context: Context, track: Track, moveCamera: Boolean) {
     }
     startPlacemark.setIconStyle(placemarkIconStyle)
 
-    if (track.points.size > 1) {
+    if (points.size > 1) {
         val finishPoint = points.last()
         val finishPlacemark = pinsCollection.addPlacemark()
         finishPlacemark.apply {
@@ -69,7 +70,7 @@ fun MapView.showTrack(context: Context, track: Track, moveCamera: Boolean) {
         finishPlacemark.setIconStyle(placemarkIconStyle)
     }
 
-    val geometry = if (track.points.size > 1) {
+    val geometry = if (points.size > 1) {
         val polyline = Polyline(points)
         val polylineObject = map.mapObjects.addPolyline(polyline)
         polylineObject.apply {

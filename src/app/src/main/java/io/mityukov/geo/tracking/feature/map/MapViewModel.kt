@@ -10,6 +10,8 @@ import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControlle
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.core.model.track.TrackAction
+import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.utils.PausableTimer
 import io.mityukov.geo.tracking.utils.time.TimeUtils
@@ -23,8 +25,47 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
-fun Track.toTrackInProgress(): TrackInProgress {
+fun Track.toTrackInProgress(currentTime: String): TrackInProgress {
+    val duration = if (actions.size > 1) {
+        var pausedTimeStamp = ""
+        val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
+            when (action.type) {
+                TrackActionType.Pause -> {
+                    pausedTimeStamp = action.timestamp
+                    value
+                }
+
+                TrackActionType.Resume -> {
+                    val newValue = value + TimeUtils.durationBetween(
+                        pausedTimeStamp,
+                        action.timestamp
+                    )
+                    pausedTimeStamp = ""
+                    newValue
+                }
+
+                else -> {
+                    value
+                }
+            }
+        }
+
+        val considerLastPause = if (actions.last().type == TrackActionType.Pause) {
+            pausedDuration + TimeUtils.durationBetween(
+                actions.last().timestamp,
+                currentTime
+            )
+        } else {
+            pausedDuration
+        }
+
+        TimeUtils.durationBetween(start, currentTime) - considerLastPause
+    } else {
+        TimeUtils.durationBetween(start, currentTime)
+    }
+
     return TrackInProgress(
         id = id,
         start = start,
@@ -33,7 +74,7 @@ fun Track.toTrackInProgress(): TrackInProgress {
         altitudeUp = altitudeUp,
         altitudeDown = altitudeDown,
         points = points,
-        duration = TimeUtils.durationSince(start)
+        duration = duration,
     )
 }
 
@@ -107,8 +148,13 @@ class MapViewModel @Inject constructor(
 
             val state = mutableState
                 ?: if (trackCaptureStatus is TrackCaptureStatus.Run) {
+                    if (trackCaptureStatus.paused) {
+                        timer.pause()
+                    } else {
+                        timer.resume()
+                    }
                     MapState.CurrentTrack(
-                        trackCaptureStatus.track.toTrackInProgress(),
+                        trackCaptureStatus.track.toTrackInProgress(TimeUtils.getCurrentUtcTime()),
                         trackCaptureStatus,
                         currentLocation.geolocation
                     )

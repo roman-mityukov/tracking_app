@@ -7,7 +7,8 @@ data class Track(
     val distance: Int,
     val altitudeUp: Int,
     val altitudeDown: Int,
-    val points: List<TrackPoint>
+    val points: List<TrackPoint>,
+    val actions: List<TrackAction>,
 ) {
-    val isCompleted: Boolean = end.isNotEmpty()
+    val isCompleted: Boolean = end.isNotBlank()
 }

@@ -23,12 +23,12 @@ object TimeUtils {
         return local
     }
 
-    fun durationSince(startTime: String): Duration {
-        val start = Instant.parse(startTime)
-        val current = Instant.now()
-        val diff = current.epochSecond - start.epochSecond
-        return diff.seconds
-    }
+//    fun durationSince(startTime: String): Duration {
+//        val start = Instant.parse(startTime)
+//        val current = Instant.now()
+//        val diff = current.epochSecond - start.epochSecond
+//        return diff.seconds
+//    }
 
     fun durationBetween(startTime: String, endTime: String): Duration {
         val start = Instant.parse(startTime)

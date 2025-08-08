@@ -1,9 +1,12 @@
 package io.mityukov.geo.tracking.core.data.repository.track
 
+import io.mityukov.geo.tracking.core.database.model.TrackActionEntity
 import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
 import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.core.model.track.TrackAction
+import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import javax.inject.Inject
@@ -59,7 +62,8 @@ class TrackMapper @Inject constructor() {
             } else {
                 0
             },
-            points = entity.points.map(::trackPointEntityToDomain)
+            points = entity.points.map(::trackPointEntityToDomain),
+            actions = entity.actions.map(::trackActionEntityToDomain)
         )
     }
 
@@ -72,6 +76,15 @@ class TrackMapper @Inject constructor() {
                 altitude = entity.altitude,
                 time = entity.time
             )
+        )
+    }
+
+    fun trackActionEntityToDomain(entity: TrackActionEntity): TrackAction {
+        return TrackAction(
+            id = entity.id,
+            trackId = entity.trackId,
+            type = TrackActionType.valueOf(entity.action),
+            timestamp = entity.timestamp,
         )
     }
 }

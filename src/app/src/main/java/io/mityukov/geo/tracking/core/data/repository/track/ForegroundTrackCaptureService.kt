@@ -20,13 +20,12 @@ import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
+import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.log.logw
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -70,24 +69,23 @@ class ForegroundTrackCaptureService : LifecycleService() {
             stopSelf()
             return
         } else {
-            lifecycleScope.launch(coroutineDispatcher) {
-                trackCaptureRepository.start()
+            lifecycleScope.launch {
                 val currentTrackCaptureStatus = dataStore.data.first()
-                withContext(Dispatchers.Main) {
-                    if (currentTrackCaptureStatus.trackId == null) {
-                        stopSelf()
-                    } else {
-                        ServiceCompat.startForeground(
-                            this@ForegroundTrackCaptureService,
-                            AppProps.TRACK_CAPTURE_NOTIFICATION_ID,
-                            buildNotification(currentTrackCaptureStatus.trackId),
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                            } else {
-                                0
-                            },
-                        )
-                    }
+                if (currentTrackCaptureStatus.trackId == null) {
+                    stopSelf()
+                } else {
+                    ServiceCompat.startForeground(
+                        this@ForegroundTrackCaptureService,
+                        AppProps.TRACK_CAPTURE_NOTIFICATION_ID,
+                        buildNotification(currentTrackCaptureStatus.trackId),
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                        } else {
+                            0
+                        },
+                    )
+                    trackCaptureRepository.start()
+                    logd("ForegroundGeolocationService trackCaptureRepository started")
                 }
             }
         }

@@ -32,11 +32,13 @@ class TrackCaptureRepositoryImpl @Inject constructor(
 ) : TrackCaptureRepository {
     private val mutex = Mutex()
     private var geolocationSubscription: Job? = null
-    private val initialized: Boolean = geolocationSubscription?.isActive ?: false
+    private val initialized: Boolean
+        get() = geolocationSubscription?.isActive ?: false
 
     override suspend fun start() = withContext(coroutineDispatcher) {
         mutex.withLock {
-            if (initialized) return@withLock
+            if (initialized) return@withContext
+            logd("TrackCaptureRepositoryImpl start")
 
             val localAppSettings = localAppSettingsRepository.localAppSettings.first()
 
@@ -52,6 +54,7 @@ class TrackCaptureRepositoryImpl @Inject constructor(
 
     override suspend fun stop() = withContext(coroutineDispatcher) {
         mutex.withLock {
+            logd("TrackCaptureRepositoryImpl stop")
             geolocationSubscription?.cancel()
             geolocationSubscription = null
         }

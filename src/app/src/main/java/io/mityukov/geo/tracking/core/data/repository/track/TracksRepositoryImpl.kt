@@ -27,5 +27,6 @@ class TracksRepositoryImpl @Inject constructor(
     override suspend fun deleteTrack(trackId: String) = withContext(coroutineDispatcher) {
         trackDao.deleteTrack(trackId)
         trackDao.deleteTrackPoints(trackId)
+        trackDao.deleteTrackActions(trackId)
     }
 }

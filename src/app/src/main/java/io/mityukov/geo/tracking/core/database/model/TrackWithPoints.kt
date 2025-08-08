@@ -10,5 +10,10 @@ data class TrackWithPoints(
         parentColumn = "id",
         entityColumn = "track_id"
     )
-    val points: List<TrackPointEntity>
+    val points: List<TrackPointEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "track_id"
+    )
+    val actions: List<TrackActionEntity>
 )

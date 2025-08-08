@@ -1,15 +1,19 @@
 package io.mityukov.geo.tracking.core.data.repository.track
 
+import io.mityukov.geo.tracking.core.database.model.TrackActionEntity
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
 import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
+import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import org.junit.Test
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class TrackMapperUnitTest {
     private val trackId = "trackId"
     private val trackName = "trackName"
 
+    @OptIn(ExperimentalUuidApi::class)
     private val trackWithPoints = TrackWithPoints(
         track = TrackEntity(
             id = trackId,
@@ -58,7 +62,14 @@ class TrackMapperUnitTest {
                 altitude = 351.0,
                 time = 1010L,
             ),
-
+        ),
+        actions = listOf(
+            TrackActionEntity(
+                id = Uuid.random().toString(),
+                trackId = "someId",
+                action = TrackActionType.Start.toString(),
+                timestamp = "2025-08-08T06:07:11.393356Z"
+            )
         )
     )
 
@@ -72,6 +83,7 @@ class TrackMapperUnitTest {
         assert(track.start == trackWithPoints.track.start)
         assert(track.end == trackWithPoints.track.end)
         assert(track.points.size == trackWithPoints.points.size)
+        assert(track.actions.size == trackWithPoints.actions.size)
     }
 
     @Test
@@ -90,5 +102,20 @@ class TrackMapperUnitTest {
         assert(trackPoint.geolocation.longitude == entity.longitude)
         assert(trackPoint.geolocation.altitude == entity.altitude)
         assert(trackPoint.geolocation.time == entity.time)
+    }
+
+    @Test
+    fun `track action entity to domain mapping`() {
+        val entity = TrackActionEntity(
+            id = "someActionId",
+            trackId = "someTrackId",
+            action = "Start",
+            timestamp = "2025-08-08T06:07:11.393356Z",
+        )
+        val trackAction = TrackMapper().trackActionEntityToDomain(entity)
+        assert(trackAction.id == entity.id)
+        assert(trackAction.trackId == entity.trackId)
+        assert(trackAction.type == TrackActionType.Start)
+        assert(trackAction.timestamp == entity.timestamp)
     }
 }

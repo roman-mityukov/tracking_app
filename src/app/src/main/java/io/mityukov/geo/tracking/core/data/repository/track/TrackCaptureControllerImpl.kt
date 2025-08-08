@@ -6,8 +6,10 @@ import androidx.datastore.core.DataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
+import io.mityukov.geo.tracking.core.database.model.TrackActionEntity
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
+import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
 import io.mityukov.geo.tracking.utils.log.logd
@@ -26,8 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -67,18 +67,21 @@ class TrackCaptureControllerImpl @Inject constructor(
                 return@withContext
             }
             val startTime = TimeUtils.getCurrentUtcTime()
-            currentTrack =
+            val trackEntity =
                 TrackEntity(
                     id = Uuid.random().toString(),
                     name = startTime,
                     start = startTime,
                     end = ""
                 )
-            trackDao.insertTrack(currentTrack!!)
+            trackDao.insertTrack(trackEntity)
+
+            val trackAction = buildTrackActionEntity(trackEntity.id, TrackActionType.Start)
+            trackDao.insertTrackAction(trackAction)
 
             val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
                 .newBuilder()
-                .setTrackId(currentTrack!!.id)
+                .setTrackId(trackEntity.id)
                 .setTrackCaptureEnabled(true)
                 .setPaused(false)
                 .build()
@@ -86,12 +89,17 @@ class TrackCaptureControllerImpl @Inject constructor(
                 newTrackCaptureStatus
             }
 
+            currentTrack = trackEntity
+
             launchTrackCapture()
         }
     }
 
     override suspend fun resume() = withContext(coroutineContext) {
         mutex.withLock {
+            val trackAction = buildTrackActionEntity(currentTrack!!.id, TrackActionType.Resume)
+            trackDao.insertTrackAction(trackAction)
+
             val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
                 .newBuilder()
                 .setTrackId(currentTrack!!.id)
@@ -107,6 +115,9 @@ class TrackCaptureControllerImpl @Inject constructor(
 
     override suspend fun pause() = withContext(coroutineContext) {
         mutex.withLock {
+            val trackAction = buildTrackActionEntity(currentTrack!!.id, TrackActionType.Pause)
+            trackDao.insertTrackAction(trackAction)
+
             val newTrackCaptureStatus = ProtoLocalTrackCaptureStatus
                 .newBuilder()
                 .setTrackId(currentTrack!!.id)
@@ -137,6 +148,9 @@ class TrackCaptureControllerImpl @Inject constructor(
                 }
 
                 currentTrack?.let {
+                    val trackAction = buildTrackActionEntity(it.id, TrackActionType.Stop)
+                    trackDao.insertTrackAction(trackAction)
+
                     val track =
                         TrackEntity(
                             id = it.id,
@@ -200,5 +214,18 @@ class TrackCaptureControllerImpl @Inject constructor(
                     newStatus
                 }
             }
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    private fun buildTrackActionEntity(
+        trackId: String,
+        action: TrackActionType
+    ): TrackActionEntity {
+        return TrackActionEntity(
+            id = Uuid.random().toString(),
+            trackId = trackId,
+            timestamp = TimeUtils.getCurrentUtcTime(),
+            action = action.toString(),
+        )
     }
 }

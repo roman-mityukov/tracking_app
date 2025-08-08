@@ -1,4 +1,4 @@
-package io.mityukov.geo.tracking.feature.map
+package io.mityukov.geo.tracking.feature.track.list
 
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
@@ -8,11 +8,11 @@ import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
-class MapViewModelTest {
+class TracksViewModelTest {
     val track = Track(
         id = "someTrackId",
         start = "2025-08-08T06:07:11.393356Z",
-        end = "",
+        end = "2025-08-08T06:07:31.393356Z",
         distance = 123,
         altitudeUp = 3,
         altitudeDown = 2,
@@ -42,86 +42,73 @@ class MapViewModelTest {
                 trackId = "someId",
                 type = TrackActionType.Start,
                 timestamp = "2025-08-08T06:07:11.393356Z"
+            ),
+            TrackAction(
+                id = "someTrackActionId1",
+                trackId = "someId",
+                type = TrackActionType.Stop,
+                timestamp = "2025-08-08T06:07:31.393356Z"
             )
         )
     )
 
     @Test
-    fun `toTrackInProgress mapping`() {
-        val trackInProgress = track.toTrackInProgress("2025-08-08T06:07:13.393356Z")
-        assert(track.id == trackInProgress.id)
-        assert(track.start == trackInProgress.start)
-        assert(track.end == trackInProgress.end)
-        assert(track.altitudeDown == trackInProgress.altitudeDown)
-        assert(track.altitudeUp == trackInProgress.altitudeUp)
-        assert(track.distance == trackInProgress.distance)
-        assert(track.points == trackInProgress.points)
-        assert(trackInProgress.duration == 2.seconds)
-    }
-
-    @Test
-    fun `duration with latest pause action`() {
-        val newTrack = buildTrack(
-            track, listOf(
-                TrackAction(
-                    id = "someTrackActionId1",
-                    trackId = "someId",
-                    type = TrackActionType.Start,
-                    timestamp = "2025-08-08T06:07:11.393356Z"
-                ),
-                TrackAction(
-                    id = "someTrackActionId1",
-                    trackId = "someId",
-                    type = TrackActionType.Pause,
-                    timestamp = "2025-08-08T06:07:15.393356Z"
-                ),
-            )
-        )
-        val trackInProgress = newTrack.toTrackInProgress("2025-08-08T06:07:18.393356Z")
-        assert(trackInProgress.duration == 4.seconds)
+    fun `toCompletedTrack mapping`() {
+        val completedTrack = track.toCompletedTrack()
+        assert(track.id == completedTrack.id)
+        assert(track.start == completedTrack.start)
+        assert(track.end == completedTrack.end)
+        assert(track.altitudeDown == completedTrack.altitudeDown)
+        assert(track.altitudeUp == completedTrack.altitudeUp)
+        assert(track.distance == completedTrack.distance)
+        assert(track.points == completedTrack.points)
+        assert(completedTrack.duration == 20.seconds)
     }
 
     @Test
     fun `duration with pause resume actions`() {
         val newTrack = buildTrack(
             track, listOf(
-                TrackAction(
-                    id = "someTrackActionId1",
-                    trackId = "someId",
+                buildTrackAction(
                     type = TrackActionType.Start,
                     timestamp = "2025-08-08T06:07:11.393356Z"
                 ),
-                TrackAction(
-                    id = "someTrackActionId2",
-                    trackId = "someId",
+                buildTrackAction(
                     type = TrackActionType.Pause,
                     timestamp = "2025-08-08T06:07:15.393356Z"
                 ),
-                TrackAction(
-                    id = "someTrackActionId3",
-                    trackId = "someId",
+                buildTrackAction(
                     type = TrackActionType.Resume,
                     timestamp = "2025-08-08T06:07:18.393356Z"
                 ),
-                TrackAction(
-                    id = "someTrackActionId4",
-                    trackId = "someId",
+                buildTrackAction(
                     type = TrackActionType.Pause,
                     timestamp = "2025-08-08T06:07:21.393356Z"
                 ),
-                TrackAction(
-                    id = "someTrackActionId5",
-                    trackId = "someId",
+                buildTrackAction(
                     type = TrackActionType.Resume,
                     timestamp = "2025-08-08T06:07:28.393356Z"
                 ),
+                buildTrackAction(
+                    type = TrackActionType.Stop,
+                    timestamp = "2025-08-08T06:07:31.393356Z"
+                ),
             )
         )
-        val trackInProgress = newTrack.toTrackInProgress("2025-08-08T06:07:31.393356Z")
-        assert(trackInProgress.duration == 10.seconds)
+        val completedTrack = newTrack.toCompletedTrack()
+        assert(completedTrack.duration == 10.seconds)
     }
 
     private fun buildTrack(track: Track, actions: List<TrackAction>): Track {
         return track.copy(actions = actions)
+    }
+
+    private fun buildTrackAction(type: TrackActionType, timestamp: String): TrackAction {
+        return TrackAction(
+            id = "someTrackActionId",
+            trackId = "someId",
+            type = type,
+            timestamp = timestamp,
+        )
     }
 }

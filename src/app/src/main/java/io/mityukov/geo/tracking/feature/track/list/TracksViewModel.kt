@@ -8,15 +8,61 @@ import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControlle
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.core.model.track.TrackAction
+import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 fun Track.toCompletedTrack(): CompletedTrack {
+    val duration = if (actions.size > 2) {
+        var pausedTimeStamp = ""
+        val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
+            logd("timestamp ${action.timestamp}" )
+            when (action.type) {
+                TrackActionType.Pause -> {
+                    pausedTimeStamp = action.timestamp
+                    value
+                }
+
+                TrackActionType.Resume -> {
+                    val newValue = value + TimeUtils.durationBetween(
+                        pausedTimeStamp,
+                        action.timestamp
+                    )
+                    pausedTimeStamp = ""
+                    newValue
+                }
+
+                TrackActionType.Stop -> {
+                    if (pausedTimeStamp.isNotEmpty()) {
+                        val newValue = value + TimeUtils.durationBetween(
+                            pausedTimeStamp,
+                            action.timestamp
+                        )
+                        newValue
+                    } else {
+                        value
+                    }
+                }
+
+                else -> {
+                    value
+                }
+            }
+        }
+        logd("pausedDuration $pausedDuration")
+        TimeUtils.durationBetween(start, end) - pausedDuration
+    } else {
+        TimeUtils.durationBetween(start, end)
+    }
+
     return CompletedTrack(
         id = id,
         start = start,
@@ -25,7 +71,7 @@ fun Track.toCompletedTrack(): CompletedTrack {
         altitudeUp = altitudeUp,
         altitudeDown = altitudeDown,
         points = points,
-        duration = TimeUtils.durationBetween(start, end)
+        duration = duration
     )
 }
 

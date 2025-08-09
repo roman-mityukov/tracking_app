@@ -1,10 +1,11 @@
 package io.mityukov.geo.tracking.app
 
 import android.app.Application
+import android.os.StrictMode
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.HiltAndroidApp
 import io.mityukov.geo.tracking.BuildConfig
-import io.mityukov.geo.tracking.utils.log.initLogs
+import io.mityukov.geo.tracking.utils.log.Logger
 import ru.ok.tracer.HasTracerConfiguration
 import ru.ok.tracer.TracerConfiguration
 import ru.ok.tracer.crash.report.CrashFreeConfiguration
@@ -26,8 +27,15 @@ class GeoApp : Application(), HasTracerConfiguration {
     override fun onCreate() {
         super.onCreate()
 
+        if (BuildConfig.DEBUG) {
+            val threadPolicy = StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build()
+            StrictMode.setThreadPolicy(threadPolicy)
+            val vmPolicy = StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build()
+            StrictMode.setVmPolicy(vmPolicy)
+        }
+
         MapKitFactory.setApiKey(BuildConfig.YANDEX_MAPKIT_API_KEY)
 
-        initLogs(this)
+        Logger.initLogs(this)
     }
 }

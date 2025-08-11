@@ -32,7 +32,7 @@ class TrackCapturerImpl @Inject constructor(
 ) : TrackCapturer {
     private val mutex = Mutex()
     private var geolocationSubscription: Job? = null
-    private val initialized: Boolean
+    private val inProgress: Boolean
         get() = geolocationSubscription?.isActive ?: false
 
     @androidx.annotation.RequiresPermission(
@@ -40,7 +40,7 @@ class TrackCapturerImpl @Inject constructor(
     )
     override suspend fun start() = withContext(coroutineDispatcher) {
         mutex.withLock {
-            if (initialized) return@withContext
+            if (inProgress) return@withContext
             logd("TrackCaptureRepositoryImpl start")
 
             val localAppSettings = localAppSettingsRepository.localAppSettings.first()
@@ -55,7 +55,7 @@ class TrackCapturerImpl @Inject constructor(
         }
     }
 
-    override suspend fun stop() = withContext(coroutineDispatcher) {
+    override suspend fun stop() {
         mutex.withLock {
             logd("TrackCaptureRepositoryImpl stop")
             geolocationSubscription?.cancel()

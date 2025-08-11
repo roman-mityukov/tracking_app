@@ -55,10 +55,10 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 30
-        versionName = "0.24.0"
+        versionCode = 31
+        versionName = "0.25.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 
         val yandexMapKitKey = "YANDEX_MAPKIT_API_KEY"
         buildConfigField(
@@ -88,8 +88,10 @@ android {
             keyPassword = propsKeyPassword
         }
     }
-
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -147,6 +149,7 @@ dependencies {
     implementation(platform(libs.apptracer.tracer.platform))
     implementation(libs.apptracer.crash.report)
     implementation(libs.apptracer.crash.report.native)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.timber)
     implementation(libs.treessence)
@@ -164,6 +167,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    kspAndroidTest(libs.hilt.android.compiler)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

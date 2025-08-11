@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -81,7 +82,7 @@ private fun TrackList(
                 val tracks = state.tracks
 
                 LazyColumn(
-                    modifier = modifier.padding(paddingValues)
+                    modifier = modifier.testTag("TracksLazyColumn").padding(paddingValues)
                 ) {
                     if (tracks.isEmpty()) {
                         items(count = 1) {
@@ -222,7 +223,7 @@ private fun TrackItem(
 ) {
     val haptics = LocalHapticFeedback.current
     ListItem(
-        modifier = modifier.combinedClickable(
+        modifier = modifier.testTag("TrackItem").combinedClickable(
             enabled = true,
             onClick = {
                 onClick(track.id)

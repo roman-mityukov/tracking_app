@@ -44,6 +44,17 @@ unit_test:
     - cd src
     - ./gradlew :app:testDebugUnitTest
 
+instrumented_test:
+  stage: test
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - echo "running instrumented tests..."
+    - cd src
+    - ./gradlew connectedAndroidTest
+
 build_qa:
   stage: build
   tags:

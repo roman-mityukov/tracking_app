@@ -39,7 +39,13 @@ interface TrackDao {
     fun insertTrackPoint(trackPointEntity: TrackPointEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllTrackPoint(list: List<TrackPointEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTrackAction(trackActionEntity: TrackActionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllTrackAction(list: List<TrackActionEntity>)
 
     @Query("DELETE FROM track WHERE id=:trackId")
     fun deleteTrack(trackId: String)
@@ -55,5 +61,12 @@ interface TrackDao {
         deleteTrackPoints(trackId)
         deleteTrackActions(trackId)
         deleteTrack(trackId)
+    }
+
+    @Transaction
+    fun insertTrackWithPoints(trackWithPoints: TrackWithPoints) {
+        insertTrack(trackWithPoints.track)
+        insertAllTrackPoint(trackWithPoints.points)
+        insertAllTrackAction(trackWithPoints.actions)
     }
 }

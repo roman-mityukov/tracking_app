@@ -3,7 +3,9 @@ package io.mityukov.geo.tracking.core.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "track_action")
 data class TrackActionEntity(
     @PrimaryKey val id: String,

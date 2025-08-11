@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackAction
@@ -90,8 +89,6 @@ sealed interface TracksState {
     data object Pending : TracksState
     data class Data(
         val tracks: List<CompletedTrack>,
-        val capturedTrackId: String?,
-        val paused: Boolean
     ) :
         TracksState
 }
@@ -106,8 +103,6 @@ class TracksViewModel @Inject constructor(
             .combine(trackCapturerController.status) { tracks, status ->
                 TracksState.Data(
                     tracks = tracks.filter { it.isCompleted }.map { it.toCompletedTrack() },
-                    capturedTrackId = (status as? TrackCaptureStatus.Run)?.track?.id,
-                    paused = (status as? TrackCaptureStatus.Run)?.paused ?: false
                 )
             }
             .stateIn(

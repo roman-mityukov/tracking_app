@@ -79,7 +79,6 @@ private fun TrackList(
         when (state) {
             is TracksState.Data -> {
                 val tracks = state.tracks
-                val capturedTrackId = state.capturedTrackId
 
                 LazyColumn(
                     modifier = modifier.padding(paddingValues)
@@ -99,8 +98,6 @@ private fun TrackList(
                         items(items = tracks) {
                             TrackItem(
                                 track = it,
-                                isCapturedTrack = it.id == capturedTrackId,
-                                paused = state.paused,
                                 onClick = onClick,
                                 onLongPress = onLongPress,
                             )
@@ -118,7 +115,7 @@ private fun TrackList(
 }
 
 @Composable
-fun TrackHeadline(
+fun InProgressTrackHeadline(
     modifier: Modifier = Modifier,
     startTime: String,
     isCapturedTrack: Boolean,
@@ -148,6 +145,17 @@ fun TrackHeadline(
     } else {
         Text(modifier = modifier, text = formattedStartTime)
     }
+}
+
+@Composable
+fun CompletedTrackHeadline(
+    modifier: Modifier = Modifier,
+    startTime: String,
+) {
+    val formattedStartTime =
+        TimeUtils.getFormattedLocalFromUTC(startTime, AppProps.UI_DATE_TIME_FORMATTER)
+
+    Text(modifier = modifier, text = formattedStartTime)
 }
 
 @Composable
@@ -209,8 +217,6 @@ fun TrackProperties(
 private fun TrackItem(
     modifier: Modifier = Modifier,
     track: CompletedTrack,
-    isCapturedTrack: Boolean,
-    paused: Boolean,
     onClick: (String) -> Unit,
     onLongPress: (String) -> Unit,
 ) {
@@ -227,11 +233,7 @@ private fun TrackItem(
             }
         ),
         headlineContent = {
-            TrackHeadline(
-                startTime = track.start,
-                isCapturedTrack = isCapturedTrack,
-                paused = paused,
-            )
+            CompletedTrackHeadline(startTime = track.start)
         },
         supportingContent = {
             TrackProperties(

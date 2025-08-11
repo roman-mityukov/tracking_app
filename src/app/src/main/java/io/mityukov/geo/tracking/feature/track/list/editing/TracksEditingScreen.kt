@@ -30,9 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
-import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
+import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
-import io.mityukov.geo.tracking.utils.time.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,7 +147,7 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                TrackHeadline(
+                InProgressTrackHeadline(
                     startTime = track.start,
                     isCapturedTrack = isCapturedTrack,
                     paused = false

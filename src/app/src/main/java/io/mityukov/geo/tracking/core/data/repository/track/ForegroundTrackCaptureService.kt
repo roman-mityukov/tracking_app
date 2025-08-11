@@ -11,7 +11,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -19,7 +18,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.MainActivity
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
@@ -83,7 +81,7 @@ class ForegroundTrackCaptureService : LifecycleService() {
                     ServiceCompat.startForeground(
                         this@ForegroundTrackCaptureService,
                         AppProps.TRACK_CAPTURE_NOTIFICATION_ID,
-                        buildNotification(currentTrackCaptureStatus.trackId),
+                        buildNotification(),
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                         } else {
@@ -96,7 +94,7 @@ class ForegroundTrackCaptureService : LifecycleService() {
         }
     }
 
-    private fun buildNotification(trackId: String): Notification {
+    private fun buildNotification(): Notification {
         val builder: NotificationCompat.Builder =
             NotificationCompat.Builder(
                 applicationContext,
@@ -105,10 +103,6 @@ class ForegroundTrackCaptureService : LifecycleService() {
 
         val activityIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            data = DeepLinkProps.TRACK_DETAILS_URI_PATTERN.replace(
-                "{${DeepLinkProps.TRACK_DETAILS_PATH}}",
-                trackId
-            ).toUri()
         }
         val pendingIntent =
             PendingIntent.getActivity(

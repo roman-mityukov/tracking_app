@@ -23,18 +23,21 @@ import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-class TrackCaptureRepositoryImpl @Inject constructor(
+class TrackCapturerImpl @Inject constructor(
     @TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
     private val trackDao: TrackDao,
     private val geolocationProvider: GeolocationProvider,
     private val localAppSettingsRepository: LocalAppSettingsRepository,
     @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
-) : TrackCaptureRepository {
+) : TrackCapturer {
     private val mutex = Mutex()
     private var geolocationSubscription: Job? = null
     private val initialized: Boolean
         get() = geolocationSubscription?.isActive ?: false
 
+    @androidx.annotation.RequiresPermission(
+        allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
+    )
     override suspend fun start() = withContext(coroutineDispatcher) {
         mutex.withLock {
             if (initialized) return@withContext

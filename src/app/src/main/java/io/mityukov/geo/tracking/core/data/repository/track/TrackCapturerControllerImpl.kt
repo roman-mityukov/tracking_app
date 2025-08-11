@@ -32,14 +32,14 @@ import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-class TrackCaptureControllerImpl @Inject constructor(
+class TrackCapturerControllerImpl @Inject constructor(
     private val trackDao: TrackDao,
     private val trackMapper: TrackMapper,
     @ApplicationContext private val applicationContext: Context,
     @TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
     @DispatcherIO private val coroutineContext: CoroutineDispatcher,
     private val permissionChecker: PermissionChecker,
-) : TrackCaptureController {
+) : TrackCapturerController {
     private val mutableStateFlow = MutableStateFlow<TrackCaptureStatus>(TrackCaptureStatus.Idle)
     override val status: Flow<TrackCaptureStatus> = mutableStateFlow
 

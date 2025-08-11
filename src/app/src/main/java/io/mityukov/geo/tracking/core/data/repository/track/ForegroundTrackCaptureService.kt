@@ -1,13 +1,16 @@
 package io.mityukov.geo.tracking.core.data.repository.track
 
+import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.LifecycleService
@@ -20,9 +23,7 @@ import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
-import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.log.logw
-import io.mityukov.geo.tracking.utils.permission.PermissionChecker
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,10 +33,7 @@ import kotlin.uuid.ExperimentalUuidApi
 @AndroidEntryPoint
 class ForegroundTrackCaptureService : LifecycleService() {
     @Inject
-    lateinit var trackCaptureRepository: TrackCaptureRepository
-
-    @Inject
-    lateinit var permissionChecker: PermissionChecker
+    lateinit var trackCapturer: TrackCapturer
 
     @Inject
     @TrackCaptureStatusDataStore
@@ -58,13 +56,21 @@ class ForegroundTrackCaptureService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         lifecycleScope.launch {
-            trackCaptureRepository.stop()
+            trackCapturer.stop()
         }
     }
 
     @OptIn(ExperimentalUuidApi::class)
     private fun startForeground() {
-        if (permissionChecker.locationGranted.not()) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             logw("ForegroundGeolocationService no permissions - stopSelf")
             stopSelf()
             return
@@ -84,8 +90,7 @@ class ForegroundTrackCaptureService : LifecycleService() {
                             0
                         },
                     )
-                    trackCaptureRepository.start()
-                    logd("ForegroundGeolocationService trackCaptureRepository started")
+                    trackCapturer.start()
                 }
             }
         }

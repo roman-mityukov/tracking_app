@@ -53,10 +53,10 @@ android {
 
     defaultConfig {
         applicationId = "io.mityukov.geo.tracking"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 36
-        versionCode = 28
-        versionName = "0.22.0"
+        versionCode = 29
+        versionName = "0.23.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackAction
@@ -14,7 +12,7 @@ import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -24,7 +22,7 @@ fun Track.toCompletedTrack(): CompletedTrack {
     val duration = if (actions.size > 2) {
         var pausedTimeStamp = ""
         val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
-            logd("timestamp ${action.timestamp}" )
+            logd("timestamp ${action.timestamp}")
             when (action.type) {
                 TrackActionType.Pause -> {
                     pausedTimeStamp = action.timestamp
@@ -90,26 +88,18 @@ sealed interface TracksState {
     data object Pending : TracksState
     data class Data(
         val tracks: List<CompletedTrack>,
-        val capturedTrackId: String?,
-        val paused: Boolean
     ) :
         TracksState
 }
 
 @HiltViewModel
-class TracksViewModel @Inject constructor(
-    tracksRepository: TracksRepository,
-    trackCaptureController: TrackCaptureController,
-) : ViewModel() {
+class TracksViewModel @Inject constructor(tracksRepository: TracksRepository) : ViewModel() {
     val stateFlow =
-        tracksRepository.tracks
-            .combine(trackCaptureController.status) { tracks, status ->
-                TracksState.Data(
-                    tracks = tracks.filter { it.isCompleted }.map { it.toCompletedTrack() },
-                    capturedTrackId = (status as? TrackCaptureStatus.Run)?.track?.id,
-                    paused = (status as? TrackCaptureStatus.Run)?.paused ?: false
-                )
-            }
+        tracksRepository.tracks.map { tracks ->
+            TracksState.Data(
+                tracks = tracks.filter { it.isCompleted }.map { it.toCompletedTrack() },
+            )
+        }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),

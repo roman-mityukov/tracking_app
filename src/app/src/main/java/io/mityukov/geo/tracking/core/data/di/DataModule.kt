@@ -18,10 +18,10 @@ import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettin
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
 import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureControllerImpl
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureRepository
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerControllerImpl
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturer
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TrackShareService
 import io.mityukov.geo.tracking.core.data.repository.track.TrackShareServiceImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
@@ -56,7 +56,7 @@ interface DataModule {
 
     @Singleton
     @Binds
-    fun bindTrackCaptureController(impl: TrackCaptureControllerImpl): TrackCaptureController
+    fun bindTrackCaptureController(impl: TrackCapturerControllerImpl): TrackCapturerController
 
     @Singleton
     @Binds
@@ -64,7 +64,7 @@ interface DataModule {
 
     @Singleton
     @Binds
-    fun bindTrackCaptureRepository(impl: TrackCaptureRepositoryImpl): TrackCaptureRepository
+    fun bindTrackCaptureRepository(impl: TrackCapturerImpl): TrackCapturer
 
     @Binds
     fun bindTrackShareService(impl: TrackShareServiceImpl): TrackShareService

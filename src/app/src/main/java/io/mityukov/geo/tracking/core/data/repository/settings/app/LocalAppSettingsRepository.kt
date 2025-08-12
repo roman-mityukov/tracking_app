@@ -6,5 +6,6 @@ import kotlin.time.Duration
 interface LocalAppSettingsRepository {
     suspend fun switchOnboarding()
     suspend fun setGeolocationUpdatesRate(duration: Duration)
+    suspend fun resetToDefaults()
     val localAppSettings: Flow<LocalAppSettings>
 }

@@ -71,7 +71,7 @@ class TrackCaptureRepositoryTest {
 
         dao.insertTrack(TrackEntity(id = trackId, name = "Random name", start = "", end = ""))
 
-        val repositoryUnderTest = TrackCaptureRepositoryImpl(
+        val repositoryUnderTest = TrackCapturerImpl(
             dataStore = dataStore,
             trackDao = dao,
             geolocationProvider = FakeGeolocationProviderImpl(mockedGeolocation = GeolocationUtils.mockedGeolocation),

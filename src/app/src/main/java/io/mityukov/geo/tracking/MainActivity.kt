@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
         notificationManager.createNotificationChannel(notificationChannel)
 
         MapKitFactory.initialize(this@MainActivity)
+
         enableEdgeToEdge()
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition {

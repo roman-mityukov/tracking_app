@@ -1,10 +1,12 @@
 @file:Suppress("TooManyFunctions")
+
 package io.mityukov.geo.tracking.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import io.mityukov.geo.tracking.core.database.model.TrackActionEntity
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
@@ -16,12 +18,14 @@ interface TrackDao {
     @Query("SELECT * FROM track")
     fun getAllTracks(): Flow<List<TrackEntity>>
 
+    @Transaction
     @Query("SELECT * FROM track")
     fun getAllTracksWithPoints(): Flow<List<TrackWithPoints>>
 
     @Query("SELECT * FROM track WHERE id=:id")
     fun getTrack(id: String): TrackEntity
 
+    @Transaction
     @Query("SELECT * FROM track WHERE id=:id")
     fun getTrackWithPoints(id: String): Flow<TrackWithPoints>
 
@@ -35,7 +39,13 @@ interface TrackDao {
     fun insertTrackPoint(trackPointEntity: TrackPointEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllTrackPoint(list: List<TrackPointEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTrackAction(trackActionEntity: TrackActionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllTrackAction(list: List<TrackActionEntity>)
 
     @Query("DELETE FROM track WHERE id=:trackId")
     fun deleteTrack(trackId: String)
@@ -45,4 +55,18 @@ interface TrackDao {
 
     @Query("DELETE FROM track_action WHERE track_id=:trackId")
     fun deleteTrackActions(trackId: String)
+
+    @Transaction
+    fun deleteAllTrackData(trackId: String) {
+        deleteTrackPoints(trackId)
+        deleteTrackActions(trackId)
+        deleteTrack(trackId)
+    }
+
+    @Transaction
+    fun insertTrackWithPoints(trackWithPoints: TrackWithPoints) {
+        insertTrack(trackWithPoints.track)
+        insertAllTrackPoint(trackWithPoints.points)
+        insertAllTrackAction(trackWithPoints.actions)
+    }
 }

@@ -1,13 +1,14 @@
 package io.mityukov.geo.tracking.feature.map
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackAction
@@ -118,7 +119,7 @@ sealed interface MapState {
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
-    private val trackCaptureController: TrackCaptureController,
+    private val trackCapturerController: TrackCapturerController,
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
@@ -130,7 +131,7 @@ class MapViewModel @Inject constructor(
         timer.start()
     }
 
-    val stateFlow: StateFlow<MapState> = trackCaptureController.status
+    val stateFlow: StateFlow<MapState> = trackCapturerController.status
         .combine(mutableStateFlow) { trackCaptureStatus, mutableState ->
             Pair(trackCaptureStatus, mutableState)
         }
@@ -174,6 +175,9 @@ class MapViewModel @Inject constructor(
             initialValue = MapState.PendingLocationUpdates
         )
 
+
+    @SuppressLint("MissingPermission")
+    // Пермишены на локацию проверяются в MapScreen
     fun add(event: MapEvent) {
         when (event) {
             MapEvent.GetCurrentLocation -> {
@@ -200,8 +204,8 @@ class MapViewModel @Inject constructor(
             MapEvent.ResumeCurrentLocationUpdate -> {
                 viewModelScope.launch {
                     geolocationUpdatesRepository.start()
-                    if (trackCaptureController.status.first() is TrackCaptureStatus.Error) {
-                        trackCaptureController.bind()
+                    if (trackCapturerController.status.first() is TrackCaptureStatus.Error) {
+                        trackCapturerController.bind()
                     }
                     timer.start()
                 }

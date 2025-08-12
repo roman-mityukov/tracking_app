@@ -74,7 +74,7 @@ import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
-import io.mityukov.geo.tracking.feature.track.list.TrackHeadline
+import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
 import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
@@ -380,7 +380,7 @@ private fun CurrentTrack(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        TrackHeadline(
+                        InProgressTrackHeadline(
                             startTime = viewModelState.track.start,
                             isCapturedTrack = true,
                             paused = viewModelState.status.paused

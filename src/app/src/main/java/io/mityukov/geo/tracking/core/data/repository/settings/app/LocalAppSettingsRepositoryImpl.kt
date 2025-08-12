@@ -24,7 +24,7 @@ class LocalAppSettingsRepositoryImpl @Inject constructor(
         LocalAppSettings(
             showOnboarding = proto.showOnboarding == 0,
             geolocationUpdatesInterval = if (proto.geolocationUpdatesRateSeconds == 0) {
-                AppProps.DEFAULT_GEOLOCATION_UPDATES_INTERVAL
+                AppProps.Defaults.GEOLOCATION_UPDATES_INTERVAL
             } else {
                 proto.geolocationUpdatesRateSeconds.seconds
             },
@@ -70,4 +70,19 @@ class LocalAppSettingsRepositoryImpl @Inject constructor(
                 Unit
             }
         }
+
+    override suspend fun resetToDefaults() = withContext(coroutineDispatcher) {
+        mutex.withLock {
+            dataStore.updateData {
+                ProtoLocalAppSettings
+                    .newBuilder()
+                    .setShowOnboarding(0)
+                    .setGeolocationUpdatesRateSeconds(
+                        AppProps.Defaults.GEOLOCATION_UPDATES_INTERVAL.inWholeSeconds.toInt()
+                    )
+                    .build()
+            }
+            Unit
+        }
+    }
 }

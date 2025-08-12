@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureController
+import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
 import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -23,9 +23,9 @@ data class TrackCaptureState(val status: TrackCaptureStatus)
 
 @HiltViewModel
 class TrackCaptureViewModel @Inject constructor(
-    private val trackCaptureController: TrackCaptureController,
+    private val trackCapturerController: TrackCapturerController,
 ) : ViewModel() {
-    val stateFlow = trackCaptureController.status
+    val stateFlow = trackCapturerController.status
         .map {
             TrackCaptureState(it)
         }
@@ -37,7 +37,7 @@ class TrackCaptureViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            trackCaptureController.bind()
+            trackCapturerController.bind()
         }
     }
 
@@ -45,19 +45,19 @@ class TrackCaptureViewModel @Inject constructor(
         viewModelScope.launch {
             when (event) {
                 TrackCaptureEvent.StartCapture -> {
-                    trackCaptureController.start()
+                    trackCapturerController.start()
                 }
 
                 TrackCaptureEvent.StopCapture -> {
-                    trackCaptureController.stop()
+                    trackCapturerController.stop()
                 }
 
                 TrackCaptureEvent.PauseCapture -> {
-                    trackCaptureController.pause()
+                    trackCapturerController.pause()
                 }
 
                 TrackCaptureEvent.PlayCapture -> {
-                    trackCaptureController.resume()
+                    trackCapturerController.resume()
                 }
             }
         }

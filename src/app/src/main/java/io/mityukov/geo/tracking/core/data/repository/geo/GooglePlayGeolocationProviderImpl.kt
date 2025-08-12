@@ -65,7 +65,6 @@ class GooglePlayGeolocationProviderImpl @Inject constructor(
                 }
         }
 
-    @SuppressLint("MissingPermission")
     @androidx.annotation.RequiresPermission(
         allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
     )

@@ -1,6 +1,5 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
-import android.annotation.SuppressLint
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
@@ -36,7 +35,9 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
         get() = geolocationSubscription?.isActive ?: false
     private val mutex = Mutex()
 
-    @SuppressLint("MissingPermission")
+    @androidx.annotation.RequiresPermission(
+        allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
+    )
     override suspend fun start() = withContext(coroutineDispatcher) {
         mutex.withLock {
             if (started.not()) {

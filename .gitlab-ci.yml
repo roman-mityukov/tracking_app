@@ -44,6 +44,21 @@ unit_test:
     - cd src
     - ./gradlew :app:testDebugUnitTest
 
+instrumented_test:
+  stage: test
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  before_script:
+    - emulator -avd Pixel9 &
+    - adb wait-for-device
+  script:
+    - echo "running instrumented tests..."
+    - cd src
+    - ./gradlew connectedAndroidTest && killall -INT crashpad_handler || true
+    - adb emu kill || true
+
 build_qa:
   stage: build
   tags:

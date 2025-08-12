@@ -22,6 +22,7 @@ leakCanary = "2.14"
 lifecycle = "2.9.2"
 mockitoCore = "5.18.0"
 mockitoKotlin = "6.0.0"
+mockitoAndroid = "5.18.0"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
 protobuf = "4.29.2"
@@ -66,6 +67,7 @@ apptracer-crash-report = { module = "ru.ok.tracer:tracer-crash-report" }
 apptracer-crash-report-native = { module = "ru.ok.tracer:tracer-crash-report-native" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
@@ -73,6 +75,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 leak-canary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakCanary"}
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mockito-android = {module = "org.mockito:mockito-android", version.ref = "mockitoAndroid"}
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }

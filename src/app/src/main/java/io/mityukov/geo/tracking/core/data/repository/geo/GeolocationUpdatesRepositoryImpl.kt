@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class GeolocationUpdatesRepositoryImpl @Inject constructor(
     private val locationSettingsRepository: LocationSettingsRepository,
     private val geolocationProvider: GeolocationProvider,
-    @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
     private val permissionChecker: PermissionChecker,
 ) : GeolocationUpdatesRepository {
     private val mutableStateFlow = MutableStateFlow(

@@ -1,4 +1,7 @@
+@file:OptIn(KspExperimental::class)
+
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.google.devtools.ksp.KspExperimental
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,6 +22,9 @@ detekt {
 }
 hilt {
     enableAggregatingTask = false
+}
+ksp {
+    useKsp2 = false
 }
 room {
     schemaDirectory("$projectDir/schemas")
@@ -55,8 +61,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 31
-        versionName = "0.25.0"
+        versionCode = 32
+        versionName = "0.26.0"
 
         testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 
@@ -149,6 +155,7 @@ dependencies {
     implementation(platform(libs.apptracer.tracer.platform))
     implementation(libs.apptracer.crash.report)
     implementation(libs.apptracer.crash.report.native)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.timber)

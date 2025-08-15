@@ -24,11 +24,11 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class TrackCapturerImpl @Inject constructor(
-    @TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
+    @param:TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
     private val trackDao: TrackDao,
     private val geolocationProvider: GeolocationProvider,
     private val localAppSettingsRepository: LocalAppSettingsRepository,
-    @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : TrackCapturer {
     private val mutex = Mutex()
     private var geolocationSubscription: Job? = null

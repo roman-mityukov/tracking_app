@@ -15,8 +15,8 @@ import java.util.TimeZone
 import javax.inject.Inject
 
 class TrackShareServiceImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    @param:ApplicationContext private val context: Context,
+    @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : TrackShareService {
     override suspend fun prepareTrackFile(track: Track) = withContext(coroutineDispatcher) {
         val gpxContent = exportToGpx(track)

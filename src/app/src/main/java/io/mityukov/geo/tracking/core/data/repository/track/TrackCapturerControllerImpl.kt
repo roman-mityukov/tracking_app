@@ -35,9 +35,9 @@ import kotlin.uuid.Uuid
 class TrackCapturerControllerImpl @Inject constructor(
     private val trackDao: TrackDao,
     private val trackMapper: TrackMapper,
-    @ApplicationContext private val applicationContext: Context,
-    @TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
-    @DispatcherIO private val coroutineContext: CoroutineDispatcher,
+    @param:ApplicationContext private val applicationContext: Context,
+    @param:TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
+    @param:DispatcherIO private val coroutineContext: CoroutineDispatcher,
     private val permissionChecker: PermissionChecker,
 ) : TrackCapturerController {
     private val mutableStateFlow = MutableStateFlow<TrackCaptureStatus>(TrackCaptureStatus.Idle)

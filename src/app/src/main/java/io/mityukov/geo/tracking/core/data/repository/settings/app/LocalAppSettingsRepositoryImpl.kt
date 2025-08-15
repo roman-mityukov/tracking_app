@@ -17,8 +17,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class LocalAppSettingsRepositoryImpl @Inject constructor(
-    @AppSettingsDataStore private val dataStore: DataStore<ProtoLocalAppSettings>,
-    @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    @param:AppSettingsDataStore private val dataStore: DataStore<ProtoLocalAppSettings>,
+    @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : LocalAppSettingsRepository {
     override val localAppSettings: Flow<LocalAppSettings> = dataStore.data.map { proto ->
         LocalAppSettings(

@@ -12,7 +12,7 @@ import javax.inject.Inject
 class TracksRepositoryImpl @Inject constructor(
     private val trackDao: TrackDao,
     private val trackMapper: TrackMapper,
-    @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : TracksRepository {
     override val tracks: Flow<List<Track>> = trackDao.getAllTracksWithPoints().map {
         it.map {

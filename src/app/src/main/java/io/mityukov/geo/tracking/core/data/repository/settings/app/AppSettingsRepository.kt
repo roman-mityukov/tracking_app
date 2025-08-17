@@ -3,9 +3,9 @@ package io.mityukov.geo.tracking.core.data.repository.settings.app
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
 
-interface LocalAppSettingsRepository {
+interface AppSettingsRepository {
     suspend fun switchOnboarding()
     suspend fun setGeolocationUpdatesRate(duration: Duration)
     suspend fun resetToDefaults()
-    val localAppSettings: Flow<LocalAppSettings>
+    val appSettings: Flow<AppSettings>
 }

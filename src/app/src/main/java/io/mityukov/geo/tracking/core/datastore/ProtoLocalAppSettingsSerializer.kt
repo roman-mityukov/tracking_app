@@ -1,9 +1,9 @@
-package io.mityukov.geo.tracking.core.data.repository.settings.app
+package io.mityukov.geo.tracking.core.datastore
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import com.google.protobuf.InvalidProtocolBufferException
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalAppSettings
 import java.io.InputStream
 import java.io.OutputStream
 

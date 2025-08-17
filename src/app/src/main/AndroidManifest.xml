@@ -70,7 +70,7 @@
                 android:resource="@xml/filepaths" />
         </provider>
         <service
-            android:name=".core.data.repository.track.ForegroundTrackCaptureService"
+            android:name=".core.data.repository.track.capture.ForegroundTrackCaptureService"
             android:exported="false"
             android:foregroundServiceType="location" />
     </application>

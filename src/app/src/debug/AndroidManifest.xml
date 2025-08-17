@@ -4,6 +4,7 @@
     <application>
         <activity
             android:name="io.mityukov.geo.tracking.hilt.HiltTestActivity"
+            android:label="@string/app_name_test"
             android:exported="true"
             android:theme="@style/Theme.GeoApp">
             <intent-filter>

@@ -77,6 +77,7 @@ class TrackMapperUnitTest {
     fun `track entity to domain mapping`() {
         val track = TrackMapper().trackWithPointsEntityToDomain(trackWithPoints)
         assert(track.id == trackWithPoints.track.id)
+        assert(track.name == trackWithPoints.track.name)
         assert(track.distance == 3197)
         assert(track.altitudeUp == 63)
         assert(track.altitudeDown == 103)

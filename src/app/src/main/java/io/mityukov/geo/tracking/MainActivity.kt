@@ -16,7 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.app.AppNavHost
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.theme.GeoAppTheme
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettings
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettings
 import io.mityukov.geo.tracking.feature.splash.SplashViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                val localAppSettings: LocalAppSettings = splashViewModel.getAppSettings()
+                val appSettings: AppSettings = splashViewModel.getAppSettings()
 
                 splashScreen.setKeepOnScreenCondition {
                     false
@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                 setContent {
                     GeoAppTheme {
                         AppNavHost(
-                            showOnboarding = localAppSettings.showOnboarding
+                            showOnboarding = appSettings.showOnboarding
                         )
                     }
                 }

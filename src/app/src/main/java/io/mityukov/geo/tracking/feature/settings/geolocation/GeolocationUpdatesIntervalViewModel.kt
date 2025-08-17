@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -34,9 +34,9 @@ sealed interface GeolocationUpdatesIntervalState {
 
 @HiltViewModel
 class GeolocationUpdatesIntervalViewModel @Inject constructor(
-    private val localAppSettingsRepository: LocalAppSettingsRepository
+    private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
-    val stateFlow = localAppSettingsRepository.localAppSettings.map { localAppSettings ->
+    val stateFlow = appSettingsRepository.appSettings.map { localAppSettings ->
         GeolocationUpdatesIntervalState.Data(
             interval = localAppSettings.geolocationUpdatesInterval,
         )
@@ -50,7 +50,7 @@ class GeolocationUpdatesIntervalViewModel @Inject constructor(
         when (event) {
             is GeolocationUpdatesIntervalEvent.SelectInterval -> {
                 viewModelScope.launch {
-                    localAppSettingsRepository.setGeolocationUpdatesRate(event.interval)
+                    appSettingsRepository.setGeolocationUpdatesRate(event.interval)
                 }
             }
         }

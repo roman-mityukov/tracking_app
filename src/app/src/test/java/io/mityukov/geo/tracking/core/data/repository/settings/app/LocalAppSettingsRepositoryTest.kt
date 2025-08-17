@@ -6,7 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalAppSettings
 import io.mityukov.geo.tracking.core.datastore.appSettingsDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -24,25 +24,25 @@ import kotlin.time.Duration.Companion.seconds
 class LocalAppSettingsRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var dataStore: DataStore<ProtoLocalAppSettings>
-    private lateinit var localAppSettingsRepository: LocalAppSettingsRepository
+    private lateinit var appSettingsRepository: AppSettingsRepository
 
     @Before
     fun setUp() {
         dataStore = context.appSettingsDataStore
-        localAppSettingsRepository =
-            LocalAppSettingsRepositoryImpl(dataStore, Dispatchers.IO)
+        appSettingsRepository =
+            AppSettingsRepositoryImpl(dataStore, Dispatchers.IO)
     }
 
     @After
     fun tearDown() {
         runBlocking {
-            localAppSettingsRepository.resetToDefaults()
+            appSettingsRepository.resetToDefaults()
         }
     }
 
     @Test
     fun `localAppSettingsRepository has default values`() = runTest {
-        localAppSettingsRepository.localAppSettings.test {
+        appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding)
             assert(localAppSettings.geolocationUpdatesInterval == AppProps.Defaults.GEOLOCATION_UPDATES_INTERVAL)
@@ -51,8 +51,8 @@ class LocalAppSettingsRepositoryTest {
 
     @Test
     fun `switch onboarding`() = runTest {
-        localAppSettingsRepository.switchOnboarding()
-        localAppSettingsRepository.localAppSettings.test {
+        appSettingsRepository.switchOnboarding()
+        appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding.not())
             assert(localAppSettings.geolocationUpdatesInterval == AppProps.Defaults.GEOLOCATION_UPDATES_INTERVAL)
@@ -62,8 +62,8 @@ class LocalAppSettingsRepositoryTest {
     @Test
     fun `change geolocation updates interval`() = runTest {
         val interval = 20.seconds
-        localAppSettingsRepository.setGeolocationUpdatesRate(interval)
-        localAppSettingsRepository.localAppSettings.test {
+        appSettingsRepository.setGeolocationUpdatesRate(interval)
+        appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding)
             assert(localAppSettings.geolocationUpdatesInterval == interval)
@@ -72,16 +72,16 @@ class LocalAppSettingsRepositoryTest {
 
     @Test
     fun `reset to defaults`() = runTest {
-        localAppSettingsRepository.switchOnboarding()
+        appSettingsRepository.switchOnboarding()
         val interval = 20.seconds
-        localAppSettingsRepository.setGeolocationUpdatesRate(interval)
-        localAppSettingsRepository.localAppSettings.test {
+        appSettingsRepository.setGeolocationUpdatesRate(interval)
+        appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding.not())
             assert(localAppSettings.geolocationUpdatesInterval == interval)
         }
-        localAppSettingsRepository.resetToDefaults()
-        localAppSettingsRepository.localAppSettings.test {
+        appSettingsRepository.resetToDefaults()
+        appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding)
             assert(localAppSettings.geolocationUpdatesInterval == AppProps.Defaults.GEOLOCATION_UPDATES_INTERVAL)

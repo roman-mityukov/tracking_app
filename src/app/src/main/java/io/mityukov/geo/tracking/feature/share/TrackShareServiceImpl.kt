@@ -1,4 +1,4 @@
-package io.mityukov.geo.tracking.core.data.repository.track
+package io.mityukov.geo.tracking.feature.share
 
 import android.content.Context
 import androidx.core.content.FileProvider

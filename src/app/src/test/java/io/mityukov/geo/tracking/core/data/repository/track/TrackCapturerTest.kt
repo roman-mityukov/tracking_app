@@ -7,10 +7,12 @@ import androidx.datastore.core.DataStore
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.geo.FakeGeolocationProviderImpl
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettings
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettings
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerImpl
 import io.mityukov.geo.tracking.core.database.AppDatabase
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
@@ -34,7 +36,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.VANILLA_ICE_CREAM])
-class TrackCaptureRepositoryTest {
+class TrackCapturerTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -72,12 +74,12 @@ class TrackCaptureRepositoryTest {
         dao.insertTrack(TrackEntity(id = trackId, name = "Random name", start = "", end = ""))
 
         val repositoryUnderTest = TrackCapturerImpl(
-            dataStore = dataStore,
-            trackDao = dao,
+            trackCaptureStatusProvider = TrackCaptureStatusRepositoryImpl(dataStore),
+            tracksRepository = TracksRepositoryImpl(dao, TrackMapper(), Dispatchers.IO),
             geolocationProvider = FakeGeolocationProviderImpl(mockedGeolocation = GeolocationUtils.mockedGeolocation),
-            localAppSettingsRepository = mock<LocalAppSettingsRepository> {
-                on { localAppSettings } doReturn listOf(
-                    LocalAppSettings(
+            appSettingsRepository = mock<AppSettingsRepository> {
+                on { appSettings } doReturn listOf(
+                    AppSettings(
                         showOnboarding = true,
                         geolocationUpdatesInterval = 5000.milliseconds
                     )

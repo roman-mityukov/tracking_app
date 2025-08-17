@@ -11,6 +11,7 @@ import kotlin.time.Duration.Companion.seconds
 class TracksViewModelTest {
     val track = Track(
         id = "someTrackId",
+        name = "2025-08-08T06:07:11.393356Z",
         start = "2025-08-08T06:07:11.393356Z",
         end = "2025-08-08T06:07:31.393356Z",
         distance = 123,

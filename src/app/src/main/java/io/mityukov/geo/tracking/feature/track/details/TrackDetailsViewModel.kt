@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.core.data.repository.track.TrackShareService
+import io.mityukov.geo.tracking.feature.share.TrackShareService
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.feature.home.HomeRouteTrackDetails
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrack

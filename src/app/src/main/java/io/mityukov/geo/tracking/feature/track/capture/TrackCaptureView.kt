@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 
 @Composable
 fun TrackCaptureView(viewModel: TrackCaptureViewModel = hiltViewModel()) {

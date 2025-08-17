@@ -1,4 +1,4 @@
-package io.mityukov.geo.tracking.core.data.repository.track
+package io.mityukov.geo.tracking.feature.share
 
 import io.mityukov.geo.tracking.core.model.track.Track
 

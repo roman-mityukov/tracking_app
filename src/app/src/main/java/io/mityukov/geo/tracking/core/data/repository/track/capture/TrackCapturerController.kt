@@ -1,4 +1,4 @@
-package io.mityukov.geo.tracking.core.data.repository.track
+package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import io.mityukov.geo.tracking.core.model.track.Track
 import kotlinx.coroutines.flow.Flow

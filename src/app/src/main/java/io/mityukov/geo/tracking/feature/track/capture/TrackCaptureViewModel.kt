@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn

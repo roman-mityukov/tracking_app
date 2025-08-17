@@ -1,3 +1,4 @@
+@file:Suppress("TooManyFunctions")
 package io.mityukov.geo.tracking.core.data.di
 
 import android.content.Context
@@ -8,30 +9,33 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalAppSettings
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.geo.GooglePlayGeolocationProviderImpl
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepositoryImpl
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerControllerImpl
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturer
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerImpl
-import io.mityukov.geo.tracking.core.data.repository.track.TrackShareService
-import io.mityukov.geo.tracking.core.data.repository.track.TrackShareServiceImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusProvider
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepository
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturer
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerControllerImpl
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerImpl
 import io.mityukov.geo.tracking.core.database.AppDatabase
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.datastore.appSettingsDataStore
 import io.mityukov.geo.tracking.core.datastore.trackCaptureStatusDataStore
 import io.mityukov.geo.tracking.di.AppSettingsDataStore
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
+import io.mityukov.geo.tracking.feature.share.TrackShareService
+import io.mityukov.geo.tracking.feature.share.TrackShareServiceImpl
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
 import io.mityukov.geo.tracking.utils.permission.PermissionCheckerImpl
 import javax.inject.Singleton
@@ -40,7 +44,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 interface DataModule {
     @Binds
-    fun bindLocalAppSettingsRepository(impl: LocalAppSettingsRepositoryImpl): LocalAppSettingsRepository
+    fun bindLocalAppSettingsRepository(impl: AppSettingsRepositoryImpl): AppSettingsRepository
 
     @Binds
     fun bindCurrentLocationRepository(impl: GeolocationUpdatesRepositoryImpl): GeolocationUpdatesRepository
@@ -64,7 +68,15 @@ interface DataModule {
 
     @Singleton
     @Binds
-    fun bindTrackCaptureRepository(impl: TrackCapturerImpl): TrackCapturer
+    fun bindTrackCapturer(impl: TrackCapturerImpl): TrackCapturer
+
+    @Singleton
+    @Binds
+    fun bindTrackCaptureStatusRepository(impl: TrackCaptureStatusRepositoryImpl): TrackCaptureStatusRepository
+
+    @Singleton
+    @Binds
+    fun bindTrackCaptureStatusProvider(impl: TrackCaptureStatusRepositoryImpl): TrackCaptureStatusProvider
 
     @Binds
     fun bindTrackShareService(impl: TrackShareServiceImpl): TrackShareService

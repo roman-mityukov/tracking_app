@@ -3,7 +3,7 @@ package io.mityukov.geo.tracking.feature.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,7 +21,7 @@ sealed interface OnboardingState {
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val localAppSettingsRepository: LocalAppSettingsRepository
+    private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
     private val mutableStateFlow = MutableStateFlow<OnboardingState>(OnboardingState.Pending)
     val stateFlow = mutableStateFlow.asStateFlow()
@@ -30,7 +30,7 @@ class OnboardingViewModel @Inject constructor(
         when (event) {
             OnboardingEvent.ConsumeOnboarding -> {
                 viewModelScope.launch {
-                    localAppSettingsRepository.switchOnboarding()
+                    appSettingsRepository.switchOnboarding()
                     mutableStateFlow.update {
                         OnboardingState.OnboardingConsumed
                     }

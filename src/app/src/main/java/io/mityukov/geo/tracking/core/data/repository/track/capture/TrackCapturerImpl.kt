@@ -1,15 +1,13 @@
-package io.mityukov.geo.tracking.core.data.repository.track
+package io.mityukov.geo.tracking.core.data.repository.track.capture
 
-import androidx.datastore.core.DataStore
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateResult
-import io.mityukov.geo.tracking.core.data.repository.settings.app.LocalAppSettingsRepository
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
-import io.mityukov.geo.tracking.core.database.dao.TrackDao
-import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
+import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.di.DispatcherIO
-import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,13 +19,12 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 class TrackCapturerImpl @Inject constructor(
-    @param:TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
-    private val trackDao: TrackDao,
+    private val trackCaptureStatusProvider: TrackCaptureStatusProvider,
+    private val tracksRepository: TracksRepository,
     private val geolocationProvider: GeolocationProvider,
-    private val localAppSettingsRepository: LocalAppSettingsRepository,
+    private val appSettingsRepository: AppSettingsRepository,
     @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : TrackCapturer {
     private val mutex = Mutex()
@@ -35,21 +32,26 @@ class TrackCapturerImpl @Inject constructor(
     private val inProgress: Boolean
         get() = geolocationSubscription?.isActive ?: false
 
-    @androidx.annotation.RequiresPermission(
-        allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
+    @RequiresPermission(
+        allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION]
     )
     override suspend fun start() = withContext(coroutineDispatcher) {
         mutex.withLock {
             if (inProgress) return@withContext
             logd("TrackCaptureRepositoryImpl start")
 
-            val localAppSettings = localAppSettingsRepository.localAppSettings.first()
+            val geolocationUpdatesInterval =
+                appSettingsRepository.appSettings.first().geolocationUpdatesInterval
 
             geolocationSubscription = launch {
-                geolocationProvider.locationUpdates(localAppSettings.geolocationUpdatesInterval)
+                geolocationProvider.locationUpdates(geolocationUpdatesInterval)
                     .collect { result ->
                         logd("TrackCaptureRepositoryImpl locationCallback $result")
-                        handleGeolocationUpdate(result)
+                        val captureStatus = trackCaptureStatusProvider.status.first()
+
+                        if (captureStatus is LocalTrackCaptureStatus.Enabled) {
+                            handleGeolocationUpdate(captureStatus, result)
+                        }
                     }
             }
         }
@@ -64,26 +66,28 @@ class TrackCapturerImpl @Inject constructor(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private suspend fun handleGeolocationUpdate(geolocationUpdateResult: GeolocationUpdateResult) {
-        val trackCaptureStatus = dataStore.data.first()
-        val currentTrackId = trackCaptureStatus.trackId
-        val paused = trackCaptureStatus.paused
+    private suspend fun handleGeolocationUpdate(
+        captureStatus: LocalTrackCaptureStatus.Enabled,
+        geolocationUpdateResult: GeolocationUpdateResult
+    ) {
+        val currentTrackId = captureStatus.trackId
+        val paused = captureStatus.paused
         val geolocation = geolocationUpdateResult.geolocation
 
-        if (currentTrackId != null && geolocation != null && !paused) {
+        if (geolocation != null && !paused) {
             val diff = System.currentTimeMillis() - geolocation.time
 
             if (diff < 60 * 1000) {
-                val points =
-                    trackDao.getTrackPoints(currentTrackId).first()
+                val currentTrack = tracksRepository.getTrack(currentTrackId).first()
+                val points = currentTrack.points
 
                 val canBeAdded = if (points.isNotEmpty()) {
                     val latestPoint = points.last()
                     val distance = geolocation.distanceTo(
                         Geolocation(
-                            latestPoint.latitude,
-                            latestPoint.longitude,
-                            latestPoint.altitude,
+                            latestPoint.geolocation.latitude,
+                            latestPoint.geolocation.longitude,
+                            latestPoint.geolocation.altitude,
                             0L
                         )
                     )
@@ -94,15 +98,9 @@ class TrackCapturerImpl @Inject constructor(
                 }
 
                 if (canBeAdded) {
-                    trackDao.insertTrackPoint(
-                        TrackPointEntity(
-                            id = Uuid.Companion.random().toString(),
-                            trackId = currentTrackId,
-                            latitude = geolocation.latitude,
-                            longitude = geolocation.longitude,
-                            altitude = geolocation.altitude,
-                            time = geolocation.time,
-                        )
+                    tracksRepository.insertTrackPoint(
+                        trackId = currentTrackId,
+                        geolocation = geolocation
                     )
                 }
             }

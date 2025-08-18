@@ -3,10 +3,8 @@ package io.mityukov.geo.tracking.core.datastore
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
-import io.mityukov.geo.tracking.core.data.repository.settings.app.ProtoLocalAppSettingsSerializer
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalAppSettings
-import io.mityukov.geo.tracking.core.data.repository.settings.app.proto.ProtoLocalTrackCaptureStatus
-import io.mityukov.geo.tracking.core.data.repository.track.ProtoLocalTrackCaptureStatusSerializer
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalAppSettings
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalTrackCaptureStatus
 
 val Context.appSettingsDataStore: DataStore<ProtoLocalAppSettings> by dataStore(
     fileName = "local_app_settings.proto",

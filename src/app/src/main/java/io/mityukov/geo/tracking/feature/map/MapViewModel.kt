@@ -7,8 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCaptureStatus
-import io.mityukov.geo.tracking.core.data.repository.track.TrackCapturerController
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackAction

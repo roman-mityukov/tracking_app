@@ -15,6 +15,7 @@ class TrackMapper @Inject constructor() {
     fun trackWithPointsEntityToDomain(entity: TrackWithPoints): Track {
         return Track(
             id = entity.track.id,
+            name = entity.track.name,
             start = entity.track.start,
             end = entity.track.end,
             distance = if (entity.points.size > 1) {

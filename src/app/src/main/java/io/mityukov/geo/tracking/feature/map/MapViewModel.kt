@@ -99,16 +99,12 @@ sealed interface MapEvent {
 
 sealed interface MapState {
     data object PendingLocationUpdates : MapState
-    data class CurrentLocation(
-        val data: Geolocation,
-        val timestamp: Long = System.currentTimeMillis()
-    ) : MapState
+    data class CurrentLocation(val data: Geolocation) : MapState
 
     data class CurrentTrack(
         val track: TrackInProgress,
         val status: TrackCaptureStatus.Run,
         val currentLocation: Geolocation?,
-        val timestamp: Long = System.currentTimeMillis()
     ) : MapState
 
     data object CurrentTrackError : MapState

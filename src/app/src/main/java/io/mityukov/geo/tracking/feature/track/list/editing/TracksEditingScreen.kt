@@ -59,7 +59,7 @@ fun TracksEditingScreen(
                     },
                 ) { paddingValues ->
                     LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                        items(items = allTracks) { track ->
+                        items(items = allTracks, key = {track -> track.id}) { track ->
                             TrackItem(
                                 track = track,
                                 isSelected = selectedTracks.any { it.id == track.id },

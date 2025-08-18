@@ -166,7 +166,7 @@ private fun MapInfoContent(
 
         is MapState.CurrentLocation -> {
             snackbarHostState.currentSnackbarData?.dismiss()
-            LaunchedEffect(viewModelState.timestamp) {
+            LaunchedEffect(viewModelState.data.time) {
                 onConsumeCurrentLocation()
             }
             CurrentGeolocation(

@@ -82,7 +82,9 @@ private fun TrackList(
                 val tracks = state.tracks
 
                 LazyColumn(
-                    modifier = modifier.testTag("TracksLazyColumn").padding(paddingValues)
+                    modifier = modifier
+                        .testTag("TracksLazyColumn")
+                        .padding(paddingValues),
                 ) {
                     if (tracks.isEmpty()) {
                         items(count = 1) {
@@ -96,7 +98,7 @@ private fun TrackList(
                             }
                         }
                     } else {
-                        items(items = tracks) {
+                        items(items = tracks, key = { track -> track.id }) {
                             TrackItem(
                                 track = it,
                                 onClick = onClick,
@@ -223,16 +225,18 @@ private fun TrackItem(
 ) {
     val haptics = LocalHapticFeedback.current
     ListItem(
-        modifier = modifier.testTag("TrackItem").combinedClickable(
-            enabled = true,
-            onClick = {
-                onClick(track.id)
-            },
-            onLongClick = {
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                onLongPress(track.id)
-            }
-        ),
+        modifier = modifier
+            .testTag("TrackItem")
+            .combinedClickable(
+                enabled = true,
+                onClick = {
+                    onClick(track.id)
+                },
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLongPress(track.id)
+                }
+            ),
         headlineContent = {
             CompletedTrackHeadline(startTime = track.start)
         },

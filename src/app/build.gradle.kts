@@ -61,8 +61,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 33
-        versionName = "0.27.0"
+        versionCode = 34
+        versionName = "0.27.1"
 
         testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 
@@ -151,6 +151,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.material3)
     implementation(platform(libs.apptracer.tracer.platform))
     implementation(libs.apptracer.crash.report)
@@ -178,6 +179,5 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
     kspAndroidTest(libs.hilt.android.compiler)
-    debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

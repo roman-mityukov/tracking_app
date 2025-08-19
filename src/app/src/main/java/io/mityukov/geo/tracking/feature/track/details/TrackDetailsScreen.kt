@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -51,8 +54,10 @@ import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
+import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import io.mityukov.geo.tracking.yandex.showTrack
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.DurationUnit
 
@@ -60,6 +65,7 @@ import kotlin.time.DurationUnit
 @Composable
 fun TrackDetailsScreen(
     viewModel: TrackDetailsViewModel = hiltViewModel(),
+    onTrackMapSelected: (String) -> Unit,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -111,6 +117,7 @@ fun TrackDetailsScreen(
                 TrackDetailsContent(
                     paddingValues = paddingValues,
                     track = track,
+                    onTrackMapSelected = onTrackMapSelected,
                     onDelete = {
                         openDeleteDialog.value = true
                     },
@@ -174,6 +181,7 @@ private fun TrackDetailsContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     track: CompletedTrack,
+    onTrackMapSelected: (String) -> Unit,
     onDelete: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -195,7 +203,7 @@ private fun TrackDetailsContent(
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
-        TrackDetailsMap(track = track)
+        TrackDetailsMap(track = track, onTrackMapSelected = onTrackMapSelected)
         Spacer(modifier = Modifier.height(16.dp))
         ButtonDeleteTrack(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -205,40 +213,64 @@ private fun TrackDetailsContent(
 }
 
 @Composable
-private fun TrackDetailsMap(modifier: Modifier = Modifier, track: CompletedTrack) {
+private fun TrackDetailsMap(
+    modifier: Modifier = Modifier,
+    track: CompletedTrack,
+    onTrackMapSelected: (String) -> Unit,
+) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
-    AndroidView(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(ratio = 1f),
-        factory = { context ->
-            mapView.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
+    Box {
+        AndroidView(
+            modifier = modifier
+                .fillMaxWidth()
+                .aspectRatio(ratio = 1f),
+            factory = { context ->
+                mapView.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                )
+                mapView.setNoninteractive(true)
+                mapView
+            }
+        )
+        Button(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(48.dp)
+                .padding(8.dp),
+            onClick = {
+                onTrackMapSelected(track.id)
+            },
+            shape = CircleShape,
+            contentPadding = PaddingValues(0.dp),
+        ) {
+            Icon(
+                painterResource(R.drawable.icon_fullscreen),
+                contentDescription = stringResource(R.string.content_description_track_details_map_fullscreen),
             )
-            mapView.setNoninteractive(false)
-            mapView
         }
-    )
+    }
 
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
         val observer = object : DefaultLifecycleObserver {
             override fun onStart(owner: LifecycleOwner) {
+                logd("onStart1")
                 super.onStart(owner)
                 mapView.onStart()
             }
 
             override fun onStop(owner: LifecycleOwner) {
+                logd("onStop1")
                 super.onStop(owner)
                 mapView.onStop()
             }
         }
-        lifecycle.addObserver(observer)
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
-            lifecycle.removeObserver(observer)
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 

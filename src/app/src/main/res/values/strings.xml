@@ -75,4 +75,7 @@
     <string name="track_details_distance">Расстояние %1$dм</string>
     <string name="track_details_altitude_up">Набор высоты %1$dм</string>
     <string name="track_details_altitude_down">Сброс высоты %1$dм</string>
+    <string name="altitude_chart_title">Изменение высоты</string>
+    <string name="altitude_chart_axis_altitude">Высота, м</string>
+    <string name="altitude_chart_axis_distance">Расстояние, м</string>
 </resources>

@@ -61,8 +61,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 37
-        versionName = "0.29.1"
+        versionCode = 38
+        versionName = "0.30.0"
 
         testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 
@@ -138,7 +138,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-    implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)

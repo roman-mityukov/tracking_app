@@ -75,6 +75,7 @@ class TrackMapper @Inject constructor() {
                 latitude = entity.latitude,
                 longitude = entity.longitude,
                 altitude = entity.altitude,
+                speed = entity.speed,
                 time = entity.time
             )
         )
@@ -94,9 +95,7 @@ private fun TrackPointEntity.distanceTo(other: TrackPointEntity): Int {
     return distanceTo(
         this.latitude,
         this.longitude,
-        this.altitude,
         other.latitude,
         other.longitude,
-        other.altitude
     )
 }

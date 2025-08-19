@@ -97,10 +97,8 @@ data class CompletedTrack(
                 currentDistance += distanceTo(
                     firstPoint.latitude,
                     firstPoint.longitude,
-                    firstPoint.altitude,
                     secondPoint.latitude,
                     secondPoint.longitude,
-                    secondPoint.altitude
                 )
                 result.add(Pair(secondPoint.altitude.toInt(), currentDistance))
             } else {

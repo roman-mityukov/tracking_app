@@ -1,7 +1,7 @@
 [versions]
 accompanistPermissions = "0.37.3"
 activityCompose = "1.10.1"
-agp = "8.12.0"
+agp = "8.12.1"
 apptracer = "1.1.2"
 composeBom = "2025.08.00"
 coreKtx = "1.17.0"
@@ -24,7 +24,6 @@ mockitoCore = "5.19.0"
 mockitoKotlin = "6.0.0"
 mockitoAndroid = "5.18.0"
 navigationCompose = "2.9.3"
-playServicesLocation = "21.3.0"
 protobuf = "4.31.1"
 protobufPlugin = "0.9.5"
 robolectric = "4.15.1"
@@ -76,7 +75,6 @@ leak-canary = { module = "com.squareup.leakcanary:leakcanary-android", version.r
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 mockito-android = {module = "org.mockito:mockito-android", version.ref = "mockitoAndroid"}
-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }

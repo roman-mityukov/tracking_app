@@ -13,5 +13,6 @@ data class TrackPointEntity(
     val latitude: Double,
     val longitude: Double,
     val altitude: Double,
+    val speed: Float,
     val time: Long
 )

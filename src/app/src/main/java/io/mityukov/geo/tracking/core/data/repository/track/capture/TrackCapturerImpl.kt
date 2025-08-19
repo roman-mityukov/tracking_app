@@ -6,7 +6,6 @@ import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateResult
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
-import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import io.mityukov.geo.tracking.utils.log.logd
@@ -83,13 +82,11 @@ class TrackCapturerImpl @Inject constructor(
 
                 val canBeAdded = if (points.isNotEmpty()) {
                     val latestPoint = points.last()
-                    val distance = geolocation.distanceTo(
-                        Geolocation(
-                            latestPoint.geolocation.latitude,
-                            latestPoint.geolocation.longitude,
-                            latestPoint.geolocation.altitude,
-                            0L
-                        )
+                    val distance = distanceTo(
+                        geolocation.latitude,
+                        geolocation.longitude,
+                        latestPoint.geolocation.latitude,
+                        latestPoint.geolocation.longitude,
                     )
                     logd("Can be added - distance $distance")
                     distance > 1

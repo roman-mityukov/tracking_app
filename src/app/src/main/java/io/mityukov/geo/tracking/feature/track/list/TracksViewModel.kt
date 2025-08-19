@@ -9,12 +9,14 @@ import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackAction
 import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
+import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -82,7 +84,30 @@ data class CompletedTrack(
     val altitudeDown: Int,
     val points: List<TrackPoint>,
     val duration: Duration
-)
+) {
+    val altitudeByDistance: List<Pair<Int, Int>> by lazy {
+        val result = mutableListOf<Pair<Int, Int>>()
+        var currentDistance = 0
+        points.forEachIndexed { index, point ->
+            if (index > 0) {
+                val firstPoint = points[index - 1].geolocation
+                val secondPoint = points[index].geolocation
+                currentDistance += distanceTo(
+                    firstPoint.latitude,
+                    firstPoint.longitude,
+                    firstPoint.altitude,
+                    secondPoint.latitude,
+                    secondPoint.longitude,
+                    secondPoint.altitude
+                )
+                result.add(Pair(secondPoint.altitude.toInt(), currentDistance))
+            } else {
+                result.add(Pair(points[index].geolocation.altitude.toInt(), 0))
+            }
+        }
+        result.toList()
+    }
+}
 
 sealed interface TracksState {
     data object Pending : TracksState

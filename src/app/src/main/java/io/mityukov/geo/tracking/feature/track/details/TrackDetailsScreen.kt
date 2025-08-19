@@ -189,6 +189,12 @@ private fun TrackDetailsContent(
 
         TrackDetailsList(track = track)
         Spacer(modifier = Modifier.height(16.dp))
+        AltitudeChart(
+            chartData = AltitudeChartData(
+                track.altitudeByDistance.map { ChartPoint(it.second, it.first) }
+            )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         TrackDetailsMap(track = track)
         Spacer(modifier = Modifier.height(16.dp))
         ButtonDeleteTrack(

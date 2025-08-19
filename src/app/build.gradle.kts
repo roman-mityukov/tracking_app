@@ -61,8 +61,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 35
-        versionName = "0.28.0"
+        versionCode = 36
+        versionName = "0.29.0"
 
         testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 
@@ -96,7 +96,6 @@ android {
     }
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
         }
         release {
             isMinifyEnabled = false

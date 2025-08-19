@@ -1,0 +1,128 @@
+package io.mityukov.geo.tracking.feature.track.details
+
+import android.app.Activity
+import android.view.ViewGroup
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.yandex.mapkit.mapview.MapView
+import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.yandex.showTrack
+
+@Composable
+fun TrackDetailsMapScreen(
+    viewModel: TrackDetailsMapViewModel = hiltViewModel(),
+    onBack: () -> Unit,
+) {
+    Scaffold(contentWindowInsets = WindowInsets.safeContent) { paddingValues ->
+        val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            when (viewModelState.value) {
+                is TrackDetailsMapState.Data -> {
+                    logd("TrackDetailsMapState.Data")
+                    val track = (viewModelState.value as TrackDetailsMapState.Data).data
+                    val context = LocalContext.current
+                    logd("context is activity ${context is Activity}")
+                    val mapView = remember { MapView(context) }
+                    AndroidView(
+                        factory = { context ->
+                            mapView.layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            )
+                            mapView
+                        }
+                    )
+
+                    val startPadding =
+                        if (paddingValues.calculateStartPadding(LayoutDirection.Ltr) == 0.dp) {
+                            16.dp
+                        } else {
+                            paddingValues.calculateStartPadding(LayoutDirection.Ltr)
+                        }
+
+                    Button(
+                        modifier = Modifier
+                            .padding(
+                                top = paddingValues.calculateTopPadding(),
+                                start = startPadding
+                            )
+                            .size(48.dp),
+                        onClick = onBack,
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.icon_back),
+                            contentDescription = stringResource(R.string.content_description_back_button)
+                        )
+                    }
+
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    DisposableEffect(lifecycleOwner) {
+                        val observer = object : DefaultLifecycleObserver {
+                            override fun onStart(owner: LifecycleOwner) {
+                                logd("onStart2")
+                                super.onStart(owner)
+                                mapView.onStart()
+                            }
+
+                            override fun onStop(owner: LifecycleOwner) {
+                                logd("onStop2")
+                                super.onStop(owner)
+                                mapView.onStop()
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
+                    }
+
+                    if (track.points.isNotEmpty()) {
+                        LaunchedEffect(track.points.last()) {
+                            mapView.showTrack(context, track.points, true)
+                        }
+                    }
+                }
+
+                TrackDetailsMapState.Pending -> {
+                    logd("TrackDetailsMapState.Pending")
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
+        }
+    }
+}

@@ -3,6 +3,7 @@
 package io.mityukov.geo.tracking.feature.track.details
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -32,6 +33,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.utils.ui.FontScalePreviews
+import io.mityukov.geo.tracking.utils.ui.NightModePreview
 
 data class ChartPoint(val distance: Int, val altitude: Int)
 data class AltitudeChartData(val points: List<ChartPoint>) {
@@ -66,7 +68,9 @@ private fun AltitudeChartCanvas(modifier: Modifier = Modifier, chartData: Altitu
 
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer(cacheSize = 0)
-    val textStyle = MaterialTheme.typography.labelSmall
+    val isDarkTheme = isSystemInDarkTheme()
+    val axisColor = if (isDarkTheme) Color.White else Color.Black
+    val textStyle = MaterialTheme.typography.labelSmall.copy(color = axisColor)
 
     val measureResult =
         textMeasurer.measure(text = chartData.maxDistance.toString(), style = textStyle)
@@ -77,9 +81,9 @@ private fun AltitudeChartCanvas(modifier: Modifier = Modifier, chartData: Altitu
     Canvas(
         modifier = modifier.padding(start = padding, bottom = padding)
     ) {
-        drawLine(color = Color.Black, start = Offset(0f, size.height), end = Offset(0f, 0f))
+        drawLine(color = axisColor, start = Offset(0f, size.height), end = Offset(0f, 0f))
         drawLine(
-            color = Color.Black,
+            color = axisColor,
             start = Offset(0f, size.height),
             end = Offset(size.width, size.height)
         )
@@ -95,7 +99,6 @@ private fun AltitudeChartCanvas(modifier: Modifier = Modifier, chartData: Altitu
                 path.lineTo(x, y)
             }
         }
-
         drawPath(path = path, color = Color.Blue, style = Stroke(width = 4f))
 
         drawVerticalAxisText(
@@ -111,12 +114,7 @@ private fun AltitudeChartCanvas(modifier: Modifier = Modifier, chartData: Altitu
             Offset(0f, 0f),
         )
 
-        drawVerticalAxisText(
-            "0",
-            textStyle,
-            textMeasurer,
-            Offset(0f, size.height),
-        )
+        drawVerticalAxisText("0", textStyle, textMeasurer, Offset(0f, size.height))
         drawVerticalAxisText(
             chartData.maxDistance.toString(),
             textStyle,
@@ -164,6 +162,7 @@ private fun DrawScope.drawHorizontalAxisText(
 }
 
 @FontScalePreviews
+@NightModePreview
 @Preview(name = "Main")
 @Composable
 private fun AltitudeChartPreview(@PreviewParameter(AltitudeChartDataProvider::class) data: AltitudeChartData) {

@@ -4,11 +4,15 @@ import android.content.Context
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.BuildConfig
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.di.DispatcherIO
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -65,4 +69,36 @@ class TrackShareServiceImpl @Inject constructor(
 
         return gpxBuilder.toString()
     }
+
+//    private fun importGpx(inputStream: InputStream): List<Geolocation> {
+//        val points = mutableListOf<Geolocation>()
+//        val factory = XmlPullParserFactory.newInstance()
+//        factory.isNamespaceAware = true
+//        val parser = factory.newPullParser()
+//        parser.setInput(inputStream, null)
+//
+//        var eventType = parser.eventType
+//        while (eventType != XmlPullParser.END_DOCUMENT) {
+//            if (eventType == XmlPullParser.START_TAG && parser.name == "trkpt") {
+//                val lat = parser.getAttributeValue(null, "lat").toDouble()
+//                val lon = parser.getAttributeValue(null, "lon").toDouble()
+//                var ele: Double? = null
+//                var time: Long? = null
+//
+//                // Чтение вложенных элементов (ele, time)
+//                while (!(eventType == XmlPullParser.END_TAG && parser.name == "trkpt")) {
+//                    if (eventType == XmlPullParser.START_TAG) {
+//                        when (parser.name) {
+//                            "ele" -> ele = parser.nextText().toDouble()
+//                            "time" -> time = parser.nextText().toLong()
+//                        }
+//                    }
+//                    eventType = parser.next()
+//                }
+//                points.add(Geolocation(lat, lon, ele ?: 0.0, time ?: 0))
+//            }
+//            eventType = parser.next()
+//        }
+//        return points
+//    }
 }

@@ -12,6 +12,7 @@ import io.mityukov.geo.tracking.feature.profile.ProfileScreen
 import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
 import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsScreen
 import io.mityukov.geo.tracking.feature.statistics.StatisticsScreen
+import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsScreen
 import io.mityukov.geo.tracking.feature.track.list.TracksScreen
 import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
@@ -26,6 +27,7 @@ fun NavGraphBuilder.mapScreenNavigation(snackbarHostState: SnackbarHostState) {
 
 fun NavGraphBuilder.tracksScreenNavigation(
     onTrackSelected: (String) -> Unit,
+    onTrackMapSelected: (String) -> Unit,
     onEditTracks: (String) -> Unit,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -42,7 +44,14 @@ fun NavGraphBuilder.tracksScreenNavigation(
                 uriPattern = DeepLinkProps.TRACK_DETAILS_URI_PATTERN
             })
         ) {
-            TrackDetailsScreen(onBack = onBack, snackbarHostState = snackbarHostState)
+            TrackDetailsScreen(
+                onBack = onBack,
+                onTrackMapSelected = onTrackMapSelected,
+                snackbarHostState = snackbarHostState
+            )
+        }
+        composable<HomeRouteTrackDetailsMap> {
+            TrackDetailsMapScreen(onBack = onBack)
         }
         composable<HomeRouteTracksEditing> {
             TracksEditingScreen(onBack = onBack)

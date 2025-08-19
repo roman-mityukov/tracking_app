@@ -26,6 +26,7 @@
     <string name="content_description_track_distance">Пройденное расстояние</string>
     <string name="content_description_track_altitude_up">Набор высоты</string>
     <string name="content_description_track_altitude_down">Сброс высоты</string>
+    <string name="content_description_track_details_map_fullscreen">Открыть карту</string>
     <string name="dialog_yes">Да</string>
     <string name="dialog_no">Нет</string>
     <string name="home_navigation_map">Карта</string>
@@ -78,4 +79,5 @@
     <string name="altitude_chart_title">Изменение высоты</string>
     <string name="altitude_chart_axis_altitude">Высота, м</string>
     <string name="altitude_chart_axis_distance">Расстояние, м</string>
+    <string name="track_details_map_title">Карта трека</string>
 </resources>

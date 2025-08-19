@@ -65,6 +65,7 @@ fun Track.toCompletedTrack(): CompletedTrack {
 
     return CompletedTrack(
         id = id,
+        name = name,
         start = start,
         end = end,
         distance = distance,
@@ -77,6 +78,7 @@ fun Track.toCompletedTrack(): CompletedTrack {
 
 data class CompletedTrack(
     val id: String,
+    val name: String,
     val start: String,
     val end: String,
     val distance: Int,

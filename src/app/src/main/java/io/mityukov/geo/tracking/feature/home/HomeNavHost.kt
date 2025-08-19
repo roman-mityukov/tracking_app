@@ -29,6 +29,9 @@ data object HomeRouteTracksList
 data class HomeRouteTrackDetails(val trackId: String)
 
 @Serializable
+data class HomeRouteTrackDetailsMap(val trackId: String)
+
+@Serializable
 data class HomeRouteTracksEditing(val trackId: String)
 
 @Serializable
@@ -62,6 +65,9 @@ fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHos
         tracksScreenNavigation(
             onTrackSelected = { trackId ->
                 navController.navigate(HomeRouteTrackDetails(trackId))
+            },
+            onTrackMapSelected = { trackId ->
+                navController.navigate(HomeRouteTrackDetailsMap(trackId))
             },
             onEditTracks = { firstSelectedTrackId ->
                 navController.navigate(HomeRouteTracksEditing(firstSelectedTrackId))

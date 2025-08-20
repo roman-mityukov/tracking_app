@@ -19,6 +19,7 @@ import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -101,9 +102,17 @@ sealed interface MapEvent {
     data object CurrentLocationConsumed : MapEvent
 }
 
+sealed interface MoveToCurrentLocationState {
+    data class MoveToCurrentLocation(val data: Geolocation): MoveToCurrentLocationState
+    data object MoveToCurrentLocationConsumed: MoveToCurrentLocationState
+}
+
 sealed interface MapState {
     data object PendingLocationUpdates : MapState
-    data class CurrentLocation(val data: Geolocation) : MapState
+    data class CurrentLocation(
+        val data: Geolocation,
+        val timestamp: Long = System.currentTimeMillis()
+    ) : MapState
 
     data class CurrentTrack(
         val track: TrackInProgress,
@@ -123,8 +132,10 @@ class MapViewModel @Inject constructor(
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
+    private val mutableMoveToCurrentLocationFlow = MutableStateFlow<MoveToCurrentLocationState>(
+        MoveToCurrentLocationState.MoveToCurrentLocationConsumed)
+    val moveToCurrentLocationFlow = mutableMoveToCurrentLocationFlow.asStateFlow()
 
-    private val mutableStateFlow = MutableStateFlow<MapState?>(null)
     private val timer = PausableTimer(coroutineScope = viewModelScope)
 
     init {
@@ -132,23 +143,19 @@ class MapViewModel @Inject constructor(
     }
 
     val stateFlow: StateFlow<MapState> = trackCapturerController.status
-        .combine(mutableStateFlow) { trackCaptureStatus, mutableState ->
-            Pair(trackCaptureStatus, mutableState)
-        }
-        .combine(timer.events) { pair, timerEvent ->
-            Triple(pair.first, pair.second, timerEvent)
+        .combine(timer.events) { trackCaptureStatus, timerEvent ->
+            Pair(trackCaptureStatus, timerEvent)
         }
         .combine(
             geolocationUpdatesRepository.currentLocation
-        ) { triple, currentLocation ->
-            val (trackCaptureStatus, mutableState, timerEvent) = triple
+        ) { pair, currentLocation ->
+            val (trackCaptureStatus, timerEvent) = pair
 
             if (currentLocation.geolocation != null) {
                 lastKnownLocation = currentLocation.geolocation
             }
 
-            val state = mutableState
-                ?: if (trackCaptureStatus is TrackCaptureStatus.Run) {
+            val state = if (trackCaptureStatus is TrackCaptureStatus.Run) {
                     if (trackCaptureStatus.paused) {
                         timer.pause()
                     } else {
@@ -182,15 +189,15 @@ class MapViewModel @Inject constructor(
         when (event) {
             MapEvent.GetCurrentLocation -> {
                 lastKnownLocation?.let { geolocation ->
-                    mutableStateFlow.update {
-                        MapState.CurrentLocation(data = geolocation)
+                    mutableMoveToCurrentLocationFlow.update {
+                        MoveToCurrentLocationState.MoveToCurrentLocation(data = geolocation)
                     }
                 }
             }
 
             MapEvent.CurrentLocationConsumed -> {
-                mutableStateFlow.update {
-                    null
+                mutableMoveToCurrentLocationFlow.update {
+                    MoveToCurrentLocationState.MoveToCurrentLocationConsumed
                 }
             }
 

@@ -12,7 +12,6 @@ import androidx.annotation.RequiresPermission
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.nmea.NmeaData
 import io.mityukov.geo.tracking.utils.nmea.NmeaParser
 import kotlinx.coroutines.channels.awaitClose
@@ -85,8 +84,9 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
 //                logd("nmeaGgaBuffer $nmeaGgaBuffer")
 //                logd("nmeaRmcBuffer $nmeaRmcBuffer")
                 geolocationsBuffer.clear()
+                val amountOfNmea = 5
 
-                nmeaGgaBuffer.forEachIndexed { index, gGA ->
+                nmeaGgaBuffer.takeLast(amountOfNmea).forEach { gGA ->
                     geolocationsBuffer.add(
                         Geolocation(
                             latitude = gGA.latitude,
@@ -107,7 +107,8 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
                     )
                 )
                 val speed =
-                    if (nmeaRmcBuffer.isEmpty()) 0f else nmeaRmcBuffer.sumOf { it.speed }
+                    if (nmeaRmcBuffer.isEmpty()) 0f else nmeaRmcBuffer.takeLast(amountOfNmea)
+                        .sumOf { it.speed }
                         .toFloat() / nmeaRmcBuffer.size.toFloat()
 
                 nmeaGgaBuffer.clear()
@@ -144,6 +145,7 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
             interval.inWholeMilliseconds,      // 10 seconds
             0f,         // 10 meters
             locationListener,
+            Looper.getMainLooper()
         )
         locationManager.addNmeaListener(nmeaListener, nmeaHandler)
         awaitClose {

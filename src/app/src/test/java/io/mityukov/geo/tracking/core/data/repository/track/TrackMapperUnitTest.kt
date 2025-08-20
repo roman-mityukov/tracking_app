@@ -28,6 +28,7 @@ class TrackMapperUnitTest {
                 latitude = 53.696453,
                 longitude = 87.439633,
                 altitude = 391.0,
+                speed = 1f,
                 time = 1000L,
             ),
             TrackPointEntity(
@@ -36,6 +37,7 @@ class TrackMapperUnitTest {
                 latitude = 53.695841,
                 longitude = 87.450213,
                 altitude = 311.0,
+                speed = 1f,
                 time = 1010L,
             ),
             TrackPointEntity(
@@ -44,6 +46,7 @@ class TrackMapperUnitTest {
                 latitude = 53.694120,
                 longitude = 87.458698,
                 altitude = 354.0,
+                speed = 1f,
                 time = 1010L,
             ),
             TrackPointEntity(
@@ -52,6 +55,7 @@ class TrackMapperUnitTest {
                 latitude = 53.697462,
                 longitude = 87.464610,
                 altitude = 331.0,
+                speed = 1f,
                 time = 1010L,
             ),
             TrackPointEntity(
@@ -60,6 +64,7 @@ class TrackMapperUnitTest {
                 latitude = 53.691241,
                 longitude = 87.482451,
                 altitude = 351.0,
+                speed = 1f,
                 time = 1010L,
             ),
         ),
@@ -78,7 +83,7 @@ class TrackMapperUnitTest {
         val track = TrackMapper().trackWithPointsEntityToDomain(trackWithPoints)
         assert(track.id == trackWithPoints.track.id)
         assert(track.name == trackWithPoints.track.name)
-        assert(track.distance == 3197)
+        assert(track.distance == 3191)
         assert(track.altitudeUp == 63)
         assert(track.altitudeDown == 103)
         assert(track.start == trackWithPoints.track.start)
@@ -95,6 +100,7 @@ class TrackMapperUnitTest {
             latitude = 53.696453,
             longitude = 87.439633,
             altitude = 391.0,
+            speed = 1f,
             time = 1000L,
         )
         val trackPoint = TrackMapper().trackPointEntityToDomain(entity)
@@ -102,6 +108,7 @@ class TrackMapperUnitTest {
         assert(trackPoint.geolocation.latitude == entity.latitude)
         assert(trackPoint.geolocation.longitude == entity.longitude)
         assert(trackPoint.geolocation.altitude == entity.altitude)
+        assert(trackPoint.geolocation.speed == entity.speed)
         assert(trackPoint.geolocation.time == entity.time)
     }
 

@@ -64,7 +64,7 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
                         }
                     }
 
-                    geolocationSubscription = launch(Dispatchers.Main) {
+                    geolocationSubscription = launch {
                         geolocationProvider.locationUpdates(5000.milliseconds).collect { result ->
                             mutableStateFlow.update {
                                 result

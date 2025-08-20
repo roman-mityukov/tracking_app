@@ -159,6 +159,7 @@ private fun TrackItem(
                     distance = track.distance,
                     altitudeUp = track.altitudeUp,
                     altitudeDown = track.altitudeDown,
+                    averageSpeed = track.averageSpeed,
                 )
             },
             trailingContent = {

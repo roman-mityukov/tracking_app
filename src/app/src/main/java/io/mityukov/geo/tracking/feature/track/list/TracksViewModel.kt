@@ -107,6 +107,39 @@ data class CompletedTrack(
         }
         result.toList()
     }
+
+    val speedByDistance: List<Pair<Double, Int>> by lazy {
+        val result = mutableListOf<Pair<Double, Int>>()
+        var currentDistance = 0
+        points.forEachIndexed { index, point ->
+            if (index > 0) {
+                val firstPoint = points[index - 1].geolocation
+                val secondPoint = points[index].geolocation
+                currentDistance += distanceTo(
+                    firstPoint.latitude,
+                    firstPoint.longitude,
+                    secondPoint.latitude,
+                    secondPoint.longitude,
+                )
+                result.add(Pair(secondPoint.speed.toDouble(), currentDistance))
+            } else {
+                result.add(Pair(points[index].geolocation.speed.toDouble(), 0))
+            }
+        }
+        result.toList()
+    }
+
+    val averageSpeed: Double by lazy {
+        points.sumOf { it.geolocation.speed.toDouble() } / points.size
+    }
+
+    val minSpeed: Double by lazy {
+        points.minBy { it.geolocation.speed }.geolocation.speed.toDouble()
+    }
+
+    val maxSpeed: Double by lazy {
+        points.maxBy { it.geolocation.speed }.geolocation.speed.toDouble()
+    }
 }
 
 sealed interface TracksState {

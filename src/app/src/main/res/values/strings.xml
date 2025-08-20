@@ -26,6 +26,7 @@
     <string name="content_description_track_distance">Пройденное расстояние</string>
     <string name="content_description_track_altitude_up">Набор высоты</string>
     <string name="content_description_track_altitude_down">Сброс высоты</string>
+    <string name="content_description_track_average_speed">Средняя скорость</string>
     <string name="content_description_track_details_map_fullscreen">Открыть карту</string>
     <string name="dialog_yes">Да</string>
     <string name="dialog_no">Нет</string>
@@ -36,7 +37,7 @@
     <string name="map_location_permission_consent">Дать разрешение</string>
     <string name="map_disabled_location_permission_description">Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы</string>
     <string name="map_disabled_location_permission_consent">Включить</string>
-    <string name="map_current_location_message">Текущая геопозиция %s\nШирота %f, Долгота %f\nВысота %f, Скорость %f</string>
+    <string name="map_current_location_message">Текущая геопозиция %s\nШирота %f, Долгота %f\nВысота %d м, Скорость %s м/с</string>
     <string name="map_current_location_share_text">Моя текущая геопозиция %f,%f</string>
     <string name="map_current_location_share_title">Поделиться геопозицией</string>
     <string name="map_update_location">Обновление местоположения…</string>
@@ -76,8 +77,14 @@
     <string name="track_details_distance">Расстояние %1$dм</string>
     <string name="track_details_altitude_up">Набор высоты %1$dм</string>
     <string name="track_details_altitude_down">Сброс высоты %1$dм</string>
-    <string name="altitude_chart_title">Изменение высоты</string>
+    <string name="track_details_average_speed">Средняя скорость %1$sм/с</string>
+    <string name="track_details_min_speed">Мин скорость %1$sм/с</string>
+    <string name="track_details_max_speed">Макс скорость %1$sм/с</string>
+    <string name="altitude_chart_title">График высоты</string>
     <string name="altitude_chart_axis_altitude">Высота, м</string>
     <string name="altitude_chart_axis_distance">Расстояние, м</string>
+    <string name="speed_chart_title">График скорости</string>
+    <string name="speed_chart_axis_speed">Скорость, м/с</string>
+    <string name="speed_chart_axis_distance">Расстояние, м</string>
     <string name="track_details_map_title">Карта трека</string>
 </resources>

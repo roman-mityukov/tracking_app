@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.utils.time.TimeUtils
+import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -187,6 +188,7 @@ fun TrackProperties(
     distance: Int,
     altitudeUp: Int,
     altitudeDown: Int,
+    averageSpeed: Double,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         TrackItemProperty(
@@ -205,13 +207,18 @@ fun TrackProperties(
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_altitude_up,
-            text = "$altitudeUp",
+            text = "${altitudeUp}м",
             contentDescription = stringResource(R.string.content_description_track_altitude_up),
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_altitude_down,
-            text = "$altitudeDown",
+            text = "${altitudeDown}м",
             contentDescription = stringResource(R.string.content_description_track_altitude_down),
+        )
+        TrackItemProperty(
+            iconResource = R.drawable.icon_speed,
+            text = "${String.format(Locale.getDefault(), "%.2f", averageSpeed)}м/с",
+            contentDescription = stringResource(R.string.content_description_track_average_speed),
         )
     }
 }
@@ -246,6 +253,7 @@ private fun TrackItem(
                 distance = track.distance,
                 altitudeUp = track.altitudeUp,
                 altitudeDown = track.altitudeDown,
+                averageSpeed = track.averageSpeed,
             )
         },
     )

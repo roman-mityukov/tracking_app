@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        tools:ignore="UnnecessaryRequiredFeature" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND" />
@@ -51,6 +55,7 @@
                     android:scheme="geoapp" />
             </intent-filter>
         </activity>
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -69,6 +74,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
         </provider>
+
         <service
             android:name=".core.data.repository.track.capture.ForegroundTrackCaptureService"
             android:exported="false"

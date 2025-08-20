@@ -8,9 +8,10 @@ data class Geolocation(
     val latitude: Double,
     val longitude: Double,
     val altitude: Double,
+    val speed: Float,
     val time: Long,
 ) {
-    val localDateTime
+    val localDateTime: LocalDateTime
         get() = LocalDateTime.ofInstant(
             Instant.ofEpochMilli(time),
             ZoneId.systemDefault()

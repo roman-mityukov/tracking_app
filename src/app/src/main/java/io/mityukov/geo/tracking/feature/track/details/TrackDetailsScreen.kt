@@ -57,8 +57,8 @@ import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import io.mityukov.geo.tracking.yandex.showTrack
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -203,6 +203,10 @@ private fun TrackDetailsContent(
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
+        SpeedChart(
+            chartData = SpeedChartData(track.speedByDistance.map { SpeedChartPoint(it.second, it.first) })
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         TrackDetailsMap(track = track, onTrackMapSelected = onTrackMapSelected)
         Spacer(modifier = Modifier.height(16.dp))
         ButtonDeleteTrack(
@@ -310,6 +314,27 @@ private fun TrackDetailsList(modifier: Modifier = Modifier, track: CompletedTrac
         Text(text = stringResource(R.string.track_details_altitude_up, track.altitudeUp))
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = stringResource(R.string.track_details_altitude_down, track.altitudeDown))
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(
+                R.string.track_details_average_speed,
+                String.format(Locale.getDefault(), "%.2f", track.averageSpeed)
+            )
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(
+                R.string.track_details_min_speed,
+                String.format(Locale.getDefault(), "%.2f", track.minSpeed)
+            )
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(
+                R.string.track_details_max_speed,
+                String.format(Locale.getDefault(), "%.2f", track.maxSpeed)
+            )
+        )
     }
 }
 

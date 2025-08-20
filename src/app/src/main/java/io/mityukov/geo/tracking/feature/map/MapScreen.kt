@@ -495,7 +495,9 @@ private fun CurrentGeolocationSharing(
                     R.string.map_current_location_message,
                     geolocation.localDateTime,
                     geolocation.latitude,
-                    geolocation.longitude
+                    geolocation.longitude,
+                    geolocation.altitude,
+                    geolocation.speed,
                 ),
                 style = MaterialTheme.typography.bodySmall,
             )

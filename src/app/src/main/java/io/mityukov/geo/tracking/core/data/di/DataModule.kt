@@ -14,7 +14,7 @@ import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalTrackCapture
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepositoryImpl
-import io.mityukov.geo.tracking.core.data.repository.geo.GooglePlayGeolocationProviderImpl
+import io.mityukov.geo.tracking.core.data.repository.geo.HardwareGeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
@@ -50,7 +50,7 @@ interface DataModule {
     fun bindCurrentLocationRepository(impl: GeolocationUpdatesRepositoryImpl): GeolocationUpdatesRepository
 
     @Binds
-    fun bindGeolocationProvider(impl: GooglePlayGeolocationProviderImpl): GeolocationProvider
+    fun bindGeolocationProvider(impl: HardwareGeolocationProvider): GeolocationProvider
 
     @Binds
     fun bindLocationSettingsRepository(impl: LocationSettingsRepositoryImpl): LocationSettingsRepository

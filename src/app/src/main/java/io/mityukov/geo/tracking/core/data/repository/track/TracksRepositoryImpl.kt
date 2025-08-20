@@ -82,6 +82,7 @@ class TracksRepositoryImpl @Inject constructor(
                 latitude = geolocation.latitude,
                 longitude = geolocation.longitude,
                 altitude = geolocation.altitude,
+                speed = geolocation.speed,
                 time = geolocation.time,
             )
         )

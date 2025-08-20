@@ -81,6 +81,8 @@ import io.mityukov.geo.tracking.yandex.YandexMapSettings
 import io.mityukov.geo.tracking.yandex.showTrack
 import io.mityukov.geo.tracking.yandex.zoom
 import kotlinx.coroutines.launch
+import java.util.Locale
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -390,6 +392,7 @@ private fun CurrentTrack(
                             distance = viewModelState.track.distance,
                             altitudeUp = viewModelState.track.altitudeUp,
                             altitudeDown = viewModelState.track.altitudeDown,
+                            averageSpeed = viewModelState.track.averageSpeed,
                         )
                     }
                 }
@@ -496,8 +499,8 @@ private fun CurrentGeolocationSharing(
                     geolocation.localDateTime,
                     geolocation.latitude,
                     geolocation.longitude,
-                    geolocation.altitude,
-                    geolocation.speed,
+                    geolocation.altitude.roundToInt(),
+                    String.format(Locale.getDefault(), "%.1f", geolocation.speed),
                 ),
                 style = MaterialTheme.typography.bodySmall,
             )

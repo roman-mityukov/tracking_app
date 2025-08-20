@@ -88,7 +88,11 @@ data class TrackInProgress(
     val altitudeDown: Int,
     val points: List<TrackPoint>,
     val duration: Duration
-)
+) {
+    val averageSpeed: Double by lazy {
+        points.sumOf { it.geolocation.speed.toDouble() } / points.size
+    }
+}
 
 sealed interface MapEvent {
     data object PauseCurrentLocationUpdate : MapEvent

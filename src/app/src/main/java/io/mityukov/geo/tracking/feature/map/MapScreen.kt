@@ -43,7 +43,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,6 +79,7 @@ import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
 import io.mityukov.geo.tracking.yandex.showTrack
 import io.mityukov.geo.tracking.yandex.zoom
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -94,6 +94,7 @@ fun MapScreen(
         val context = LocalContext.current
         val mapView = remember { MapView(context) }
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
+        val moveToCurrentLocationState = viewModel.moveToCurrentLocationFlow.collectAsStateWithLifecycle()
 
         MapLifecycle(viewModel = viewModel, mapView = mapView)
         MapPermissions(viewModelState = viewModelState.value, snackbarHostState = snackbarHostState)
@@ -121,9 +122,33 @@ fun MapScreen(
             viewModelState.value,
             mapView,
             snackbarHostState,
-            needMoveToCurrentLocation
-        ) {
-            viewModel.add(MapEvent.CurrentLocationConsumed)
+        )
+
+        LaunchedEffect(Unit) {
+            delay(1000)
+            viewModel.add(MapEvent.GetCurrentLocation)
+        }
+
+        when(moveToCurrentLocationState.value) {
+            is MoveToCurrentLocationState.MoveToCurrentLocation -> {
+                if (needMoveToCurrentLocation.value) {
+                    needMoveToCurrentLocation.value = false
+                    val geolocation = (moveToCurrentLocationState.value
+                            as MoveToCurrentLocationState.MoveToCurrentLocation).data
+                    mapView.map.move(
+                        CameraPosition(
+                            Point(geolocation.latitude, geolocation.longitude),
+                            YandexMapSettings.ZOOM_DEFAULT,
+                            0f,
+                            0f,
+                        )
+                    )
+                    viewModel.add(MapEvent.CurrentLocationConsumed)
+                }
+            }
+            MoveToCurrentLocationState.MoveToCurrentLocationConsumed -> {
+                // no op
+            }
         }
     }
 }
@@ -149,8 +174,6 @@ private fun MapInfoContent(
     viewModelState: MapState,
     mapView: MapView,
     snackbarHostState: SnackbarHostState,
-    needMoveToCurrentLocation: MutableState<Boolean>,
-    onConsumeCurrentLocation: () -> Unit,
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
@@ -168,14 +191,11 @@ private fun MapInfoContent(
 
         is MapState.CurrentLocation -> {
             snackbarHostState.currentSnackbarData?.dismiss()
-            LaunchedEffect(viewModelState.data.time) {
-                onConsumeCurrentLocation()
-            }
+
             CurrentGeolocation(
                 modifier = modifier,
                 geolocation = viewModelState.data,
                 mapView = mapView,
-                needMoveToCurrentLocation = needMoveToCurrentLocation,
                 snackbarHostState = snackbarHostState,
             )
         }
@@ -307,7 +327,6 @@ private fun CurrentGeolocation(
     modifier: Modifier,
     geolocation: Geolocation,
     mapView: MapView,
-    needMoveToCurrentLocation: MutableState<Boolean>,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
@@ -327,18 +346,6 @@ private fun CurrentGeolocation(
                 scale = TrackAppearanceSettings.PLACEMARK_SCALE
             }
         )
-
-        if (needMoveToCurrentLocation.value) {
-            needMoveToCurrentLocation.value = false
-            mapView.map.move(
-                CameraPosition(
-                    Point(geolocation.latitude, geolocation.longitude),
-                    YandexMapSettings.ZOOM_DEFAULT,
-                    0f,
-                    0f,
-                )
-            )
-        }
     }
 
     Column(

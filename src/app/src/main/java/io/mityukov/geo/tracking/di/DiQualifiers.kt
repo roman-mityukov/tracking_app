@@ -21,3 +21,7 @@ annotation class DispatcherDefault
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DispatcherDefaultLimitedParallelism
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class LogsDirectory

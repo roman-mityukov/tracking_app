@@ -16,14 +16,13 @@ import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.utils.PausableTimer
 import io.mityukov.geo.tracking.utils.time.TimeUtils
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -98,13 +97,6 @@ data class TrackInProgress(
 sealed interface MapEvent {
     data object PauseCurrentLocationUpdate : MapEvent
     data object ResumeCurrentLocationUpdate : MapEvent
-    data object GetCurrentLocation : MapEvent
-    data object CurrentLocationConsumed : MapEvent
-}
-
-sealed interface MoveToCurrentLocationState {
-    data class MoveToCurrentLocation(val data: Geolocation): MoveToCurrentLocationState
-    data object MoveToCurrentLocationConsumed: MoveToCurrentLocationState
 }
 
 sealed interface MapState {
@@ -132,9 +124,6 @@ class MapViewModel @Inject constructor(
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
-    private val mutableMoveToCurrentLocationFlow = MutableStateFlow<MoveToCurrentLocationState>(
-        MoveToCurrentLocationState.MoveToCurrentLocationConsumed)
-    val moveToCurrentLocationFlow = mutableMoveToCurrentLocationFlow.asStateFlow()
 
     private val timer = PausableTimer(coroutineScope = viewModelScope)
 
@@ -181,26 +170,21 @@ class MapViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),
             initialValue = MapState.PendingLocationUpdates
         )
+    val currentLocationFlow = stateFlow.filter { it is MapState.CurrentLocation || it is MapState.CurrentTrack }
+        .map {
+            val geolocation = when (it) {
+                is MapState.CurrentLocation -> it.data
+                is MapState.CurrentTrack -> it.currentLocation
+                else -> null
+            }
+            geolocation
+        }
 
 
     @SuppressLint("MissingPermission")
     // Пермишены на локацию проверяются в MapScreen
     fun add(event: MapEvent) {
         when (event) {
-            MapEvent.GetCurrentLocation -> {
-                lastKnownLocation?.let { geolocation ->
-                    mutableMoveToCurrentLocationFlow.update {
-                        MoveToCurrentLocationState.MoveToCurrentLocation(data = geolocation)
-                    }
-                }
-            }
-
-            MapEvent.CurrentLocationConsumed -> {
-                mutableMoveToCurrentLocationFlow.update {
-                    MoveToCurrentLocationState.MoveToCurrentLocationConsumed
-                }
-            }
-
             MapEvent.PauseCurrentLocationUpdate -> {
                 viewModelScope.launch {
                     geolocationUpdatesRepository.stop()

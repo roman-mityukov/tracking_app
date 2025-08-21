@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -52,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
+import io.mityukov.geo.tracking.app.ui.ButtonBack
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
 import io.mityukov.geo.tracking.utils.log.logd
@@ -156,12 +155,7 @@ private fun TrackDetailsTopBar(
         modifier = modifier,
         title = { Text(text = stringResource(R.string.track_details_title)) },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.content_description_back_button),
-                )
-            }
+            ButtonBack(onBack = onBack)
         },
         actions = {
             IconButton(onClick = {

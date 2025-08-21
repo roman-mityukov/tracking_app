@@ -1,3 +1,4 @@
+@file:Suppress("UnusedParameter")
 package io.mityukov.geo.tracking.feature.profile
 
 import androidx.compose.foundation.clickable
@@ -37,10 +38,10 @@ fun ProfileScreen(
                 bottom = paddingValues.calculateBottomPadding()
             )
         ) {
-            ProfileScreenItem(
-                Modifier.clickable { onStatisticsSelected() },
-                stringResource(R.string.profile_statistics_label),
-            )
+//            ProfileScreenItem(
+//                Modifier.clickable { onStatisticsSelected() },
+//                stringResource(R.string.profile_statistics_label),
+//            )
             ProfileScreenItem(
                 Modifier.clickable { onSettingsSelected() },
                 stringResource(R.string.profile_settings_label),

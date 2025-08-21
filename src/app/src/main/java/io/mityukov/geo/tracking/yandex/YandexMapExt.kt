@@ -14,8 +14,8 @@ import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.TrackPoint
-import io.mityukov.geo.tracking.feature.map.TrackInProgress
 
 fun Map.zoom(value: Float) {
     with(cameraPosition) {
@@ -25,6 +25,17 @@ fun Map.zoom(value: Float) {
             null,
         )
     }
+}
+
+fun MapView.navigateTo(geolocation: Geolocation) {
+    map.move(
+        CameraPosition(
+            Point(geolocation.latitude, geolocation.longitude),
+            YandexMapSettings.ZOOM_DEFAULT,
+            0f,
+            0f,
+        )
+    )
 }
 
 fun MapView.showTrack(context: Context, trackPoints: List<TrackPoint>, moveCamera: Boolean) {

@@ -2,15 +2,21 @@ package io.mityukov.geo.tracking.feature.about
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +24,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +35,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.MailTo
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.BuildConfig
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.ButtonBack
@@ -36,16 +46,43 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
+    viewModel: AboutViewModel = hiltViewModel(),
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
+    val uriString by viewModel.logsStateFlow.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    LaunchedEffect(uriString) {
+        if (uriString != null) {
+            val uri = Uri.parse(uriString)
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.type = "application/zip"
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            context.startActivity(
+                Intent.createChooser(
+                    intent,
+                    context.getString(R.string.about_intent_logs_title)
+                )
+            )
+            viewModel.add(AboutEvent.ConsumeLogs)
+        }
+    }
+
     Scaffold(
         topBar = {
             AboutTopBar(onBack = onBack)
         },
         contentWindowInsets = WindowInsets.safeContent
     ) { paddingValues ->
-        AboutContent(Modifier.padding(paddingValues), snackbarHostState)
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+            AboutContent(
+                onShareLogs = {
+                    viewModel.add(AboutEvent.ShareLogs)
+                },
+                snackbarHostState = snackbarHostState,
+            )
+        }
     }
 }
 
@@ -65,11 +102,11 @@ fun AboutTopBar(
 }
 
 @Composable
-fun AboutContent(modifier: Modifier, snackbarHostState: SnackbarHostState) {
+fun AboutContent(modifier: Modifier = Modifier, onShareLogs: () -> Unit, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.width(IntrinsicSize.Max),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -80,6 +117,8 @@ fun AboutContent(modifier: Modifier, snackbarHostState: SnackbarHostState) {
         ContactButton(onClick = {
             sendEmail(context, coroutineScope, snackbarHostState)
         })
+        Spacer(modifier = Modifier.height(8.dp))
+        ShareLogsButton(onShareLogs = onShareLogs)
     }
 }
 
@@ -103,8 +142,15 @@ private fun AppInfo(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ContactButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(modifier = modifier, onClick = onClick) {
-        Text(text = stringResource(R.string.about_button_label_email))
+    Button(modifier = modifier.fillMaxWidth(), onClick = onClick) {
+        Text(text = stringResource(R.string.about_button_label_email), maxLines = 1)
+    }
+}
+
+@Composable
+private fun ShareLogsButton(modifier: Modifier = Modifier, onShareLogs: () -> Unit) {
+    Button(modifier = modifier.fillMaxWidth(), onClick = onShareLogs) {
+        Text(text = stringResource(R.string.about_button_send_logs), maxLines = 1)
     }
 }
 

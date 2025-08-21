@@ -29,22 +29,13 @@ object Logger {
         }
     }
 
-    fun initLogs(context: Context) {
+    fun initLogs(logsDirectory: File) {
         synchronized(lock) {
             if (isInitialized || (initializationJob != null && initializationJob!!.isActive)) {
                 return
             }
             initializationJob = coroutineScope.launch {
                 delay(1000)
-                val directoryName = "logs"
-                val logsDirectory = File(context.getExternalFilesDir(null), directoryName)
-
-                if (logsDirectory.exists().not()) {
-                    val isDirectoryCreated = logsDirectory.mkdir()
-                    if (isDirectoryCreated.not()) {
-                        error("Can not create directory with name $directoryName")
-                    }
-                }
 
                 Timber.plant(Timber.DebugTree())
                 val fileLoggerTree = FileLoggerTree.Builder()

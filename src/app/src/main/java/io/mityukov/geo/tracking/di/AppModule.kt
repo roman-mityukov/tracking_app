@@ -15,6 +15,7 @@ import io.mityukov.geo.tracking.app.AppProps
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.io.File
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -48,5 +49,20 @@ interface AppModule {
         @Provides
         @DispatcherDefault
         fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+        @Provides
+        @LogsDirectory
+        fun providesLogsDirectory(@ApplicationContext context: Context): File {
+            val directory = File(context.getExternalFilesDir(null), "logs")
+
+            if (directory.exists().not()) {
+                val isDirectoryCreated = directory.mkdir()
+                if (isDirectoryCreated.not()) {
+                    error("Can not create directory with name logs")
+                }
+            }
+
+            return directory
+        }
     }
 }

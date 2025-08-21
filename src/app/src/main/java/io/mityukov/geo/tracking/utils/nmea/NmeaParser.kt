@@ -92,7 +92,7 @@ object NmeaParser {
     }
 }
 
-sealed class NmeaData {
+sealed interface NmeaData {
     data class GGA(
         val time: Double,
         val latitude: Double,
@@ -104,7 +104,7 @@ sealed class NmeaData {
         val altitudeUnit: String,
         val geoidHeight: Double,
         val geoidHeightUnit: String
-    ) : NmeaData()
+    ) : NmeaData
 
     data class RMC(
         val time: Double,
@@ -116,5 +116,5 @@ sealed class NmeaData {
         val date: Int,
         val magneticVariation: Double,
         val magneticVariationDirection: String
-    ) : NmeaData()
+    ) : NmeaData
 }

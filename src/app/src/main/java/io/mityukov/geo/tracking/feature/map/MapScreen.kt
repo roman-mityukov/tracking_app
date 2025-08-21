@@ -4,7 +4,6 @@ package io.mityukov.geo.tracking.feature.map
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.PointF
 import android.os.Build
 import android.provider.Settings
 import android.view.ViewGroup
@@ -43,6 +42,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,22 +64,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.mapview.MapView
-import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
-import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
-import io.mityukov.geo.tracking.yandex.YandexMapSettings
-import io.mityukov.geo.tracking.yandex.showTrack
-import io.mityukov.geo.tracking.yandex.zoom
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -92,72 +85,45 @@ fun MapScreen(
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         val context = LocalContext.current
-        val mapView = remember { MapView(context) }
+        val mapViewHolder = remember { MapViewHolder(MapView(context), context) }
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
-        val moveToCurrentLocationState = viewModel.moveToCurrentLocationFlow.collectAsStateWithLifecycle()
 
-        MapLifecycle(viewModel = viewModel, mapView = mapView)
+        MapLifecycle(
+            onStart = {
+                mapViewHolder.onStart()
+            },
+            onResume = {
+                viewModel.add(MapEvent.ResumeCurrentLocationUpdate)
+            },
+            onStop = {
+                mapViewHolder.onStop()
+                viewModel.add(MapEvent.PauseCurrentLocationUpdate)
+            },
+        )
         MapPermissions(viewModelState = viewModelState.value, snackbarHostState = snackbarHostState)
-        MapContent(mapView = mapView)
-
-        val needMoveToCurrentLocation = remember { mutableStateOf(true) }
+        MapContent(mapViewHolder = mapViewHolder)
         MapControls(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 32.dp),
-            onZoomIn = {
-                mapView.map.zoom(YandexMapSettings.ZOOM_STEP)
-            },
-            onZoomOut = {
-                mapView.map.zoom(-YandexMapSettings.ZOOM_STEP)
-            },
-            onMyLocation = {
-                needMoveToCurrentLocation.value = true
-                viewModel.add(MapEvent.GetCurrentLocation)
-            },
+            mapViewHolder = mapViewHolder,
+            currentLocationFlow = viewModel.currentLocationFlow,
         )
-
         MapInfoContent(
-            Modifier.align(Alignment.TopCenter),
-            viewModelState.value,
-            mapView,
-            snackbarHostState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            viewModelState = viewModelState.value,
+            mapViewHolder = mapViewHolder,
+            snackbarHostState = snackbarHostState,
         )
-
-        LaunchedEffect(Unit) {
-            delay(1000)
-            viewModel.add(MapEvent.GetCurrentLocation)
-        }
-
-        when(moveToCurrentLocationState.value) {
-            is MoveToCurrentLocationState.MoveToCurrentLocation -> {
-                if (needMoveToCurrentLocation.value) {
-                    needMoveToCurrentLocation.value = false
-                    val geolocation = (moveToCurrentLocationState.value
-                            as MoveToCurrentLocationState.MoveToCurrentLocation).data
-                    mapView.map.move(
-                        CameraPosition(
-                            Point(geolocation.latitude, geolocation.longitude),
-                            YandexMapSettings.ZOOM_DEFAULT,
-                            0f,
-                            0f,
-                        )
-                    )
-                    viewModel.add(MapEvent.CurrentLocationConsumed)
-                }
-            }
-            MoveToCurrentLocationState.MoveToCurrentLocationConsumed -> {
-                // no op
-            }
-        }
     }
 }
 
 @Composable
-private fun MapContent(modifier: Modifier = Modifier, mapView: MapView) {
+private fun MapContent(modifier: Modifier = Modifier, mapViewHolder: MapViewHolder) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
+            val mapView = mapViewHolder.mapView
             mapView.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -172,15 +138,18 @@ private fun MapContent(modifier: Modifier = Modifier, mapView: MapView) {
 private fun MapInfoContent(
     modifier: Modifier,
     viewModelState: MapState,
-    mapView: MapView,
+    mapViewHolder: MapViewHolder,
     snackbarHostState: SnackbarHostState,
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
+            LaunchedEffect(viewModelState.track.points.last()) {
+                mapViewHolder.showTrack(viewModelState.track.points)
+            }
+
             CurrentTrack(
                 modifier = modifier,
                 viewModelState = viewModelState,
-                mapView = mapView,
                 snackbarHostState = snackbarHostState,
             )
         }
@@ -192,10 +161,13 @@ private fun MapInfoContent(
         is MapState.CurrentLocation -> {
             snackbarHostState.currentSnackbarData?.dismiss()
 
+            LaunchedEffect(viewModelState.data) {
+                mapViewHolder.currentLocationPlacemark(viewModelState.data)
+            }
+
             CurrentGeolocation(
                 modifier = modifier,
                 geolocation = viewModelState.data,
-                mapView = mapView,
                 snackbarHostState = snackbarHostState,
             )
         }
@@ -259,8 +231,9 @@ private fun MapPermissions(
 
 @Composable
 private fun MapLifecycle(
-    viewModel: MapViewModel,
-    mapView: MapView,
+    onStart: () -> Unit,
+    onResume: () -> Unit,
+    onStop: () -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -268,18 +241,17 @@ private fun MapLifecycle(
         val observer = object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 super.onResume(owner)
-                viewModel.add(MapEvent.ResumeCurrentLocationUpdate)
+                onResume()
             }
 
             override fun onStart(owner: LifecycleOwner) {
                 super.onStart(owner)
-                mapView.onStart()
+                onStart()
             }
 
             override fun onStop(owner: LifecycleOwner) {
                 super.onStop(owner)
-                mapView.onStop()
-                viewModel.add(MapEvent.PauseCurrentLocationUpdate)
+                onStop()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -292,28 +264,44 @@ private fun MapLifecycle(
 @Composable
 private fun MapControls(
     modifier: Modifier,
-    onZoomIn: () -> Unit,
-    onZoomOut: () -> Unit,
-    onMyLocation: () -> Unit,
+    currentLocationFlow: Flow<Geolocation?>,
+    mapViewHolder: MapViewHolder,
 ) {
+    val currentLocationState: State<Geolocation?> =
+        currentLocationFlow.collectAsStateWithLifecycle(null)
+    val mapNavigateTo = {
+        val geolocation = currentLocationState.value
+        mapViewHolder.navigateTo(geolocation)
+    }
+
+    LaunchedEffect(Unit) {
+        val delayBeforeNavigation = 500L
+        delay(delayBeforeNavigation)
+        mapNavigateTo()
+    }
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,
     ) {
         MapControlButton(
-            onClick = onZoomIn,
+            onClick = {
+                mapViewHolder.zoomIn()
+            },
             icon = R.drawable.icon_plus,
             contentDescription = stringResource(R.string.content_description_map_zoom_in),
         )
         Spacer(modifier = Modifier.height(8.dp))
         MapControlButton(
-            onClick = onZoomOut,
+            onClick = {
+                mapViewHolder.zoomOut()
+            },
             icon = R.drawable.icon_minus,
             contentDescription = stringResource(R.string.content_description_map_zoom_out),
         )
         Spacer(modifier = Modifier.height(8.dp))
         MapControlButton(
-            onClick = onMyLocation,
+            onClick = mapNavigateTo,
             icon = R.drawable.icon_my_location,
             contentDescription = stringResource(R.string.content_description_map_my_location),
         )
@@ -326,28 +314,8 @@ private fun MapControls(
 private fun CurrentGeolocation(
     modifier: Modifier,
     geolocation: Geolocation,
-    mapView: MapView,
     snackbarHostState: SnackbarHostState,
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(geolocation) {
-        mapView.map.mapObjects.clear()
-        val placemark = mapView.map.mapObjects.addPlacemark()
-        placemark.apply {
-            geometry = Point(geolocation.latitude, geolocation.longitude)
-            setIcon(ImageProvider.fromResource(context, R.drawable.pin_my_location))
-        }
-        placemark.setIconStyle(
-            IconStyle().apply {
-                anchor = PointF(
-                    TrackAppearanceSettings.PLACEMARK_ANCHOR_X,
-                    TrackAppearanceSettings.PLACEMARK_ANCHOR_Y
-                )
-                scale = TrackAppearanceSettings.PLACEMARK_SCALE
-            }
-        )
-    }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -365,15 +333,9 @@ private fun CurrentGeolocation(
 private fun CurrentTrack(
     modifier: Modifier,
     viewModelState: MapState.CurrentTrack,
-    mapView: MapView,
     snackbarHostState: SnackbarHostState,
 ) {
     if (viewModelState.track.points.isNotEmpty()) {
-        val context = LocalContext.current
-        LaunchedEffect(viewModelState.track.points.last()) {
-            mapView.showTrack(context, viewModelState.track.points, false)
-        }
-
         Column(
             modifier = modifier
                 .fillMaxWidth()

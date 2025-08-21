@@ -34,6 +34,8 @@ import io.mityukov.geo.tracking.core.datastore.appSettingsDataStore
 import io.mityukov.geo.tracking.core.datastore.trackCaptureStatusDataStore
 import io.mityukov.geo.tracking.di.AppSettingsDataStore
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
+import io.mityukov.geo.tracking.feature.share.LogSharingService
+import io.mityukov.geo.tracking.feature.share.LogSharingServiceImpl
 import io.mityukov.geo.tracking.feature.share.TrackShareService
 import io.mityukov.geo.tracking.feature.share.TrackShareServiceImpl
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
@@ -80,6 +82,9 @@ interface DataModule {
 
     @Binds
     fun bindTrackShareService(impl: TrackShareServiceImpl): TrackShareService
+
+    @Binds
+    fun bindLogSharingService(impl: LogSharingServiceImpl): LogSharingService
 
     companion object {
         @Provides

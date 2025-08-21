@@ -5,11 +5,14 @@ import android.os.StrictMode
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.HiltAndroidApp
 import io.mityukov.geo.tracking.BuildConfig
+import io.mityukov.geo.tracking.di.LogsDirectory
 import io.mityukov.geo.tracking.utils.log.Logger
 import ru.ok.tracer.HasTracerConfiguration
 import ru.ok.tracer.TracerConfiguration
 import ru.ok.tracer.crash.report.CrashFreeConfiguration
 import ru.ok.tracer.crash.report.CrashReportConfiguration
+import java.io.File
+import javax.inject.Inject
 
 @HiltAndroidApp
 class GeoApp : Application(), HasTracerConfiguration {
@@ -24,6 +27,10 @@ class GeoApp : Application(), HasTracerConfiguration {
             },
         )
 
+    @Inject
+    @LogsDirectory
+    lateinit var logsDirectory: File
+
     override fun onCreate() {
         super.onCreate()
 
@@ -36,6 +43,6 @@ class GeoApp : Application(), HasTracerConfiguration {
 
         MapKitFactory.setApiKey(BuildConfig.YANDEX_MAPKIT_API_KEY)
 
-        Logger.initLogs(this)
+        Logger.initLogs(logsDirectory)
     }
 }

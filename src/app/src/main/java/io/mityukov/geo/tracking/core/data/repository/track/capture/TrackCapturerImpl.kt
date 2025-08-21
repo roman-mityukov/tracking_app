@@ -48,7 +48,8 @@ class TrackCapturerImpl @Inject constructor(
             geolocationSubscription = launch {
                 geolocationProvider.locationUpdates(geolocationUpdatesInterval)
                     .collect { result ->
-                        logd("TrackCaptureRepositoryImpl locationCallback geolocation ${result.geolocation} error ${result.error} nmea size ${result.nmea.size}")
+                        logd("TrackCaptureRepositoryImpl locationCallback geolocation" +
+                                " ${result.geolocation} error ${result.error} nmea size ${result.nmea.size}")
                         val captureStatus = trackCaptureStatusProvider.status.first()
 
                         if (captureStatus is LocalTrackCaptureStatus.Enabled) {

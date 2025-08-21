@@ -6,9 +6,12 @@ import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateResult
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
+import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.utils.log.logw
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -45,7 +48,7 @@ class TrackCapturerImpl @Inject constructor(
             geolocationSubscription = launch {
                 geolocationProvider.locationUpdates(geolocationUpdatesInterval)
                     .collect { result ->
-                        logd("TrackCaptureRepositoryImpl locationCallback $result")
+                        logd("TrackCaptureRepositoryImpl locationCallback geolocation ${result.geolocation} error ${result.error} nmea size ${result.nmea.size}")
                         val captureStatus = trackCaptureStatusProvider.status.first()
 
                         if (captureStatus is LocalTrackCaptureStatus.Enabled) {
@@ -69,38 +72,51 @@ class TrackCapturerImpl @Inject constructor(
         captureStatus: LocalTrackCaptureStatus.Enabled,
         geolocationUpdateResult: GeolocationUpdateResult
     ) {
-        val currentTrackId = captureStatus.trackId
-        val paused = captureStatus.paused
-        val geolocation = geolocationUpdateResult.geolocation
+        if (captureStatus.paused) return
+        if (geolocationUpdateResult.isInvalidData()) return
 
-        if (geolocation != null && !paused) {
-            val diff = System.currentTimeMillis() - geolocation.time
+        geolocationUpdateResult.geolocation?.let { geolocation ->
+            val currentTrack = tracksRepository.getTrack(captureStatus.trackId).first()
+            val points = currentTrack.points
 
-            if (diff < 60 * 1000) {
-                val currentTrack = tracksRepository.getTrack(currentTrackId).first()
-                val points = currentTrack.points
+            val isAcceptableDistance = acceptableDistance(points, geolocation, 4f)
 
-                val canBeAdded = if (points.isNotEmpty()) {
-                    val latestPoint = points.last()
-                    val distance = distanceTo(
-                        geolocation.latitude,
-                        geolocation.longitude,
-                        latestPoint.geolocation.latitude,
-                        latestPoint.geolocation.longitude,
-                    )
-                    logd("Can be added - distance $distance")
-                    distance > 1
-                } else {
-                    true
-                }
-
-                if (canBeAdded) {
-                    tracksRepository.insertTrackPoint(
-                        trackId = currentTrackId,
-                        geolocation = geolocation
-                    )
-                }
+            if (isAcceptableDistance) {
+                tracksRepository.insertTrackPoint(
+                    trackId = currentTrack.id,
+                    geolocation = geolocation
+                )
+            } else {
+                logw("not acceptable distance")
             }
         }
     }
+
+    fun acceptableDistance(
+        points: List<TrackPoint>,
+        next: Geolocation,
+        speedThreshold: Float
+    ): Boolean {
+        if (points.isEmpty()) return true
+
+        val previous = points.last().geolocation
+        val distance: Float = distanceTo(
+            lat1 = next.latitude,
+            lon1 = next.longitude,
+            lat2 = previous.latitude,
+            lon2 = previous.longitude,
+        ).toFloat() // meters
+        val time: Long = (next.time - previous.time) / 1000 // seconds
+        val maxDistance = time * speedThreshold
+
+        logd("distance $distance time $time maxDistance $maxDistance")
+
+        return distance > 1 && distance < maxDistance
+    }
+}
+
+private fun GeolocationUpdateResult.isInvalidData(): Boolean {
+    val hasNoData = geolocation == null
+    val hasStaleData = (System.currentTimeMillis() - (geolocation?.time ?: 0)) > 60 * 1000
+    return hasNoData || hasStaleData
 }

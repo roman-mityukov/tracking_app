@@ -1,6 +1,7 @@
 package io.mityukov.geo.tracking.utils.geolocation
 
 import io.mityukov.geo.tracking.utils.ext.toRadians
+import kotlin.math.absoluteValue
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
@@ -30,5 +31,5 @@ fun distanceTo(
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
     val horizontalDistance = earthRadius * c
 
-    return horizontalDistance.roundToInt()
+    return horizontalDistance.roundToInt().absoluteValue
 }

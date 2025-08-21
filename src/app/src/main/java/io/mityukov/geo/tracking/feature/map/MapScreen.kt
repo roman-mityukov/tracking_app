@@ -143,8 +143,10 @@ private fun MapInfoContent(
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
-            LaunchedEffect(viewModelState.track.points.last()) {
-                mapViewHolder.showTrack(viewModelState.track.points)
+            if(viewModelState.track.points.isNotEmpty()) {
+                LaunchedEffect(viewModelState.track.points.last()) {
+                    mapViewHolder.showTrack(viewModelState.track.points)
+                }
             }
 
             CurrentTrack(

@@ -12,6 +12,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
+import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.nmea.NmeaData
 import io.mityukov.geo.tracking.utils.nmea.NmeaParser
 import kotlinx.coroutines.channels.awaitClose
@@ -58,7 +59,6 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
 
     val nmeaGgaBuffer = mutableListOf<NmeaData.GGA>()
     val nmeaRmcBuffer = mutableListOf<NmeaData.RMC>()
-    val geolocationsBuffer = mutableListOf<Geolocation>()
     val nmeaHandler = Handler(Looper.getMainLooper())
     val nmeaListener = object : OnNmeaMessageListener {
         val parser = NmeaParser
@@ -80,48 +80,24 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
     override fun locationUpdates(interval: Duration): Flow<GeolocationUpdateResult> = callbackFlow {
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
-//                logd("location $location")
-//                logd("nmeaGgaBuffer $nmeaGgaBuffer")
-//                logd("nmeaRmcBuffer $nmeaRmcBuffer")
-                geolocationsBuffer.clear()
-                val amountOfNmea = 5
-
-                nmeaGgaBuffer.takeLast(amountOfNmea).forEach { gGA ->
-                    geolocationsBuffer.add(
-                        Geolocation(
-                            latitude = gGA.latitude,
-                            longitude = gGA.longitude,
-                            altitude = gGA.altitude + gGA.geoidHeight,
-                            speed = 0f,
-                            time = 0
-                        )
-                    )
-                }
-                geolocationsBuffer.add(
-                    Geolocation(
-                        latitude = location.latitude,
-                        longitude = location.longitude,
-                        speed = if (location.hasSpeed()) location.speed else 0f,
-                        altitude = if (location.hasAltitude()) location.altitude else 0.0,
-                        time = location.time
-                    )
-                )
-                val speed =
-                    if (nmeaRmcBuffer.isEmpty()) 0f else nmeaRmcBuffer.takeLast(amountOfNmea)
-                        .sumOf { it.speed }
-                        .toFloat() / nmeaRmcBuffer.size.toFloat()
-
+                logd("HardwareGeolocationProviderImpl $location")
+                val nmea = mutableListOf<NmeaData>()
+                nmea.addAll(nmeaGgaBuffer)
+                nmea.addAll(nmeaRmcBuffer)
                 nmeaGgaBuffer.clear()
                 nmeaRmcBuffer.clear()
+
                 trySendBlocking(
                     GeolocationUpdateResult(
                         geolocation = Geolocation(
-                            latitude = geolocationsBuffer.sumOf { it.latitude } / geolocationsBuffer.size,
-                            longitude = geolocationsBuffer.sumOf { it.longitude } / geolocationsBuffer.size,
-                            speed = speed,
-                            altitude = geolocationsBuffer.sumOf { it.altitude } / geolocationsBuffer.size,
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            speed = if (location.hasSpeed()) location.speed else 0f,
+                            altitude = if (location.hasAltitude()) location.altitude else 0.0,
                             time = location.time
-                        ), error = null
+                        ),
+                        error = null,
+                        nmea = nmea
                     )
                 )
             }

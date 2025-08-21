@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.app.ui.ButtonBack
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
 import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
@@ -110,12 +110,7 @@ private fun TracksEditingTopBar(
         modifier = modifier,
         title = { Text(text = stringResource(R.string.tracks_editing_title)) },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.content_description_back_button),
-                )
-            }
+            ButtonBack(onBack = onBack)
         },
         actions = {
             IconButton(onClick = {

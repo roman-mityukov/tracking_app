@@ -11,13 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -33,6 +29,7 @@ import androidx.core.net.MailTo
 import androidx.core.net.toUri
 import io.mityukov.geo.tracking.BuildConfig
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.app.ui.ButtonBack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -62,12 +59,7 @@ fun AboutTopBar(
         modifier = modifier,
         title = { Text(text = stringResource(R.string.about_title)) },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.content_description_back_button),
-                )
-            }
+            ButtonBack(onBack = onBack)
         }
     )
 }

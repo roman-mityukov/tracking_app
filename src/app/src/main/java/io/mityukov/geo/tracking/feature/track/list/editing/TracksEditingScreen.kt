@@ -29,8 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.ButtonBack
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
-import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
-import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
+import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.feature.track.list.CompletedTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,11 +59,10 @@ fun TracksEditingScreen(
                     },
                 ) { paddingValues ->
                     LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                        items(items = allTracks, key = {track -> track.id}) { track ->
+                        items(items = allTracks, key = { track -> track.id }) { track ->
                             TrackItem(
                                 track = track,
                                 isSelected = selectedTracks.any { it.id == track.id },
-                                isCapturedTrack = track.id == data.capturedTrack,
                                 onClick = {
                                     viewModel.add(TracksEditingEvent.ChangeSelection(track.id))
                                 })
@@ -128,9 +127,8 @@ private fun TracksEditingTopBar(
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
-    track: CompletedTrack,
+    track: Track,
     isSelected: Boolean,
-    isCapturedTrack: Boolean,
     onClick: (String) -> Unit,
 ) {
     Row(modifier = modifier) {
@@ -142,11 +140,7 @@ private fun TrackItem(
                 }
             ),
             headlineContent = {
-                InProgressTrackHeadline(
-                    startTime = track.start,
-                    isCapturedTrack = isCapturedTrack,
-                    paused = false
-                )
+                CompletedTrackHeadline(startTime = track.start)
             },
             supportingContent = {
                 TrackProperties(

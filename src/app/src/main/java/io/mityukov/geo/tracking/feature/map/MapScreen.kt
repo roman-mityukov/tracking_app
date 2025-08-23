@@ -52,8 +52,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ShareCompat
@@ -66,11 +69,12 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
-import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -143,9 +147,9 @@ private fun MapInfoContent(
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
-            if(viewModelState.track.points.isNotEmpty()) {
-                LaunchedEffect(viewModelState.track.points.last()) {
-                    mapViewHolder.showTrack(viewModelState.track.points)
+            if (viewModelState.geolocations.isNotEmpty()) {
+                LaunchedEffect(viewModelState.geolocations.size) {
+                    mapViewHolder.updateTrack(viewModelState.geolocations)
                 }
             }
 
@@ -337,45 +341,42 @@ private fun CurrentTrack(
     viewModelState: MapState.CurrentTrack,
     snackbarHostState: SnackbarHostState,
 ) {
-    if (viewModelState.track.points.isNotEmpty()) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = WindowInsets.safeDrawing.asPaddingValues()
-                        .calculateTopPadding() + 16.dp
-                )
-        ) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        InProgressTrackHeadline(
-                            startTime = viewModelState.track.start,
-                            isCapturedTrack = true,
-                            paused = viewModelState.status.paused
-                        )
-                        TrackProperties(
-                            duration = viewModelState.track.duration,
-                            distance = viewModelState.track.distance,
-                            altitudeUp = viewModelState.track.altitudeUp,
-                            altitudeDown = viewModelState.track.altitudeDown,
-                            averageSpeed = viewModelState.track.averageSpeed,
-                        )
-                    }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 16.dp,
+                vertical = WindowInsets.safeDrawing.asPaddingValues()
+                    .calculateTopPadding() + 16.dp
+            )
+    ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    InProgressTrackHeadline(
+                        startTime = viewModelState.trackInProgress.start,
+                        paused = viewModelState.trackInProgress.paused
+                    )
+                    TrackProperties(
+                        duration = viewModelState.trackInProgress.duration,
+                        distance = viewModelState.trackInProgress.distance,
+                        altitudeUp = viewModelState.trackInProgress.altitudeUp,
+                        altitudeDown = viewModelState.trackInProgress.altitudeDown,
+                        averageSpeed = viewModelState.trackInProgress.averageSpeed,
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+        }
+        Spacer(modifier = Modifier.height(8.dp))
 
-            if (viewModelState.currentLocation != null) {
-                CurrentGeolocationSharing(
-                    geolocation = viewModelState.currentLocation,
-                    snackbarHostState = snackbarHostState
-                )
-            }
+        if (viewModelState.currentLocation != null) {
+            CurrentGeolocationSharing(
+                geolocation = viewModelState.currentLocation,
+                snackbarHostState = snackbarHostState
+            )
         }
     }
 }
@@ -402,6 +403,34 @@ private fun CurrentTrackError(modifier: Modifier = Modifier) {
         }
     }
 }
+@Composable
+private fun InProgressTrackHeadline(
+    modifier: Modifier = Modifier,
+    startTime: Long,
+    paused: Boolean
+) {
+    val formattedStartTime =
+        TimeUtils.getFormattedLocalFromUTC(startTime, AppProps.UI_DATE_TIME_FORMATTER)
+
+    Text(
+        modifier = modifier,
+        text = buildAnnotatedString {
+            append("$formattedStartTime ")
+            withStyle(
+                style = SpanStyle(
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                )
+            ) {
+                if (paused) {
+                    append(stringResource(R.string.tracks_item_title_pause))
+                } else {
+                    append(stringResource(R.string.tracks_item_title_capturing))
+                }
+            }
+        })
+}
+
 
 @Composable
 private fun NoLocation(

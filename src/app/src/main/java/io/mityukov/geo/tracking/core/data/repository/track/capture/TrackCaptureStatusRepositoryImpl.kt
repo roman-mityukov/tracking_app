@@ -1,44 +1,109 @@
 package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import androidx.datastore.core.DataStore
+import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoGeolocation
 import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalTrackCaptureStatus
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.di.TrackCaptureStatusDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 class TrackCaptureStatusRepositoryImpl @Inject constructor(
     @param:TrackCaptureStatusDataStore private val dataStore: DataStore<ProtoLocalTrackCaptureStatus>,
 ) : TrackCaptureStatusRepository {
-    override val status: Flow<LocalTrackCaptureStatus> = dataStore.data.map { proto ->
-        if (proto.trackCaptureEnabled) {
-            LocalTrackCaptureStatus.Enabled(trackId = proto.trackId, paused = proto.paused)
-        } else {
-            LocalTrackCaptureStatus.Disabled
-        }
+    override val status: Flow<TrackCaptureStatus> = dataStore.data.map { proto ->
+        proto.toTrackCaptureStatus()
     }
 
-    override suspend fun update(localTrackCaptureStatus: LocalTrackCaptureStatus) {
-        val newTrackCaptureStatus = when(localTrackCaptureStatus) {
-            LocalTrackCaptureStatus.Disabled -> {
+    override suspend fun update(status: TrackCaptureStatus) {
+        val newTrackCaptureStatus = when (status) {
+            TrackCaptureStatus.Idle, TrackCaptureStatus.Error -> {
                 ProtoLocalTrackCaptureStatus
                     .newBuilder()
-                    .setTrackId("")
                     .setTrackCaptureEnabled(false)
+                    .setStart(0)
+                    .setDurationInSeconds(0)
+                    .setDistance(0)
+                    .setAltitudeUp(0)
+                    .setAltitudeDown(0)
+                    .setAverageSpeed(0f)
+                    .setMinSpeed(0f)
+                    .setMaxSpeed(0f)
+                    .setLastGeolocation(ProtoGeolocation.getDefaultInstance())
+                    .setGeolocationCount(0)
                     .setPaused(false)
                     .build()
             }
-            is LocalTrackCaptureStatus.Enabled -> {
+
+            is TrackCaptureStatus.Run -> {
+                val trackInProgress = status.trackInProgress
+                val geolocation = status.trackInProgress.lastLocation
+
                 ProtoLocalTrackCaptureStatus
                     .newBuilder()
-                    .setTrackId(localTrackCaptureStatus.trackId)
                     .setTrackCaptureEnabled(true)
-                    .setPaused(localTrackCaptureStatus.paused)
+                    .setStart(trackInProgress.start)
+                    .setDurationInSeconds(trackInProgress.duration.inWholeSeconds)
+                    .setDistance(trackInProgress.distance)
+                    .setAltitudeUp(trackInProgress.altitudeUp)
+                    .setAltitudeDown(trackInProgress.altitudeDown)
+                    .setAverageSpeed(trackInProgress.averageSpeed)
+                    .setMinSpeed(trackInProgress.minSpeed)
+                    .setMaxSpeed(trackInProgress.maxSpeed)
+                    .setLastGeolocation(
+                        if (geolocation != null) {
+                            ProtoGeolocation.newBuilder()
+                                .setLatitude(geolocation.latitude)
+                                .setLongitude(geolocation.longitude)
+                                .setAltitude(geolocation.altitude)
+                                .setSpeed(geolocation.speed)
+                                .setTimestamp(geolocation.time)
+                                .build()
+                        } else {
+                            ProtoGeolocation.getDefaultInstance()
+                        }
+                    )
+                    .setGeolocationCount(trackInProgress.geolocationCount)
+                    .setPaused(trackInProgress.paused)
                     .build()
             }
         }
         dataStore.updateData {
             newTrackCaptureStatus
         }
+    }
+}
+
+private fun ProtoLocalTrackCaptureStatus.toTrackCaptureStatus(): TrackCaptureStatus {
+    return if (trackCaptureEnabled) {
+        TrackCaptureStatus.Run(
+            trackInProgress = TrackInProgress(
+                start = start,
+                duration = durationInSeconds.seconds,
+                distance = distance,
+                altitudeUp = altitudeUp,
+                altitudeDown = altitudeDown,
+                averageSpeed = averageSpeed,
+                maxSpeed = maxSpeed,
+                minSpeed = minSpeed,
+                lastLocation = if (lastGeolocation.timestamp > 0) {
+                    Geolocation(
+                        lastGeolocation.latitude,
+                        lastGeolocation.longitude,
+                        lastGeolocation.altitude,
+                        lastGeolocation.speed,
+                        lastGeolocation.timestamp,
+                    )
+                } else {
+                    null
+                },
+                geolocationCount = geolocationCount,
+                paused = paused
+            )
+        )
+    } else {
+        TrackCaptureStatus.Idle
     }
 }

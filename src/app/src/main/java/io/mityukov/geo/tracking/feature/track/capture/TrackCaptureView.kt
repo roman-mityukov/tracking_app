@@ -63,7 +63,7 @@ private fun ButtonStartTrackCapture(modifier: Modifier = Modifier, viewModel: Tr
             if ((trackCaptureStatus is TrackCaptureStatus.Run).not()) {
                 viewModel.add(TrackCaptureEvent.StartCapture)
             } else {
-                if (trackCaptureStatus.paused) {
+                if (trackCaptureStatus.trackInProgress.paused) {
                     viewModel.add(TrackCaptureEvent.PlayCapture)
                 } else {
                     viewModel.add(TrackCaptureEvent.PauseCapture)
@@ -78,7 +78,7 @@ private fun ButtonStartTrackCapture(modifier: Modifier = Modifier, viewModel: Tr
         )
     ) {
         if (trackCaptureStatus is TrackCaptureStatus.Run) {
-            if (trackCaptureStatus.paused) {
+            if (trackCaptureStatus.trackInProgress.paused) {
                 Icon(
                     painterResource(R.drawable.icon_play),
                     contentDescription = stringResource(R.string.content_description_map_resume_track),

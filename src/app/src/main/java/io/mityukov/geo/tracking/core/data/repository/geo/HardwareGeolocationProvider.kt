@@ -80,7 +80,6 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
     override fun locationUpdates(interval: Duration): Flow<GeolocationUpdateResult> = callbackFlow {
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
-                logd("HardwareGeolocationProviderImpl $location")
                 val nmea = mutableListOf<NmeaData>()
                 nmea.addAll(nmeaGgaBuffer)
                 nmea.addAll(nmeaRmcBuffer)

@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
-import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.core.model.track.TrackActionType
 import io.mityukov.geo.tracking.di.DispatcherIO
+import io.mityukov.geo.tracking.utils.PausableTimer
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,14 +14,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
 class TrackCapturerControllerImpl @Inject constructor(
@@ -35,14 +36,16 @@ class TrackCapturerControllerImpl @Inject constructor(
     override val status: Flow<TrackCaptureStatus> = mutableStateFlow
 
     private val coroutineScope = CoroutineScope(coroutineContext)
-    private var subscriptionJob: Job? = null
+    private var statusSubscriptionJob: Job? = null
+    private var timerSubscriptionJob: Job? = null
     private val mutex = Mutex()
+    private val timer = PausableTimer(coroutineScope = coroutineScope)
 
     override suspend fun bind() = withContext(coroutineContext) {
         mutex.withLock {
             val captureStatus = trackCaptureStatusRepository.status.first()
-            if (captureStatus is LocalTrackCaptureStatus.Enabled && subscriptionJob == null) {
-                launchTrackCapture(captureStatus.trackId)
+            if (captureStatus is LocalTrackCaptureStatus.Enabled && statusSubscriptionJob == null) {
+                launchTrackCapture()
             }
         }
     }
@@ -58,14 +61,9 @@ class TrackCapturerControllerImpl @Inject constructor(
                 }
 
                 LocalTrackCaptureStatus.Disabled -> {
-                    val trackId = tracksRepository.insertTrack()
-                    tracksRepository.insertTrackAction(trackId, TrackActionType.Start)
-
-                    trackCaptureStatusRepository.update(
-                        LocalTrackCaptureStatus.Enabled(trackId = trackId, paused = false)
-                    )
-
-                    launchTrackCapture(trackId)
+                    tracksRepository.insertTrackAction(TrackActionType.Start)
+                    trackCaptureStatusRepository.update(LocalTrackCaptureStatus.Enabled())
+                    launchTrackCapture()
                 }
             }
         }
@@ -81,20 +79,13 @@ class TrackCapturerControllerImpl @Inject constructor(
                 }
 
                 is LocalTrackCaptureStatus.Enabled -> {
-                    tracksRepository.insertTrackAction(
-                        captureStatus.trackId,
-                        TrackActionType.Resume
-                    )
+                    timer.resume()
+                    tracksRepository.insertTrackAction(TrackActionType.Resume)
                     trackCaptureStatusRepository.update(
-                        LocalTrackCaptureStatus.Enabled(
-                            paused = false,
-                            trackId = captureStatus.trackId
-                        )
+                        LocalTrackCaptureStatus.Enabled(captureStatus.trackInProgress.copy(paused = false))
                     )
                 }
             }
-
-
         }
     }
 
@@ -108,12 +99,10 @@ class TrackCapturerControllerImpl @Inject constructor(
                 }
 
                 is LocalTrackCaptureStatus.Enabled -> {
-                    tracksRepository.insertTrackAction(captureStatus.trackId, TrackActionType.Pause)
+                    timer.pause()
+                    tracksRepository.insertTrackAction(TrackActionType.Pause)
                     trackCaptureStatusRepository.update(
-                        LocalTrackCaptureStatus.Enabled(
-                            paused = true,
-                            trackId = captureStatus.trackId
-                        )
+                        LocalTrackCaptureStatus.Enabled(captureStatus.trackInProgress.copy(paused = true))
                     )
                 }
             }
@@ -130,12 +119,12 @@ class TrackCapturerControllerImpl @Inject constructor(
                 }
 
                 is LocalTrackCaptureStatus.Enabled -> {
-                    subscriptionJob?.cancel()
-                    subscriptionJob = null
+                    timer.stop()
+                    statusSubscriptionJob?.cancel()
+                    statusSubscriptionJob = null
                     stopForegroundService()
-                    val currentTrack = tracksRepository.getTrack(captureStatus.trackId).first()
 
-                    tracksRepository.insertTrackAction(currentTrack.id, TrackActionType.Stop)
+                    tracksRepository.insertTrackAction(TrackActionType.Stop)
                     trackCaptureStatusRepository.update(LocalTrackCaptureStatus.Disabled)
                     mutableStateFlow.update {
                         TrackCaptureStatus.Idle
@@ -145,12 +134,27 @@ class TrackCapturerControllerImpl @Inject constructor(
         }
     }
 
-    private fun launchTrackCapture(trackId: String) {
+    private fun launchTrackCapture() {
         if (permissionChecker.locationGranted) {
             startForegroundService()
-            subscriptionJob = coroutineScope.launch {
-                subscribe(trackId)
+            statusSubscriptionJob = coroutineScope.launch {
+                subscribe()
             }
+            timerSubscriptionJob = coroutineScope.launch {
+                timer.events.collect {
+                    val currentStatus = trackCaptureStatusRepository.status.first()
+                    if (currentStatus is LocalTrackCaptureStatus.Enabled) {
+                        trackCaptureStatusRepository.update(
+                            LocalTrackCaptureStatus.Enabled(
+                                trackInProgress = currentStatus.trackInProgress.copy(
+                                    duration = (currentStatus.trackInProgress.duration.inWholeSeconds + 1).seconds
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+            timer.start()
         } else {
             mutableStateFlow.update {
                 TrackCaptureStatus.Error
@@ -172,21 +176,18 @@ class TrackCapturerControllerImpl @Inject constructor(
         )
     }
 
-    private suspend fun subscribe(trackId: String) {
+    private suspend fun subscribe() {
         logd("TrackCaptureService subscribePointsUpdate")
 
-        tracksRepository.getTrack(trackId)
-            .combine(trackCaptureStatusRepository.status) { track: Track, status: LocalTrackCaptureStatus ->
-                when (status) {
+        trackCaptureStatusRepository.status
+            .map { localStatus: LocalTrackCaptureStatus ->
+                when (localStatus) {
                     LocalTrackCaptureStatus.Disabled -> {
                         TrackCaptureStatus.Idle
                     }
 
                     is LocalTrackCaptureStatus.Enabled -> {
-                        TrackCaptureStatus.Run(
-                            track = track,
-                            paused = status.paused
-                        )
+                        TrackCaptureStatus.Run(trackInProgress = localStatus.trackInProgress)
                     }
                 }
             }.collect { newStatus ->

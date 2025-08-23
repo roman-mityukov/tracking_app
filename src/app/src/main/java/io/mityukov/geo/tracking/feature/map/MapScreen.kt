@@ -66,11 +66,13 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.list.InProgressTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
+import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -143,9 +145,9 @@ private fun MapInfoContent(
 ) {
     when (viewModelState) {
         is MapState.CurrentTrack -> {
-            if(viewModelState.track.points.isNotEmpty()) {
-                LaunchedEffect(viewModelState.track.points.last()) {
-                    mapViewHolder.showTrack(viewModelState.track.points)
+            if (viewModelState.trackInProgress.lastLocation != null) {
+                LaunchedEffect(viewModelState.trackInProgress.lastLocation) {
+                    mapViewHolder.updateTrack(viewModelState.trackInProgress.lastLocation)
                 }
             }
 
@@ -337,45 +339,43 @@ private fun CurrentTrack(
     viewModelState: MapState.CurrentTrack,
     snackbarHostState: SnackbarHostState,
 ) {
-    if (viewModelState.track.points.isNotEmpty()) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = WindowInsets.safeDrawing.asPaddingValues()
-                        .calculateTopPadding() + 16.dp
-                )
-        ) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        InProgressTrackHeadline(
-                            startTime = viewModelState.track.start,
-                            isCapturedTrack = true,
-                            paused = viewModelState.status.paused
-                        )
-                        TrackProperties(
-                            duration = viewModelState.track.duration,
-                            distance = viewModelState.track.distance,
-                            altitudeUp = viewModelState.track.altitudeUp,
-                            altitudeDown = viewModelState.track.altitudeDown,
-                            averageSpeed = viewModelState.track.averageSpeed,
-                        )
-                    }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 16.dp,
+                vertical = WindowInsets.safeDrawing.asPaddingValues()
+                    .calculateTopPadding() + 16.dp
+            )
+    ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    InProgressTrackHeadline(
+                        startTime = viewModelState.trackInProgress.start,
+                        isCapturedTrack = true,
+                        paused = viewModelState.trackInProgress.paused
+                    )
+                    TrackProperties(
+                        duration = viewModelState.trackInProgress.duration,
+                        distance = viewModelState.trackInProgress.distance,
+                        altitudeUp = viewModelState.trackInProgress.altitudeUp,
+                        altitudeDown = viewModelState.trackInProgress.altitudeDown,
+                        averageSpeed = viewModelState.trackInProgress.averageSpeed,
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+        }
+        Spacer(modifier = Modifier.height(8.dp))
 
-            if (viewModelState.currentLocation != null) {
-                CurrentGeolocationSharing(
-                    geolocation = viewModelState.currentLocation,
-                    snackbarHostState = snackbarHostState
-                )
-            }
+        if (viewModelState.currentLocation != null) {
+            CurrentGeolocationSharing(
+                geolocation = viewModelState.currentLocation,
+                snackbarHostState = snackbarHostState
+            )
         }
     }
 }

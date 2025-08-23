@@ -111,9 +111,9 @@ fun TrackDetailsMapScreen(
                         }
                     }
 
-                    if (track.points.isNotEmpty()) {
-                        LaunchedEffect(track.points.last()) {
-                            mapView.showTrack(context, track.points, true)
+                    if (track.geolocations.isNotEmpty()) {
+                        LaunchedEffect(track.geolocations.last()) {
+                            mapView.showTrack(context, track.geolocations, true)
                         }
                     }
                 }

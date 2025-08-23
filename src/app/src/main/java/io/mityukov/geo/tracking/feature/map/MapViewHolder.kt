@@ -8,7 +8,6 @@ import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
 import io.mityukov.geo.tracking.yandex.navigateTo
@@ -16,6 +15,7 @@ import io.mityukov.geo.tracking.yandex.showTrack
 import io.mityukov.geo.tracking.yandex.zoom
 
 class MapViewHolder(val mapView: MapView, private val context: Context) {
+    private val geolocations = mutableListOf<Geolocation>()
     fun currentLocationPlacemark(geolocation: Geolocation) {
         mapView.map.mapObjects.clear()
         val placemark = mapView.map.mapObjects.addPlacemark()
@@ -34,8 +34,9 @@ class MapViewHolder(val mapView: MapView, private val context: Context) {
         )
     }
 
-    fun showTrack(points: List<TrackPoint>) {
-        mapView.showTrack(context, points, false)
+    fun updateTrack(geolocation: Geolocation) {
+        geolocations.add(geolocation)
+        mapView.showTrack(context, geolocations, false)
     }
 
     fun zoomIn() {

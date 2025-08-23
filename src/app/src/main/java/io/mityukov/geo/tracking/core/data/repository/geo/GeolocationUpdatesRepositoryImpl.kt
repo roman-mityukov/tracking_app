@@ -1,10 +1,10 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.utils.permission.PermissionChecker
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,17 +57,15 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
                         )
                     }
                 } else {
-                    launch {
-                        val lastKnownLocation = geolocationProvider.getLastKnownLocation()
-                        mutableStateFlow.update {
-                            lastKnownLocation
-                        }
+                    val lastKnownLocation = geolocationProvider.getLastKnownLocation()
+                    mutableStateFlow.update {
+                        lastKnownLocation.toGeolocationUpdateResult()
                     }
 
                     geolocationSubscription = launch {
-                        geolocationProvider.locationUpdates(5000.milliseconds).collect { result ->
+                        geolocationProvider.locationUpdates(10000.milliseconds).collect { result ->
                             mutableStateFlow.update {
-                                result
+                                result.toGeolocationUpdateResult()
                             }
                         }
                     }
@@ -82,4 +80,21 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
             geolocationSubscription = null
         }
     }
+}
+
+private fun PlatformLocationUpdateResult.toGeolocationUpdateResult(): GeolocationUpdateResult {
+    return GeolocationUpdateResult(
+        geolocation = if (location != null) {
+            Geolocation(
+                latitude = location.latitude,
+                longitude = location.longitude,
+                altitude = location.altitude,
+                speed = location.speed,
+                time = location.time,
+            )
+        } else {
+            null
+        },
+        error = error,
+    )
 }

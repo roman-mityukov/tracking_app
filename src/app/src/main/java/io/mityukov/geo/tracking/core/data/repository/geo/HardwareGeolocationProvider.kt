@@ -11,7 +11,6 @@ import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.nmea.NmeaData
 import io.mityukov.geo.tracking.utils.nmea.NmeaParser
@@ -29,104 +28,65 @@ class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext 
     private val locationManager = context.getSystemService<LocationManager>() as LocationManager
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    override suspend fun getLastKnownLocation(): GeolocationUpdateResult =
+    override suspend fun getLastKnownLocation(): PlatformLocationUpdateResult =
         suspendCoroutine { continuation ->
             val lastKnownLocation =
                 locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
 
             if (lastKnownLocation != null) {
                 continuation.resume(
-                    GeolocationUpdateResult(
-                        geolocation = Geolocation(
-                            latitude = lastKnownLocation.latitude,
-                            longitude = lastKnownLocation.longitude,
-                            altitude = lastKnownLocation.altitude,
-                            speed = lastKnownLocation.speed,
-                            time = lastKnownLocation.time,
-                        ),
+                    PlatformLocationUpdateResult(
+                        location = lastKnownLocation,
                         error = null,
                     )
                 )
             } else {
                 continuation.resume(
-                    GeolocationUpdateResult(
-                        geolocation = null,
+                    PlatformLocationUpdateResult(
+                        location = null,
                         error = GeolocationUpdateException.LocationIsNull
                     )
                 )
             }
         }
 
-    val nmeaGgaBuffer = mutableListOf<NmeaData.GGA>()
-    val nmeaRmcBuffer = mutableListOf<NmeaData.RMC>()
-    val nmeaHandler = Handler(Looper.getMainLooper())
-    val nmeaListener = object : OnNmeaMessageListener {
-        val parser = NmeaParser
-        override fun onNmeaMessage(line: String, timestamp: Long) {
-            if (line.contains("GGA") || line.contains("RMC")) {
-                val nmeaData = parser.parseNmeaMessage(line)
-                if (nmeaData != null) {
-                    if (nmeaData is NmeaData.GGA) {
-                        nmeaGgaBuffer.add(nmeaData)
-                    } else if (nmeaData is NmeaData.RMC) {
-                        nmeaRmcBuffer.add(nmeaData)
-                    }
-                }
-            }
-        }
-    }
-
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    override fun locationUpdates(interval: Duration): Flow<GeolocationUpdateResult> = callbackFlow {
-        val locationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                logd("HardwareGeolocationProviderImpl $location")
-                val nmea = mutableListOf<NmeaData>()
-                nmea.addAll(nmeaGgaBuffer)
-                nmea.addAll(nmeaRmcBuffer)
-                nmeaGgaBuffer.clear()
-                nmeaRmcBuffer.clear()
-
-                trySendBlocking(
-                    GeolocationUpdateResult(
-                        geolocation = Geolocation(
-                            latitude = location.latitude,
-                            longitude = location.longitude,
-                            speed = if (location.hasSpeed()) location.speed else 0f,
-                            altitude = if (location.hasAltitude()) location.altitude else 0.0,
-                            time = location.time
-                        ),
-                        error = null,
-                        nmea = nmea
-                    )
-                )
-            }
-
-            override fun onProviderDisabled(provider: String) {
-                super.onProviderDisabled(provider)
-
-                if (provider == LocationManager.GPS_PROVIDER) {
+    override fun locationUpdates(interval: Duration, minDistance: Float): Flow<PlatformLocationUpdateResult> =
+        callbackFlow {
+            val locationListener = object : LocationListener {
+                override fun onLocationChanged(location: Location) {
+                    logd("HardwareGeolocationProvider emit location $location")
                     trySendBlocking(
-                        GeolocationUpdateResult(
-                            geolocation = null,
-                            error = GeolocationUpdateException.LocationDisabled
+                        PlatformLocationUpdateResult(
+                            location = location,
+                            error = null
                         )
                     )
                 }
+
+                override fun onProviderDisabled(provider: String) {
+                    super.onProviderDisabled(provider)
+
+                    if (provider == LocationManager.GPS_PROVIDER) {
+                        trySendBlocking(
+                            PlatformLocationUpdateResult(
+                                location = null,
+                                error = GeolocationUpdateException.LocationDisabled
+                            )
+                        )
+                    }
+                }
+            }
+
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                interval.inWholeMilliseconds,
+                minDistance,
+                locationListener,
+                Looper.getMainLooper()
+            )
+            awaitClose {
+                locationManager.removeUpdates(locationListener)
             }
         }
-
-        locationManager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            interval.inWholeMilliseconds,      // 10 seconds
-            0f,         // 10 meters
-            locationListener,
-            Looper.getMainLooper()
-        )
-        locationManager.addNmeaListener(nmeaListener, nmeaHandler)
-        awaitClose {
-            locationManager.removeUpdates(locationListener)
-            locationManager.removeNmeaListener(nmeaListener)
-        }
-    }
 }

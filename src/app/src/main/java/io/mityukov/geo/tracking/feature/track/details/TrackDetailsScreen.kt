@@ -52,7 +52,7 @@ import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.ButtonBack
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
-import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
+import io.mityukov.geo.tracking.core.model.track.DetailedTrack
 import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import io.mityukov.geo.tracking.yandex.showTrack
@@ -115,7 +115,7 @@ fun TrackDetailsScreen(
 
                 TrackDetailsContent(
                     paddingValues = paddingValues,
-                    track = track,
+                    detailedTrack = track,
                     onTrackMapSelected = onTrackMapSelected,
                     onDelete = {
                         openDeleteDialog.value = true
@@ -174,7 +174,7 @@ private fun TrackDetailsTopBar(
 private fun TrackDetailsContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    track: CompletedTrack,
+    detailedTrack: DetailedTrack,
     onTrackMapSelected: (String) -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -189,19 +189,24 @@ private fun TrackDetailsContent(
             .verticalScroll(scrollState)
     ) {
 
-        TrackDetailsList(track = track)
+        TrackDetailsList(detailedTrack = detailedTrack)
         Spacer(modifier = Modifier.height(16.dp))
         AltitudeChart(
             chartData = AltitudeChartData(
-                track.altitudeByDistance.map { ChartPoint(it.second, it.first) }
+                detailedTrack.altitudeByDistance.map { ChartPoint(it.second, it.first) }
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
         SpeedChart(
-            chartData = SpeedChartData(track.speedByDistance.map { SpeedChartPoint(it.second, it.first) })
+            chartData = SpeedChartData(detailedTrack.speedByDistance.map {
+                SpeedChartPoint(
+                    it.second,
+                    it.first
+                )
+            })
         )
         Spacer(modifier = Modifier.height(16.dp))
-        TrackDetailsMap(track = track, onTrackMapSelected = onTrackMapSelected)
+        TrackDetailsMap(track = detailedTrack, onTrackMapSelected = onTrackMapSelected)
         Spacer(modifier = Modifier.height(16.dp))
         ButtonDeleteTrack(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -213,7 +218,7 @@ private fun TrackDetailsContent(
 @Composable
 private fun TrackDetailsMap(
     modifier: Modifier = Modifier,
-    track: CompletedTrack,
+    track: DetailedTrack,
     onTrackMapSelected: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -239,7 +244,7 @@ private fun TrackDetailsMap(
                 .size(48.dp)
                 .padding(8.dp),
             onClick = {
-                onTrackMapSelected(track.id)
+                onTrackMapSelected(track.data.id)
             },
             shape = CircleShape,
             contentPadding = PaddingValues(0.dp),
@@ -272,15 +277,16 @@ private fun TrackDetailsMap(
         }
     }
 
-    if (track.points.isNotEmpty()) {
-        LaunchedEffect(track.points.last()) {
-            mapView.showTrack(context, track.points, true)
+    if (track.geolocations.isNotEmpty()) {
+        LaunchedEffect(track.geolocations.last()) {
+            mapView.showTrack(context, track.geolocations, true)
         }
     }
 }
 
 @Composable
-private fun TrackDetailsList(modifier: Modifier = Modifier, track: CompletedTrack) {
+private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: DetailedTrack) {
+    val track = detailedTrack.data
     Column(modifier = modifier) {
         Text(
             text = stringResource(

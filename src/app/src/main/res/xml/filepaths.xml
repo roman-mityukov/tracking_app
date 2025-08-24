@@ -1,4 +1,7 @@
 <paths>
+    <files-path
+        path="/"
+        name="internal_files" />
     <external-files-path
         path="/"
         name="external_files" />

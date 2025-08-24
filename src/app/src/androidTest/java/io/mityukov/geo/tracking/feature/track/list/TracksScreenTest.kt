@@ -19,7 +19,7 @@ import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.theme.GeoAppTheme
 import io.mityukov.geo.tracking.core.database.AppDatabase
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
-import io.mityukov.geo.tracking.core.database.model.TrackWithPoints
+import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.hilt.HiltTestActivity
 import kotlinx.serialization.json.Json
 import org.junit.Before
@@ -116,7 +116,7 @@ class TracksScreenTest {
         val json = Json {
             ignoreUnknownKeys = true
         }
-        val entity = json.decodeFromString<TrackWithPoints>(jsonString)
-        trackDao.insertTrackWithPoints(entity)
+        val entity = json.decodeFromString<TrackEntity>(jsonString)
+        trackDao.insertTrack(entity)
     }
 }

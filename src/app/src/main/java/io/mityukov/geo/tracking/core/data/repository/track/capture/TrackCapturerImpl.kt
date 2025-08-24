@@ -7,7 +7,6 @@ import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateResult
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.di.DispatcherIO
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 import io.mityukov.geo.tracking.utils.log.logd
@@ -20,10 +19,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
 class TrackCapturerImpl @Inject constructor(
-    private val trackCaptureStatusProvider: TrackCaptureStatusProvider,
+    private val trackCaptureStatusRepository: TrackCaptureStatusRepository,
     private val tracksRepository: TracksRepository,
     private val geolocationProvider: GeolocationProvider,
     private val appSettingsRepository: AppSettingsRepository,
@@ -48,12 +48,14 @@ class TrackCapturerImpl @Inject constructor(
             geolocationSubscription = launch {
                 geolocationProvider.locationUpdates(geolocationUpdatesInterval)
                     .collect { result ->
-                        logd("TrackCaptureRepositoryImpl locationCallback geolocation" +
-                                " ${result.geolocation} error ${result.error} nmea size ${result.nmea.size}")
-                        val captureStatus = trackCaptureStatusProvider.status.first()
+                        logd(
+                            "TrackCaptureRepositoryImpl locationCallback geolocation" +
+                                    " ${result.geolocation} error ${result.error} nmea size ${result.nmea.size}"
+                        )
+                        val captureStatus = trackCaptureStatusRepository.status.first()
 
                         if (captureStatus is LocalTrackCaptureStatus.Enabled) {
-                            handleGeolocationUpdate(captureStatus, result)
+                            handleGeolocationUpdate(captureStatus.trackInProgress, result)
                         }
                     }
             }
@@ -70,22 +72,63 @@ class TrackCapturerImpl @Inject constructor(
 
     @OptIn(ExperimentalUuidApi::class)
     private suspend fun handleGeolocationUpdate(
-        captureStatus: LocalTrackCaptureStatus.Enabled,
+        trackInProgress: TrackInProgress,
         geolocationUpdateResult: GeolocationUpdateResult
     ) {
-        if (captureStatus.paused) return
+        if (trackInProgress.paused) return
         if (geolocationUpdateResult.isInvalidData()) return
 
         geolocationUpdateResult.geolocation?.let { geolocation ->
-            val currentTrack = tracksRepository.getTrack(captureStatus.trackId).first()
-            val points = currentTrack.points
-
-            val isAcceptableDistance = acceptableDistance(points, geolocation, 4f)
+            val isAcceptableDistance =
+                acceptableDistance(trackInProgress.lastLocation, geolocation, 2f)
 
             if (isAcceptableDistance) {
-                tracksRepository.insertTrackPoint(
-                    trackId = currentTrack.id,
-                    geolocation = geolocation
+                tracksRepository.insertTrackPoint(geolocation = geolocation)
+
+                val lastLocation = trackInProgress.lastLocation
+                val newTrackInProgress = if (lastLocation != null) {
+                    trackInProgress.copy(
+                        distance = trackInProgress.distance + distanceTo(
+                            lat1 = lastLocation.latitude,
+                            lon1 = lastLocation.longitude,
+                            lat2 = geolocation.latitude,
+                            lon2 = geolocation.longitude,
+                        ),
+                        altitudeUp = if (lastLocation.altitude > geolocation.altitude) {
+                            (lastLocation.altitude - geolocation.altitude).toInt()
+                        } else {
+                            trackInProgress.altitudeUp
+                        },
+                        altitudeDown = if (geolocation.altitude > lastLocation.altitude) {
+                            (geolocation.altitude - lastLocation.altitude).toInt()
+                        } else {
+                            trackInProgress.altitudeDown
+                        },
+                        averageSpeed = (trackInProgress.averageSpeed + geolocation.speed)
+                                / (trackInProgress.geolocationCount + 1),
+                        maxSpeed = if (geolocation.speed > trackInProgress.maxSpeed) {
+                            geolocation.speed
+                        } else {
+                            trackInProgress.maxSpeed
+                        },
+                        minSpeed = if (geolocation.speed < trackInProgress.minSpeed) {
+                            geolocation.speed
+                        } else {
+                            trackInProgress.minSpeed
+                        },
+                        lastLocation = geolocation,
+                        geolocationCount = trackInProgress.geolocationCount + 1,
+                    )
+                } else {
+                    trackInProgress.copy(
+                        lastLocation = geolocation
+                    )
+                }
+
+                trackCaptureStatusRepository.update(
+                    LocalTrackCaptureStatus.Enabled(
+                        newTrackInProgress
+                    )
                 )
             } else {
                 logw("not acceptable distance")
@@ -94,13 +137,12 @@ class TrackCapturerImpl @Inject constructor(
     }
 
     fun acceptableDistance(
-        points: List<TrackPoint>,
+        previous: Geolocation?,
         next: Geolocation,
         speedThreshold: Float
     ): Boolean {
-        if (points.isEmpty()) return true
+        if (previous == null) return true
 
-        val previous = points.last().geolocation
         val distance: Float = distanceTo(
             lat1 = next.latitude,
             lon1 = next.longitude,

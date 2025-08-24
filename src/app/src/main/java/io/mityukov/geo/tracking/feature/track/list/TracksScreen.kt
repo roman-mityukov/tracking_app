@@ -38,10 +38,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
+import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import java.util.Locale
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,7 +121,7 @@ private fun TrackList(
 @Composable
 fun InProgressTrackHeadline(
     modifier: Modifier = Modifier,
-    startTime: String,
+    startTime: Long,
     isCapturedTrack: Boolean,
     paused: Boolean
 ) {
@@ -154,7 +154,7 @@ fun InProgressTrackHeadline(
 @Composable
 fun CompletedTrackHeadline(
     modifier: Modifier = Modifier,
-    startTime: String,
+    startTime: Long,
 ) {
     val formattedStartTime =
         TimeUtils.getFormattedLocalFromUTC(startTime, AppProps.UI_DATE_TIME_FORMATTER)
@@ -188,15 +188,13 @@ fun TrackProperties(
     distance: Int,
     altitudeUp: Int,
     altitudeDown: Int,
-    averageSpeed: Double,
+    averageSpeed: Float,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         TrackItemProperty(
             iconResource = R.drawable.icon_duration,
             text = DateUtils.formatElapsedTime(
-                duration.toLong(
-                    DurationUnit.SECONDS
-                )
+                duration.inWholeSeconds
             ),
             contentDescription = stringResource(R.string.content_description_track_time),
         )
@@ -226,7 +224,7 @@ fun TrackProperties(
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
-    track: CompletedTrack,
+    track: Track,
     onClick: (String) -> Unit,
     onLongPress: (String) -> Unit,
 ) {

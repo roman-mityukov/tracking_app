@@ -15,9 +15,16 @@ object TimeUtils {
         return startTime
     }
 
-    fun getFormattedLocalFromUTC(utc: String, formatter: DateTimeFormatter): String {
+    fun getFormattedUtcTime(milliseconds: Long): String {
+        val instant = Instant.ofEpochMilli(milliseconds)
+        val formatter = DateTimeFormatter.ISO_INSTANT
+        val formattedString = formatter.format(instant)
+        return formattedString
+    }
+
+    fun getFormattedLocalFromUTC(utc: Long, formatter: DateTimeFormatter): String {
         val local = LocalDateTime.ofInstant(
-            Instant.parse(utc),
+            Instant.ofEpochMilli(utc),
             ZoneId.systemDefault()
         ).format(formatter)
         return local

@@ -15,7 +15,6 @@ import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.core.model.track.TrackPoint
 
 fun Map.zoom(value: Float) {
     with(cameraPosition) {
@@ -38,11 +37,11 @@ fun MapView.navigateTo(geolocation: Geolocation) {
     )
 }
 
-fun MapView.showTrack(context: Context, trackPoints: List<TrackPoint>, moveCamera: Boolean) {
+fun MapView.showTrack(context: Context, geolocations: List<Geolocation>, moveCamera: Boolean) {
     map.mapObjects.clear()
 
-    val points = trackPoints.map {
-        Point(it.geolocation.latitude, it.geolocation.longitude)
+    val points = geolocations.map {
+        Point(it.latitude, it.longitude)
     }
     val startImageProvider =
         ImageProvider.fromResource(context, R.drawable.pin_start)

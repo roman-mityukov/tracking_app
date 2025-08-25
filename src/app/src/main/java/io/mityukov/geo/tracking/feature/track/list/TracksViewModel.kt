@@ -6,146 +6,71 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
-import io.mityukov.geo.tracking.core.model.track.TrackAction
-import io.mityukov.geo.tracking.core.model.track.TrackActionType
-import io.mityukov.geo.tracking.core.model.track.TrackPoint
-import io.mityukov.geo.tracking.utils.geolocation.distanceTo
-import io.mityukov.geo.tracking.utils.log.logd
-import io.mityukov.geo.tracking.utils.time.TimeUtils
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import kotlin.random.Random
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
-fun Track.toCompletedTrack(): CompletedTrack {
-    val duration = if (actions.size > 2) {
-        var pausedTimeStamp = ""
-        val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
-            logd("timestamp ${action.timestamp}")
-            when (action.type) {
-                TrackActionType.Pause -> {
-                    pausedTimeStamp = action.timestamp
-                    value
-                }
-
-                TrackActionType.Resume -> {
-                    val newValue = value + TimeUtils.durationBetween(
-                        pausedTimeStamp,
-                        action.timestamp
-                    )
-                    pausedTimeStamp = ""
-                    newValue
-                }
-
-                TrackActionType.Stop -> {
-                    if (pausedTimeStamp.isNotEmpty()) {
-                        val newValue = value + TimeUtils.durationBetween(
-                            pausedTimeStamp,
-                            action.timestamp
-                        )
-                        newValue
-                    } else {
-                        value
-                    }
-                }
-
-                else -> {
-                    value
-                }
-            }
-        }
-        logd("pausedDuration $pausedDuration")
-        TimeUtils.durationBetween(start, end) - pausedDuration
-    } else {
-        TimeUtils.durationBetween(start, end)
-    }
-
-    return CompletedTrack(
-        id = id,
-        name = name,
-        start = start,
-        end = end,
-        distance = distance,
-        altitudeUp = altitudeUp,
-        altitudeDown = altitudeDown,
-        points = points,
-        duration = duration
-    )
-}
-
-data class CompletedTrack(
-    val id: String,
-    val name: String,
-    val start: String,
-    val end: String,
-    val distance: Int,
-    val altitudeUp: Int,
-    val altitudeDown: Int,
-    val points: List<TrackPoint>,
-    val duration: Duration
-) {
-    val altitudeByDistance: List<Pair<Int, Int>> by lazy {
-        val result = mutableListOf<Pair<Int, Int>>()
-        var currentDistance = 0
-        points.forEachIndexed { index, point ->
-            if (index > 0) {
-                val firstPoint = points[index - 1].geolocation
-                val secondPoint = points[index].geolocation
-                currentDistance += distanceTo(
-                    firstPoint.latitude,
-                    firstPoint.longitude,
-                    secondPoint.latitude,
-                    secondPoint.longitude,
-                )
-                result.add(Pair(secondPoint.altitude.toInt(), currentDistance))
-            } else {
-                result.add(Pair(points[index].geolocation.altitude.toInt(), 0))
-            }
-        }
-        result.toList()
-    }
-
-    val speedByDistance: List<Pair<Double, Int>> by lazy {
-        val result = mutableListOf<Pair<Double, Int>>()
-        var currentDistance = 0
-        points.forEachIndexed { index, point ->
-            if (index > 0) {
-                val firstPoint = points[index - 1].geolocation
-                val secondPoint = points[index].geolocation
-                currentDistance += distanceTo(
-                    firstPoint.latitude,
-                    firstPoint.longitude,
-                    secondPoint.latitude,
-                    secondPoint.longitude,
-                )
-                result.add(Pair(secondPoint.speed.toDouble(), currentDistance))
-            } else {
-                result.add(Pair(points[index].geolocation.speed.toDouble(), 0))
-            }
-        }
-        result.toList()
-    }
-
-    val averageSpeed: Double by lazy {
-        points.sumOf { it.geolocation.speed.toDouble() } / points.size
-    }
-
-    val minSpeed: Double by lazy {
-        points.minBy { it.geolocation.speed }.geolocation.speed.toDouble()
-    }
-
-    val maxSpeed: Double by lazy {
-        points.maxBy { it.geolocation.speed }.geolocation.speed.toDouble()
-    }
-}
+//fun Track.toCompletedTrack(): CompletedTrack {
+//    val duration = if (actions.size > 2) {
+//        var pausedTimeStamp = ""
+//        val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
+//            logd("timestamp ${action.timestamp}")
+//            when (action.type) {
+//                TrackActionType.Pause -> {
+//                    pausedTimeStamp = action.timestamp
+//                    value
+//                }
+//
+//                TrackActionType.Resume -> {
+//                    val newValue = value + TimeUtils.durationBetween(
+//                        pausedTimeStamp,
+//                        action.timestamp
+//                    )
+//                    pausedTimeStamp = ""
+//                    newValue
+//                }
+//
+//                TrackActionType.Stop -> {
+//                    if (pausedTimeStamp.isNotEmpty()) {
+//                        val newValue = value + TimeUtils.durationBetween(
+//                            pausedTimeStamp,
+//                            action.timestamp
+//                        )
+//                        newValue
+//                    } else {
+//                        value
+//                    }
+//                }
+//
+//                else -> {
+//                    value
+//                }
+//            }
+//        }
+//        logd("pausedDuration $pausedDuration")
+//        TimeUtils.durationBetween(start, end) - pausedDuration
+//    } else {
+//        TimeUtils.durationBetween(start, end)
+//    }
+//
+//    return CompletedTrack(
+//        id = id,
+//        name = name,
+//        start = start,
+//        end = end,
+//        distance = distance,
+//        altitudeUp = altitudeUp,
+//        altitudeDown = altitudeDown,
+//        points = points,
+//        duration = duration
+//    )
+//}
 
 sealed interface TracksState {
     data object Pending : TracksState
     data class Data(
-        val tracks: List<CompletedTrack>,
+        val tracks: List<Track>,
     ) :
         TracksState
 }
@@ -153,11 +78,10 @@ sealed interface TracksState {
 @HiltViewModel
 class TracksViewModel @Inject constructor(tracksRepository: TracksRepository) : ViewModel() {
     val stateFlow =
-        tracksRepository.tracks.map { tracks ->
-            TracksState.Data(
-                tracks = tracks.filter { it.isCompleted }.map { it.toCompletedTrack() },
-            )
-        }
+        tracksRepository.tracks
+            .map { tracks ->
+                TracksState.Data(tracks = tracks)
+            }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),

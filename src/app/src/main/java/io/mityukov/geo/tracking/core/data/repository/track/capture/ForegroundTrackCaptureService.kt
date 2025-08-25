@@ -12,30 +12,19 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.MainActivity
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.di.DispatcherIO
+import io.mityukov.geo.tracking.utils.log.logd
 import io.mityukov.geo.tracking.utils.log.logw
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 
 @AndroidEntryPoint
 class ForegroundTrackCaptureService : LifecycleService() {
     @Inject
-    lateinit var trackCapturer: TrackCapturer
-
-    @Inject
-    lateinit var trackCaptureStatusProvider: TrackCaptureStatusProvider
-
-    @Inject
-    @DispatcherIO
-    lateinit var coroutineDispatcher: CoroutineDispatcher
+    lateinit var trackCapturerController: TrackCapturerController
 
     override fun onBind(intent: Intent): IBinder? {
         super.onBind(intent)
@@ -45,13 +34,6 @@ class ForegroundTrackCaptureService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground()
         return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onDestroy() {
-        lifecycleScope.launch {
-            trackCapturer.stop()
-        }
-        super.onDestroy()
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -69,27 +51,17 @@ class ForegroundTrackCaptureService : LifecycleService() {
             stopSelf()
             return
         } else {
-            lifecycleScope.launch {
-                val currentTrackCaptureStatus = trackCaptureStatusProvider.status.first()
-                when(currentTrackCaptureStatus) {
-                    LocalTrackCaptureStatus.Disabled -> {
-                        stopSelf()
-                    }
-                    is LocalTrackCaptureStatus.Enabled -> {
-                        ServiceCompat.startForeground(
-                            this@ForegroundTrackCaptureService,
-                            AppProps.TRACK_CAPTURE_NOTIFICATION_ID,
-                            buildNotification(),
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                            } else {
-                                0
-                            },
-                        )
-                        trackCapturer.start()
-                    }
-                }
-            }
+            logd("trackCapturerController $trackCapturerController")
+            ServiceCompat.startForeground(
+                this@ForegroundTrackCaptureService,
+                AppProps.TRACK_CAPTURE_NOTIFICATION_ID,
+                buildNotification(),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                } else {
+                    0
+                },
+            )
         }
     }
 

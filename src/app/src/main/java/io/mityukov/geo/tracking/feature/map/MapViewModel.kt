@@ -7,15 +7,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
+import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackInProgress
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.core.model.track.Track
-import io.mityukov.geo.tracking.core.model.track.TrackAction
-import io.mityukov.geo.tracking.core.model.track.TrackActionType
-import io.mityukov.geo.tracking.core.model.track.TrackPoint
-import io.mityukov.geo.tracking.utils.PausableTimer
-import io.mityukov.geo.tracking.utils.time.TimeUtils
+import io.mityukov.geo.tracking.utils.log.logw
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -25,74 +22,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-
-fun Track.toTrackInProgress(currentTime: String): TrackInProgress {
-    val duration = if (actions.size > 1) {
-        var pausedTimeStamp = ""
-        val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
-            when (action.type) {
-                TrackActionType.Pause -> {
-                    pausedTimeStamp = action.timestamp
-                    value
-                }
-
-                TrackActionType.Resume -> {
-                    val newValue = value + TimeUtils.durationBetween(
-                        pausedTimeStamp,
-                        action.timestamp
-                    )
-                    pausedTimeStamp = ""
-                    newValue
-                }
-
-                else -> {
-                    value
-                }
-            }
-        }
-
-        val considerLastPause = if (actions.last().type == TrackActionType.Pause) {
-            pausedDuration + TimeUtils.durationBetween(
-                actions.last().timestamp,
-                currentTime
-            )
-        } else {
-            pausedDuration
-        }
-
-        TimeUtils.durationBetween(start, currentTime) - considerLastPause
-    } else {
-        TimeUtils.durationBetween(start, currentTime)
-    }
-
-    return TrackInProgress(
-        id = id,
-        start = start,
-        end = end,
-        distance = distance,
-        altitudeUp = altitudeUp,
-        altitudeDown = altitudeDown,
-        points = points,
-        duration = duration,
-    )
-}
-
-data class TrackInProgress(
-    val id: String,
-    val start: String,
-    val end: String,
-    val distance: Int,
-    val altitudeUp: Int,
-    val altitudeDown: Int,
-    val points: List<TrackPoint>,
-    val duration: Duration
-) {
-    val averageSpeed: Double by lazy {
-        points.sumOf { it.geolocation.speed.toDouble() } / points.size
-    }
-}
 
 sealed interface MapEvent {
     data object PauseCurrentLocationUpdate : MapEvent
@@ -107,8 +36,8 @@ sealed interface MapState {
     ) : MapState
 
     data class CurrentTrack(
-        val track: TrackInProgress,
-        val status: TrackCaptureStatus.Run,
+        val trackInProgress: TrackInProgress,
+        val geolocations: List<Geolocation>,
         val currentLocation: Geolocation?,
     ) : MapState
 
@@ -121,64 +50,52 @@ sealed interface MapState {
 class MapViewModel @Inject constructor(
     private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
     private val trackCapturerController: TrackCapturerController,
+    private val tracksRepository: TracksRepository,
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
 
-    private val timer = PausableTimer(coroutineScope = viewModelScope)
-
-    init {
-        timer.start()
-    }
-
     val stateFlow: StateFlow<MapState> = trackCapturerController.status
-        .combine(timer.events) { trackCaptureStatus, timerEvent ->
-            Pair(trackCaptureStatus, timerEvent)
-        }
         .combine(
             geolocationUpdatesRepository.currentLocation
-        ) { pair, currentLocation ->
-            val (trackCaptureStatus, timerEvent) = pair
-
+        ) { trackCaptureStatus, currentLocation ->
             if (currentLocation.geolocation != null) {
                 lastKnownLocation = currentLocation.geolocation
             }
 
             val state = if (trackCaptureStatus is TrackCaptureStatus.Run) {
-                    if (trackCaptureStatus.paused) {
-                        timer.pause()
-                    } else {
-                        timer.resume()
-                    }
-                    MapState.CurrentTrack(
-                        trackCaptureStatus.track.toTrackInProgress(TimeUtils.getCurrentUtcTime()),
-                        trackCaptureStatus,
-                        currentLocation.geolocation
-                    )
-                } else if (trackCaptureStatus is TrackCaptureStatus.Error) {
-                    MapState.CurrentTrackError
+                val geolocations = tracksRepository.getAllGeolocations()
+                MapState.CurrentTrack(
+                    trackCaptureStatus.trackInProgress,
+                    geolocations,
+                    currentLocation.geolocation,
+                )
+            } else if (trackCaptureStatus is TrackCaptureStatus.Error) {
+                logw("MapViewModel trackCaptureStatus $trackCaptureStatus")
+                MapState.CurrentTrackError
+            } else {
+                if (currentLocation.geolocation != null) {
+                    MapState.CurrentLocation(data = currentLocation.geolocation)
                 } else {
-                    if (currentLocation.geolocation != null) {
-                        MapState.CurrentLocation(data = currentLocation.geolocation)
-                    } else {
-                        MapState.NoLocation(cause = currentLocation.error)
-                    }
+                    MapState.NoLocation(cause = currentLocation.error)
                 }
+            }
             state
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = AppProps.STOP_TIMEOUT_MILLISECONDS),
             initialValue = MapState.PendingLocationUpdates
         )
-    val currentLocationFlow = stateFlow.filter { it is MapState.CurrentLocation || it is MapState.CurrentTrack }
-        .map {
-            val geolocation = when (it) {
-                is MapState.CurrentLocation -> it.data
-                is MapState.CurrentTrack -> it.currentLocation
-                else -> null
+    val currentLocationFlow =
+        stateFlow.filter { it is MapState.CurrentLocation || it is MapState.CurrentTrack }
+            .map {
+                val geolocation = when (it) {
+                    is MapState.CurrentLocation -> it.data
+                    is MapState.CurrentTrack -> it.currentLocation
+                    else -> null
+                }
+                geolocation
             }
-            geolocation
-        }
 
 
     @SuppressLint("MissingPermission")
@@ -188,17 +105,18 @@ class MapViewModel @Inject constructor(
             MapEvent.PauseCurrentLocationUpdate -> {
                 viewModelScope.launch {
                     geolocationUpdatesRepository.stop()
-                    timer.stop()
                 }
             }
 
             MapEvent.ResumeCurrentLocationUpdate -> {
                 viewModelScope.launch {
-                    geolocationUpdatesRepository.start()
-                    if (trackCapturerController.status.first() is TrackCaptureStatus.Error) {
+                    val status = trackCapturerController.status.first()
+                    if (status !is TrackCaptureStatus.Run) {
+                        geolocationUpdatesRepository.start()
+                    }
+                    if (status is TrackCaptureStatus.Error) {
                         trackCapturerController.bind()
                     }
-                    timer.start()
                 }
             }
         }

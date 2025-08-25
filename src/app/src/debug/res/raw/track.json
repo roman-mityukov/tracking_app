@@ -1,69 +1,14 @@
 {
-  "track": {
-    "id": "trackId",
-    "name": "trackName",
-    "start": "2025-08-08T06:07:11.393356Z",
-    "end": "2025-08-08T06:07:21.393356Z"
-  },
-  "points": [
-    {
-      "id": "pointId1",
-      "trackId": "trackId",
-      "latitude": 53.696453,
-      "longitude": 87.439633,
-      "altitude": 391.0,
-      "speed": 1.0,
-      "time": 1000
-    },
-    {
-      "id": "pointId2",
-      "trackId": "trackId",
-      "latitude": 53.695841,
-      "longitude": 87.450213,
-      "altitude": 311.0,
-      "speed": 1.0,
-      "time": 1010
-    },
-    {
-      "id": "pointId3",
-      "trackId": "trackId",
-      "latitude": 53.694120,
-      "longitude": 87.458698,
-      "altitude": 354.0,
-      "speed": 1.0,
-      "time": 1010
-    },
-    {
-      "id": "pointId4",
-      "trackId": "trackId",
-      "latitude": 53.697462,
-      "longitude": 87.464610,
-      "altitude": 331.0,
-      "speed": 1.0,
-      "time": 1010
-    },
-    {
-      "id": "pointId5",
-      "trackId": "trackId",
-      "latitude": 53.691241,
-      "longitude": 87.482451,
-      "altitude": 351.0,
-      "speed": 1.0,
-      "time": 1010
-    }
-  ],
-  "actions": [
-    {
-      "id": "someActionId1",
-      "trackId": "trackId",
-      "action": "Start",
-      "timestamp": "2025-08-08T06:07:11.393356Z"
-    },
-    {
-      "id": "someActionId2",
-      "trackId": "trackId",
-      "action": "Stop",
-      "timestamp": "2025-08-08T06:07:21.393356Z"
-    }
-  ]
+  "id": "trackId",
+  "name": "trackName",
+  "start": 1756000090451,
+  "end": 1756000139716,
+  "duration": 50,
+  "distance": 13,
+  "altitudeUp": 0,
+  "altitudeDown": 0,
+  "averageSpeed": 0.5401661992073059,
+  "minSpeed": 0.0,
+  "maxSpeed": 1.2963988780975342,
+  "filePath": "/data/user/0/io.mityukov.geo.tracking/files/tracks/24.08.2025 08:48:10.gpx"
 }

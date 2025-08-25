@@ -24,12 +24,16 @@ import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 
 @Composable
-fun TrackCaptureView(viewModel: TrackCaptureViewModel = hiltViewModel()) {
+fun TrackCaptureView(
+    viewModel: TrackCaptureViewModel = hiltViewModel()
+) {
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (state.value.status is TrackCaptureStatus.Run) {
-            ButtonStopTrackCapture(onClick = { viewModel.add(TrackCaptureEvent.StopCapture) })
+            ButtonStopTrackCapture(onClick = {
+                viewModel.add(TrackCaptureEvent.StopCapture)
+            })
             Spacer(Modifier.width(8.dp))
         }
         ButtonStartTrackCapture(viewModel = viewModel)
@@ -52,7 +56,10 @@ private fun ButtonStopTrackCapture(modifier: Modifier = Modifier, onClick: () ->
 }
 
 @Composable
-private fun ButtonStartTrackCapture(modifier: Modifier = Modifier, viewModel: TrackCaptureViewModel) {
+private fun ButtonStartTrackCapture(
+    modifier: Modifier = Modifier,
+    viewModel: TrackCaptureViewModel,
+) {
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
     val trackCaptureStatus = state.value.status
 
@@ -63,7 +70,7 @@ private fun ButtonStartTrackCapture(modifier: Modifier = Modifier, viewModel: Tr
             if ((trackCaptureStatus is TrackCaptureStatus.Run).not()) {
                 viewModel.add(TrackCaptureEvent.StartCapture)
             } else {
-                if (trackCaptureStatus.paused) {
+                if (trackCaptureStatus.trackInProgress.paused) {
                     viewModel.add(TrackCaptureEvent.PlayCapture)
                 } else {
                     viewModel.add(TrackCaptureEvent.PauseCapture)
@@ -78,7 +85,7 @@ private fun ButtonStartTrackCapture(modifier: Modifier = Modifier, viewModel: Tr
         )
     ) {
         if (trackCaptureStatus is TrackCaptureStatus.Run) {
-            if (trackCaptureStatus.paused) {
+            if (trackCaptureStatus.trackInProgress.paused) {
                 Icon(
                     painterResource(R.drawable.icon_play),
                     contentDescription = stringResource(R.string.content_description_map_resume_track),

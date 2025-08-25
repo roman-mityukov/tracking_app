@@ -64,5 +64,20 @@ interface AppModule {
 
             return directory
         }
+
+        @Provides
+        @TracksDirectory
+        fun providesTracksDirectory(@ApplicationContext context: Context): File {
+            val directory = File(context.filesDir, "tracks")
+
+            if (directory.exists().not()) {
+                val isDirectoryCreated = directory.mkdir()
+                if (isDirectoryCreated.not()) {
+                    error("Can not create directory with name logs")
+                }
+            }
+
+            return directory
+        }
     }
 }

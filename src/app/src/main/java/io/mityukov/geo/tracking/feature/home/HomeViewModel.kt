@@ -11,9 +11,9 @@ import javax.inject.Inject
 
 data class HomeNavigationItem(
     val route: HomeBaseRoute,
-    @DrawableRes val selectedIcon: Int,
-    @DrawableRes val unselectedIcon: Int,
-    @StringRes val label: Int,
+    @param:DrawableRes val selectedIcon: Int,
+    @param:DrawableRes val unselectedIcon: Int,
+    @param:StringRes val label: Int,
 )
 
 sealed interface HomeState {

@@ -2,15 +2,10 @@ package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import kotlinx.coroutines.flow.Flow
 
-sealed interface LocalTrackCaptureStatus {
-    data class Enabled(val trackId: String, val paused: Boolean) : LocalTrackCaptureStatus
-    data object Disabled : LocalTrackCaptureStatus
-}
-
 interface TrackCaptureStatusProvider {
-    val status: Flow<LocalTrackCaptureStatus>
+    val status: Flow<TrackCaptureStatus>
 }
 
 interface TrackCaptureStatusRepository : TrackCaptureStatusProvider {
-    suspend fun update(localTrackCaptureStatus: LocalTrackCaptureStatus)
+    suspend fun update(status: TrackCaptureStatus)
 }

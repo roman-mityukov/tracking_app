@@ -8,7 +8,6 @@ import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.core.model.track.TrackPoint
 import io.mityukov.geo.tracking.yandex.TrackAppearanceSettings
 import io.mityukov.geo.tracking.yandex.YandexMapSettings
 import io.mityukov.geo.tracking.yandex.navigateTo
@@ -34,8 +33,8 @@ class MapViewHolder(val mapView: MapView, private val context: Context) {
         )
     }
 
-    fun showTrack(points: List<TrackPoint>) {
-        mapView.showTrack(context, points, false)
+    fun updateTrack(geolocations: List<Geolocation>) {
+        mapView.showTrack(context, geolocations, false)
     }
 
     fun zoomIn() {

@@ -24,10 +24,8 @@ import io.mityukov.geo.tracking.core.data.repository.track.TracksRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusProvider
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepository
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepositoryImpl
-import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturer
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerControllerImpl
-import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerImpl
 import io.mityukov.geo.tracking.core.database.AppDatabase
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.datastore.appSettingsDataStore
@@ -67,10 +65,6 @@ interface DataModule {
     @Singleton
     @Binds
     fun bindTracksRepository(impl: TracksRepositoryImpl): TracksRepository
-
-    @Singleton
-    @Binds
-    fun bindTrackCapturer(impl: TrackCapturerImpl): TrackCapturer
 
     @Singleton
     @Binds

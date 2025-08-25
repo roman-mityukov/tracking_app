@@ -5,16 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
-import io.mityukov.geo.tracking.core.database.model.TrackActionEntity
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
-import io.mityukov.geo.tracking.core.database.model.TrackPointEntity
 
 @Database(
     exportSchema = true,
     entities = [
         TrackEntity::class,
-        TrackPointEntity::class,
-        TrackActionEntity::class,
     ],
     version = 1,
 )

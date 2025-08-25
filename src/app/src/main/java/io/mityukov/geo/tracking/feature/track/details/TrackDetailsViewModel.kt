@@ -5,15 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.feature.share.TrackShareService
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
+import io.mityukov.geo.tracking.core.model.track.DetailedTrack
 import io.mityukov.geo.tracking.feature.home.HomeRouteTrackDetails
-import io.mityukov.geo.tracking.feature.track.list.CompletedTrack
-import io.mityukov.geo.tracking.feature.track.list.toCompletedTrack
+import io.mityukov.geo.tracking.feature.share.TrackShareService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,7 +24,7 @@ sealed interface TrackDetailsEvent {
 
 sealed interface TrackDetailsState {
     data object Pending : TrackDetailsState
-    data class Data(val data: CompletedTrack) : TrackDetailsState
+    data class Data(val data: DetailedTrack) : TrackDetailsState
     data object DeleteCompleted : TrackDetailsState
 }
 
@@ -45,9 +43,9 @@ class TrackDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val track = tracksRepository.getTrack(routeTrackDetails.trackId).first()
+            val completedTrack = tracksRepository.getDetailedTrack(routeTrackDetails.trackId)
             mutableStateFlow.update {
-                TrackDetailsState.Data(track.toCompletedTrack())
+                TrackDetailsState.Data(completedTrack)
             }
         }
     }
@@ -65,7 +63,7 @@ class TrackDetailsViewModel @Inject constructor(
 
             TrackDetailsEvent.Share -> {
                 viewModelScope.launch {
-                    val track = tracksRepository.getTrack(routeTrackDetails.trackId).first()
+                    val track = tracksRepository.getTrack(routeTrackDetails.trackId)
                     val path = trackShareService.prepareTrackFile(track)
                     sharingMutableStateFlow.update {
                         path

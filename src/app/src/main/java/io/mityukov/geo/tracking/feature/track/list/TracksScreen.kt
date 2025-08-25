@@ -34,14 +34,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
+import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import java.util.Locale
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,42 +120,9 @@ private fun TrackList(
 }
 
 @Composable
-fun InProgressTrackHeadline(
-    modifier: Modifier = Modifier,
-    startTime: String,
-    isCapturedTrack: Boolean,
-    paused: Boolean
-) {
-    val formattedStartTime =
-        TimeUtils.getFormattedLocalFromUTC(startTime, AppProps.UI_DATE_TIME_FORMATTER)
-
-    if (isCapturedTrack) {
-        Text(
-            modifier = modifier,
-            text = buildAnnotatedString {
-                append("$formattedStartTime ")
-                withStyle(
-                    style = SpanStyle(
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold,
-                    )
-                ) {
-                    if (paused) {
-                        append(stringResource(R.string.tracks_item_title_pause))
-                    } else {
-                        append(stringResource(R.string.tracks_item_title_capturing))
-                    }
-                }
-            })
-    } else {
-        Text(modifier = modifier, text = formattedStartTime)
-    }
-}
-
-@Composable
 fun CompletedTrackHeadline(
     modifier: Modifier = Modifier,
-    startTime: String,
+    startTime: Long,
 ) {
     val formattedStartTime =
         TimeUtils.getFormattedLocalFromUTC(startTime, AppProps.UI_DATE_TIME_FORMATTER)
@@ -176,7 +144,7 @@ fun TrackItemProperty(
             contentDescription = contentDescription
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = text)
+        Text(text = text, fontSize = 12.sp)
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
@@ -188,15 +156,13 @@ fun TrackProperties(
     distance: Int,
     altitudeUp: Int,
     altitudeDown: Int,
-    averageSpeed: Double,
+    averageSpeed: Float,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         TrackItemProperty(
             iconResource = R.drawable.icon_duration,
             text = DateUtils.formatElapsedTime(
-                duration.toLong(
-                    DurationUnit.SECONDS
-                )
+                duration.inWholeSeconds
             ),
             contentDescription = stringResource(R.string.content_description_track_time),
         )
@@ -226,7 +192,7 @@ fun TrackProperties(
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
-    track: CompletedTrack,
+    track: Track,
     onClick: (String) -> Unit,
     onLongPress: (String) -> Unit,
 ) {

@@ -1,5 +1,8 @@
 package io.mityukov.geo.tracking.utils.geolocation
 
+import android.location.Location
+import android.os.Parcel
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.utils.ext.toRadians
 import kotlin.math.absoluteValue
 import kotlin.math.atan2
@@ -32,4 +35,33 @@ fun distanceTo(
     val horizontalDistance = earthRadius * c
 
     return horizontalDistance.roundToInt().absoluteValue
+}
+
+fun Location.toByteArray(): ByteArray {
+    val parcel = Parcel.obtain()
+    writeToParcel(parcel, 0)
+    val bytes = parcel.marshall()
+    parcel.recycle()
+    return bytes
+}
+
+fun Location.toDomainGeolocation(): Geolocation {
+    return Geolocation(
+        latitude = latitude,
+        longitude = longitude,
+        altitude = altitude,
+        speed = speed,
+        time = time,
+    )
+}
+
+fun locationFromByteArray(bytes: ByteArray): Location {
+    val parcel = Parcel.obtain()
+    parcel.unmarshall(bytes, 0, bytes.size)
+    parcel.setDataPosition(0)
+
+    val location: Location = Location.CREATOR.createFromParcel(parcel)
+    parcel.recycle()
+
+    return location
 }

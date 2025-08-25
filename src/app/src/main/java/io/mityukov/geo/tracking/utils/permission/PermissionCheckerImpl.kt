@@ -8,7 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class PermissionCheckerImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : PermissionChecker {
     override val locationGranted: Boolean
         get() = ContextCompat.checkSelfPermission(

@@ -25,3 +25,7 @@ annotation class DispatcherDefaultLimitedParallelism
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class LogsDirectory
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class TracksDirectory

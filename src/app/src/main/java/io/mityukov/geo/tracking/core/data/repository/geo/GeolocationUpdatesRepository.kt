@@ -1,7 +1,6 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.utils.nmea.NmeaData
 import kotlinx.coroutines.flow.Flow
 
 sealed interface GeolocationUpdateException {
@@ -14,7 +13,6 @@ sealed interface GeolocationUpdateException {
 data class GeolocationUpdateResult(
     val geolocation: Geolocation?,
     val error: GeolocationUpdateException?,
-    val nmea: List<NmeaData> = listOf()
 )
 
 interface GeolocationUpdatesRepository {

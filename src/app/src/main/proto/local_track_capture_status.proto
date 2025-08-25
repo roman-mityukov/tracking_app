@@ -5,6 +5,15 @@ option java_multiple_files = true;
 
 message ProtoLocalTrackCaptureStatus {
   bool trackCaptureEnabled = 1;
-  string trackId = 2;
-  bool paused = 3;
+  uint64 start = 2;
+  uint64 durationInSeconds = 3;
+  uint32 altitudeUp = 4;
+  uint32 altitudeDown = 5;
+  uint32 distance = 6;
+  float averageSpeed = 7;
+  float minSpeed = 8;
+  float maxSpeed = 9;
+  bytes lastLocationBytes = 10;
+  uint32 geolocationCount = 11;
+  bool paused = 12;
 }

@@ -86,6 +86,7 @@ fun MapView.showTrack(context: Context, geolocations: List<Geolocation>, moveCam
         polylineObject.apply {
             style = LineStyle().apply {
                 strokeWidth = 2f
+                turnRadius = 0f
                 setStrokeColor(ContextCompat.getColor(context, R.color.teal_700))
             }
         }

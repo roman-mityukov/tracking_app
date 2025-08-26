@@ -1,3 +1,4 @@
+@file:Suppress("CyclomaticComplexMethod")
 package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import android.content.Context
@@ -219,12 +220,14 @@ class TrackCapturerControllerImpl @Inject constructor(
         if (trackInProgress.paused) return
 
         update.location?.let { currentLocation ->
-            val isFirstPoint = trackInProgress.lastLocation == null
+            val lastLocation = trackInProgress.lastLocation
+            val isFirstPoint = lastLocation == null
             val distance =
                 if (trackInProgress.lastLocation != null) trackInProgress.lastLocation.distanceTo(
                     currentLocation
                 ) else 0f
-            val isAcceptableDistance = distance < 500
+            val isAcceptableDistance =
+                if (lastLocation != null) distance < ((currentLocation.time - lastLocation.time) / 1000) * 15 else true
             val isAcceptableAccuracy =
                 currentLocation.hasAccuracy() && currentLocation.accuracy < 50
             val isAcceptableTime = (System.currentTimeMillis() - currentLocation.time) < 60 * 1000
@@ -232,8 +235,6 @@ class TrackCapturerControllerImpl @Inject constructor(
 
             if (isFirstPoint || isAcceptable) {
                 tracksRepository.insertTrackPoint(currentLocation.toDomainGeolocation())
-
-                val lastLocation = trackInProgress.lastLocation
                 val newTrackInProgress = if (lastLocation != null) {
                     trackInProgress.copy(
                         distance = trackInProgress.distance + distanceTo(
@@ -252,8 +253,7 @@ class TrackCapturerControllerImpl @Inject constructor(
                         } else {
                             trackInProgress.altitudeDown
                         },
-                        averageSpeed = (trackInProgress.averageSpeed + currentLocation.speed)
-                                / (trackInProgress.geolocationCount + 1),
+                        sumSpeed = trackInProgress.sumSpeed + currentLocation.speed,
                         maxSpeed = if (currentLocation.speed > trackInProgress.maxSpeed) {
                             currentLocation.speed
                         } else {
@@ -269,11 +269,15 @@ class TrackCapturerControllerImpl @Inject constructor(
                     )
                 } else {
                     trackInProgress.copy(
-                        lastLocation = currentLocation
+                        sumSpeed = currentLocation.speed,
+                        maxSpeed = currentLocation.speed,
+                        minSpeed = currentLocation.speed,
+                        lastLocation = currentLocation,
+                        geolocationCount = 1,
                     )
                 }
                 trackCaptureStatusRepository.update(TrackCaptureStatus.Run(newTrackInProgress))
-                logd("TrackCapturerControllerImpl accept location $trackInProgress")
+                logd("TrackCapturerControllerImpl accept location $newTrackInProgress")
             } else {
                 logw(
                     "TrackCapturerControllerImpl don\'t accept location $currentLocation " +

@@ -58,6 +58,7 @@ import io.mityukov.geo.tracking.utils.time.TimeUtils
 import io.mityukov.geo.tracking.yandex.showTrack
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -309,11 +310,21 @@ private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: Detai
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.track_details_distance, track.distance))
+        Text(text = stringResource(R.string.track_details_distance, track.distance.roundToInt()))
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.track_details_altitude_up, track.altitudeUp))
+        Text(
+            text = stringResource(
+                R.string.track_details_altitude_up,
+                track.altitudeUp.roundToInt()
+            )
+        )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.track_details_altitude_down, track.altitudeDown))
+        Text(
+            text = stringResource(
+                R.string.track_details_altitude_down,
+                track.altitudeDown.roundToInt()
+            )
+        )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(

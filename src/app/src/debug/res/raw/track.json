@@ -7,8 +7,9 @@
   "distance": 13,
   "altitudeUp": 0,
   "altitudeDown": 0,
-  "averageSpeed": 0.5401661992073059,
+  "sumSpeed": 100,
   "minSpeed": 0.0,
   "maxSpeed": 1.2963988780975342,
+  "geolocationCount": 10,
   "filePath": "/data/user/0/io.mityukov.geo.tracking/files/tracks/24.08.2025 08:48:10.gpx"
 }

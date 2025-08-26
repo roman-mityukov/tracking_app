@@ -7,10 +7,10 @@ import kotlin.time.Duration
 data class TrackInProgress(
     val start: Long,
     val duration: Duration,
-    val distance: Int,
-    val altitudeUp: Int,
-    val altitudeDown: Int,
-    val averageSpeed: Float,
+    val distance: Float,
+    val altitudeUp: Float,
+    val altitudeDown: Float,
+    val sumSpeed: Float,
     val minSpeed: Float,
     val maxSpeed: Float,
     val lastLocation: Location?,
@@ -22,10 +22,10 @@ data class TrackInProgress(
             return TrackInProgress(
                 start = System.currentTimeMillis(),
                 duration = Duration.ZERO,
-                distance = 0,
-                altitudeUp = 0,
-                altitudeDown = 0,
-                averageSpeed = 0f,
+                distance = 0f,
+                altitudeUp = 0f,
+                altitudeDown = 0f,
+                sumSpeed = 0f,
                 minSpeed = 0f,
                 maxSpeed = 0f,
                 lastLocation = null,
@@ -34,6 +34,8 @@ data class TrackInProgress(
             )
         }
     }
+
+    val currentSpeed: Float = lastLocation?.speed ?: 0f
 }
 
 sealed interface TrackCaptureStatus {

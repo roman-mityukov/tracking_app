@@ -27,10 +27,10 @@ class TrackCaptureStatusRepositoryImpl @Inject constructor(
                     .setTrackCaptureEnabled(false)
                     .setStart(0)
                     .setDurationInSeconds(0)
-                    .setDistance(0)
-                    .setAltitudeUp(0)
-                    .setAltitudeDown(0)
-                    .setAverageSpeed(0f)
+                    .setDistance(0f)
+                    .setAltitudeUp(0f)
+                    .setAltitudeDown(0f)
+                    .setSumSpeed(0f)
                     .setMinSpeed(0f)
                     .setMaxSpeed(0f)
                     .setLastLocationBytes(ByteString.empty())
@@ -56,7 +56,7 @@ class TrackCaptureStatusRepositoryImpl @Inject constructor(
                     .setDistance(trackInProgress.distance)
                     .setAltitudeUp(trackInProgress.altitudeUp)
                     .setAltitudeDown(trackInProgress.altitudeDown)
-                    .setAverageSpeed(trackInProgress.averageSpeed)
+                    .setSumSpeed(trackInProgress.sumSpeed)
                     .setMinSpeed(trackInProgress.minSpeed)
                     .setMaxSpeed(trackInProgress.maxSpeed)
                     .setLastLocationBytes(byteString)
@@ -87,7 +87,7 @@ private fun ProtoLocalTrackCaptureStatus.toTrackCaptureStatus(): TrackCaptureSta
                 distance = distance,
                 altitudeUp = altitudeUp,
                 altitudeDown = altitudeDown,
-                averageSpeed = averageSpeed,
+                sumSpeed = sumSpeed,
                 maxSpeed = maxSpeed,
                 minSpeed = minSpeed,
                 lastLocation = location,

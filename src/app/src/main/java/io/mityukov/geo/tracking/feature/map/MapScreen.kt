@@ -365,7 +365,7 @@ private fun CurrentTrack(
                         distance = viewModelState.trackInProgress.distance,
                         altitudeUp = viewModelState.trackInProgress.altitudeUp,
                         altitudeDown = viewModelState.trackInProgress.altitudeDown,
-                        averageSpeed = viewModelState.trackInProgress.averageSpeed,
+                        speed = viewModelState.trackInProgress.currentSpeed,
                     )
                 }
             }

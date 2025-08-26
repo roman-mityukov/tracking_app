@@ -11,62 +11,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-//fun Track.toCompletedTrack(): CompletedTrack {
-//    val duration = if (actions.size > 2) {
-//        var pausedTimeStamp = ""
-//        val pausedDuration = actions.fold(0.seconds) { value: Duration, action: TrackAction ->
-//            logd("timestamp ${action.timestamp}")
-//            when (action.type) {
-//                TrackActionType.Pause -> {
-//                    pausedTimeStamp = action.timestamp
-//                    value
-//                }
-//
-//                TrackActionType.Resume -> {
-//                    val newValue = value + TimeUtils.durationBetween(
-//                        pausedTimeStamp,
-//                        action.timestamp
-//                    )
-//                    pausedTimeStamp = ""
-//                    newValue
-//                }
-//
-//                TrackActionType.Stop -> {
-//                    if (pausedTimeStamp.isNotEmpty()) {
-//                        val newValue = value + TimeUtils.durationBetween(
-//                            pausedTimeStamp,
-//                            action.timestamp
-//                        )
-//                        newValue
-//                    } else {
-//                        value
-//                    }
-//                }
-//
-//                else -> {
-//                    value
-//                }
-//            }
-//        }
-//        logd("pausedDuration $pausedDuration")
-//        TimeUtils.durationBetween(start, end) - pausedDuration
-//    } else {
-//        TimeUtils.durationBetween(start, end)
-//    }
-//
-//    return CompletedTrack(
-//        id = id,
-//        name = name,
-//        start = start,
-//        end = end,
-//        distance = distance,
-//        altitudeUp = altitudeUp,
-//        altitudeDown = altitudeDown,
-//        points = points,
-//        duration = duration
-//    )
-//}
-
 sealed interface TracksState {
     data object Pending : TracksState
     data class Data(

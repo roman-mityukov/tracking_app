@@ -1,4 +1,5 @@
 @file:Suppress("NestedBlockDepth")
+
 package io.mityukov.geo.tracking.core.data.repository.track
 
 import io.mityukov.geo.tracking.app.AppProps
@@ -138,9 +139,10 @@ class TracksRepositoryImpl @Inject constructor(
                 distance = trackInProgress.distance,
                 altitudeUp = trackInProgress.altitudeUp,
                 altitudeDown = trackInProgress.altitudeDown,
-                averageSpeed = trackInProgress.averageSpeed,
+                sumSpeed = trackInProgress.sumSpeed,
                 minSpeed = trackInProgress.minSpeed,
                 maxSpeed = trackInProgress.maxSpeed,
+                geolocationCount = trackInProgress.geolocationCount,
                 filePath = gpxFile.absolutePath
             )
             trackDao.insertTrack(track)
@@ -149,12 +151,12 @@ class TracksRepositoryImpl @Inject constructor(
         }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun insertTrackPoint(geolocation: Geolocation) =
+    override suspend fun insertTrackPoint(location: Geolocation) =
         withContext(coroutineDispatcher) {
             val trackFile = File(tracksDirectory, tempTrackFileName)
             trackFile.appendText(
-                "point,${geolocation.latitude},${geolocation.longitude}," +
-                        "${geolocation.altitude},${geolocation.speed},${geolocation.time}\n"
+                "point,${location.latitude},${location.longitude}," +
+                        "${location.altitude},${location.speed},${location.time}\n"
             )
         }
 

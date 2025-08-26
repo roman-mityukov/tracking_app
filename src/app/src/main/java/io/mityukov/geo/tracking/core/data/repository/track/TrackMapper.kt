@@ -16,9 +16,10 @@ class TrackMapper @Inject constructor() {
             altitudeUp = entity.altitudeUp,
             altitudeDown = entity.altitudeDown,
             duration = entity.duration.seconds,
-            averageSpeed = entity.averageSpeed,
+            sumSpeed = entity.sumSpeed,
             minSpeed = entity.minSpeed,
             maxSpeed = entity.maxSpeed,
+            geolocationCount = entity.geolocationCount,
             filePath = entity.filePath,
         )
     }

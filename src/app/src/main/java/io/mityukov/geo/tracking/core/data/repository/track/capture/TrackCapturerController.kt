@@ -34,6 +34,8 @@ data class TrackInProgress(
             )
         }
     }
+
+    val currentSpeed: Float = lastLocation?.speed ?: 0f
 }
 
 sealed interface TrackCaptureStatus {

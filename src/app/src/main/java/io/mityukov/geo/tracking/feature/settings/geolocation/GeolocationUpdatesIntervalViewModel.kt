@@ -23,6 +23,7 @@ sealed interface GeolocationUpdatesIntervalState {
     data class Data(
         val interval: Duration,
         val availableIntervals: List<Duration> = listOf(
+            3.seconds,
             10.seconds,
             20.seconds,
             30.seconds,

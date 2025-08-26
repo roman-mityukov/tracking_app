@@ -6,7 +6,7 @@ import kotlin.time.Duration.Companion.seconds
 
 object AppProps {
     object Defaults {
-        val GEOLOCATION_UPDATES_INTERVAL: Duration = 10.seconds
+        val GEOLOCATION_UPDATES_INTERVAL: Duration = 3.seconds
     }
     const val TRACK_CAPTURE_CHANNEL_ID: String = "TRACK_CAPTURE_CHANNEL_ID"
     const val TRACK_CAPTURE_NOTIFICATION_ID = 1

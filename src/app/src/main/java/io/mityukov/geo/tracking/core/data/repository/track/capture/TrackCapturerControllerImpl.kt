@@ -252,8 +252,7 @@ class TrackCapturerControllerImpl @Inject constructor(
                         } else {
                             trackInProgress.altitudeDown
                         },
-                        averageSpeed = (trackInProgress.averageSpeed + currentLocation.speed)
-                                / (trackInProgress.geolocationCount + 1),
+                        sumSpeed = trackInProgress.sumSpeed + currentLocation.speed,
                         maxSpeed = if (currentLocation.speed > trackInProgress.maxSpeed) {
                             currentLocation.speed
                         } else {
@@ -269,11 +268,15 @@ class TrackCapturerControllerImpl @Inject constructor(
                     )
                 } else {
                     trackInProgress.copy(
-                        lastLocation = currentLocation
+                        sumSpeed = currentLocation.speed,
+                        maxSpeed = currentLocation.speed,
+                        minSpeed = currentLocation.speed,
+                        lastLocation = currentLocation,
+                        geolocationCount = 1,
                     )
                 }
                 trackCaptureStatusRepository.update(TrackCaptureStatus.Run(newTrackInProgress))
-                logd("TrackCapturerControllerImpl accept location $trackInProgress")
+                logd("TrackCapturerControllerImpl accept location $newTrackInProgress")
             } else {
                 logw(
                     "TrackCapturerControllerImpl don\'t accept location $currentLocation " +

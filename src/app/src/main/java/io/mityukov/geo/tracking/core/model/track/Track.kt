@@ -11,8 +11,11 @@ data class Track(
     val distance: Float,
     val altitudeUp: Float,
     val altitudeDown: Float,
-    val averageSpeed: Float,
+    val sumSpeed: Float,
     val minSpeed: Float,
     val maxSpeed: Float,
+    val geolocationCount: Int,
     val filePath: String,
-)
+) {
+    val averageSpeed = if (geolocationCount > 0) sumSpeed / geolocationCount else 0f
+}

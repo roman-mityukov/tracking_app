@@ -18,12 +18,14 @@ data class TrackEntity(
     val altitudeUp: Float,
     @ColumnInfo(name = "altitude_down")
     val altitudeDown: Float,
-    @ColumnInfo(name = "average_speed")
-    val averageSpeed: Float,
+    @ColumnInfo(name = "sum_speed")
+    val sumSpeed: Float,
     @ColumnInfo(name = "min_speed")
     val minSpeed: Float,
     @ColumnInfo(name = "max_speed")
     val maxSpeed: Float,
+    @ColumnInfo(name = "geolocation_count")
+    val geolocationCount: Int,
     @ColumnInfo(name = "file_path")
     val filePath: String,
 )

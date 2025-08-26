@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import kotlin.time.Duration
 
 @Serializable
 @Entity(tableName = "track")
@@ -14,11 +13,11 @@ data class TrackEntity(
     val start: Long,
     val end: Long,
     val duration: Long,
-    val distance: Int,
+    val distance: Float,
     @ColumnInfo(name = "altitude_up")
-    val altitudeUp: Int,
+    val altitudeUp: Float,
     @ColumnInfo(name = "altitude_down")
-    val altitudeDown: Int,
+    val altitudeDown: Float,
     @ColumnInfo(name = "average_speed")
     val averageSpeed: Float,
     @ColumnInfo(name = "min_speed")

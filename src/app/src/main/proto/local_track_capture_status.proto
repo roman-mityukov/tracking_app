@@ -7,9 +7,9 @@ message ProtoLocalTrackCaptureStatus {
   bool trackCaptureEnabled = 1;
   uint64 start = 2;
   uint64 durationInSeconds = 3;
-  uint32 altitudeUp = 4;
-  uint32 altitudeDown = 5;
-  uint32 distance = 6;
+  float altitudeUp = 4;
+  float altitudeDown = 5;
+  float distance = 6;
   float averageSpeed = 7;
   float minSpeed = 8;
   float maxSpeed = 9;

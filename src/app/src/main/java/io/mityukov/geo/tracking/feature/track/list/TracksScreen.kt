@@ -37,6 +37,7 @@ import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,9 +149,9 @@ fun TrackItemProperty(
 fun TrackProperties(
     modifier: Modifier = Modifier,
     duration: Duration,
-    distance: Int,
-    altitudeUp: Int,
-    altitudeDown: Int,
+    distance: Float,
+    altitudeUp: Float,
+    altitudeDown: Float,
     speed: Float,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
@@ -163,17 +164,17 @@ fun TrackProperties(
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_distance,
-            text = "${distance}м",
+            text = "${distance.roundToInt()}м",
             contentDescription = stringResource(R.string.content_description_track_distance),
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_altitude_up,
-            text = "${altitudeUp}м",
+            text = "${altitudeUp.roundToInt()}м",
             contentDescription = stringResource(R.string.content_description_track_altitude_up),
         )
         TrackItemProperty(
             iconResource = R.drawable.icon_altitude_down,
-            text = "${altitudeDown}м",
+            text = "${altitudeDown.roundToInt()}м",
             contentDescription = stringResource(R.string.content_description_track_altitude_down),
         )
         TrackItemProperty(

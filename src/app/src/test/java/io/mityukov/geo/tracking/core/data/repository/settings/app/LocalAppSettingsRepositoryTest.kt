@@ -1,7 +1,6 @@
 package io.mityukov.geo.tracking.core.data.repository.settings.app
 
 import android.content.Context
-import android.os.Build
 import androidx.datastore.core.DataStore
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -16,11 +15,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.VANILLA_ICE_CREAM])
 class LocalAppSettingsRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var dataStore: DataStore<ProtoLocalAppSettings>

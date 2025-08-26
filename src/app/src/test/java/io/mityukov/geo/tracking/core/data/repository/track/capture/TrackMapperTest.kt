@@ -1,7 +1,6 @@
 package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import android.location.Location
-import android.os.Build
 import com.google.protobuf.ByteString
 import io.mityukov.geo.tracking.core.data.datastore.proto.ProtoLocalTrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.TrackMapper
@@ -11,11 +10,9 @@ import io.mityukov.geo.tracking.utils.geolocation.toByteArray
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.VANILLA_ICE_CREAM])
 class TrackMapperTest {
     private val trackMapper = TrackMapper()
     private val trackEntity = TrackEntity(

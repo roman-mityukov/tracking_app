@@ -140,7 +140,7 @@ private fun MapContent(modifier: Modifier = Modifier, mapViewHolder: MapViewHold
 
 @Composable
 private fun MapInfoContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     viewModelState: MapState,
     mapViewHolder: MapViewHolder,
     snackbarHostState: SnackbarHostState,
@@ -269,7 +269,7 @@ private fun MapLifecycle(
 
 @Composable
 private fun MapControls(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     currentLocationFlow: Flow<Geolocation?>,
     mapViewHolder: MapViewHolder,
 ) {
@@ -316,7 +316,7 @@ private fun MapControls(
 
 @Composable
 private fun CurrentGeolocation(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     geolocation: Geolocation,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -335,7 +335,7 @@ private fun CurrentGeolocation(
 
 @Composable
 private fun CurrentTrack(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     viewModelState: MapState.CurrentTrack,
     snackbarHostState: SnackbarHostState,
 ) {

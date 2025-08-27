@@ -1,6 +1,7 @@
 package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -25,15 +27,35 @@ import kotlin.uuid.ExperimentalUuidApi
 class ForegroundTrackCaptureService : LifecycleService() {
     @Inject
     lateinit var trackCapturerController: TrackCapturerController
+    private lateinit var wakeLock: PowerManager.WakeLock
 
     override fun onBind(intent: Intent): IBinder? {
         super.onBind(intent)
         return null
     }
 
+    @SuppressLint("WakelockTimeout")
+    override fun onCreate() {
+        super.onCreate()
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "io.mityukov.geo.tracking:ForegroundTrackCaptureService"
+        )
+        wakeLock.acquire()
+    }
+
+    @SuppressLint("WakelockTimeout")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground()
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::wakeLock.isInitialized && wakeLock.isHeld) {
+            wakeLock.release()
+        }
     }
 
     @OptIn(ExperimentalUuidApi::class)

@@ -49,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -75,7 +76,6 @@ import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureView
 import io.mityukov.geo.tracking.feature.track.list.TrackProperties
 import io.mityukov.geo.tracking.utils.time.TimeUtils
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -125,7 +125,7 @@ fun MapScreen(
 @Composable
 private fun MapContent(modifier: Modifier = Modifier, mapViewHolder: MapViewHolder) {
     AndroidView(
-        modifier = modifier,
+        modifier = modifier.keepScreenOn(),
         factory = { context ->
             val mapView = mapViewHolder.mapView
             mapView.layoutParams = ViewGroup.LayoutParams(
@@ -280,9 +280,7 @@ private fun MapControls(
         mapViewHolder.navigateTo(geolocation)
     }
 
-    LaunchedEffect(Unit) {
-        val delayBeforeNavigation = 500L
-        delay(delayBeforeNavigation)
+    LaunchedEffect(currentLocationState.value != null) {
         mapNavigateTo()
     }
 

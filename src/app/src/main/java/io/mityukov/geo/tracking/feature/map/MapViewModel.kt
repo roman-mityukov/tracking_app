@@ -12,7 +12,8 @@ import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureS
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackInProgress
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.utils.log.logw
+import io.mityukov.geo.tracking.utils.geolocation.toDomainGeolocation
+import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -56,30 +57,41 @@ class MapViewModel @Inject constructor(
     private var lastKnownLocation: Geolocation? = null
 
     val stateFlow: StateFlow<MapState> = trackCapturerController.status
-        .combine(
-            geolocationUpdatesRepository.currentLocation
-        ) { trackCaptureStatus, currentLocation ->
+        .combine(geolocationUpdatesRepository.currentLocation) { trackCaptureStatus, currentLocation ->
             if (currentLocation.geolocation != null) {
                 lastKnownLocation = currentLocation.geolocation
             }
 
-            val state = if (trackCaptureStatus is TrackCaptureStatus.Run) {
-                val geolocations = tracksRepository.getAllGeolocations()
-                MapState.CurrentTrack(
-                    trackCaptureStatus.trackInProgress,
-                    geolocations,
-                    currentLocation.geolocation,
-                )
-            } else if (trackCaptureStatus is TrackCaptureStatus.Error) {
-                logw("MapViewModel trackCaptureStatus $trackCaptureStatus")
-                MapState.CurrentTrackError
-            } else {
-                if (currentLocation.geolocation != null) {
-                    MapState.CurrentLocation(data = currentLocation.geolocation)
-                } else {
-                    MapState.NoLocation(cause = currentLocation.error)
+            val state = when (trackCaptureStatus) {
+                is TrackCaptureStatus.Run -> {
+                    //stopCurrentLocationUpdates()
+                    lastKnownLocation =
+                        trackCaptureStatus.trackInProgress.lastLocation?.toDomainGeolocation()
+                            ?: currentLocation.geolocation
+
+                    val geolocations = tracksRepository.getAllGeolocations()
+                    MapState.CurrentTrack(
+                        trackCaptureStatus.trackInProgress,
+                        geolocations,
+                        lastKnownLocation,
+                    )
+                }
+
+                is TrackCaptureStatus.Error -> {
+                    MapState.CurrentTrackError
+                }
+
+                is TrackCaptureStatus.Idle -> {
+                    //startCurrentLocationUpdates()
+                    val geolocation = lastKnownLocation
+                    if (geolocation != null) {
+                        MapState.CurrentLocation(data = geolocation)
+                    } else {
+                        MapState.NoLocation(cause = currentLocation.error)
+                    }
                 }
             }
+            logd("MapViewModel state $state")
             state
         }.stateIn(
             scope = viewModelScope,
@@ -98,27 +110,33 @@ class MapViewModel @Inject constructor(
             }
 
 
-    @SuppressLint("MissingPermission")
     // Пермишены на локацию проверяются в MapScreen
     fun add(event: MapEvent) {
         when (event) {
             MapEvent.PauseCurrentLocationUpdate -> {
                 viewModelScope.launch {
-                    geolocationUpdatesRepository.stop()
+                    stopCurrentLocationUpdates()
                 }
             }
 
             MapEvent.ResumeCurrentLocationUpdate -> {
                 viewModelScope.launch {
+                    startCurrentLocationUpdates()
                     val status = trackCapturerController.status.first()
-                    if (status !is TrackCaptureStatus.Run) {
-                        geolocationUpdatesRepository.start()
-                    }
                     if (status is TrackCaptureStatus.Error) {
                         trackCapturerController.bind()
                     }
                 }
             }
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun startCurrentLocationUpdates() {
+        geolocationUpdatesRepository.start()
+    }
+
+    private suspend fun stopCurrentLocationUpdates() {
+        geolocationUpdatesRepository.stop()
     }
 }

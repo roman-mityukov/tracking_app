@@ -322,7 +322,7 @@ private fun CurrentGeolocation(
     geolocation: Geolocation,
     snackbarHostState: SnackbarHostState,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(
@@ -486,7 +486,6 @@ private fun CurrentGeolocationSharing(
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val context = LocalContext.current
@@ -494,10 +493,12 @@ private fun CurrentGeolocationSharing(
             val errorMessage = stringResource(R.string.error_sharing)
 
             Text(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
                 text = stringResource(
                     R.string.map_current_location_message,
-                    geolocation.localDateTime,
+                    geolocation.localDateTime.format(AppProps.UI_DATE_TIME_FORMATTER),
                     geolocation.latitude,
                     geolocation.longitude,
                     geolocation.altitude.roundToInt(),

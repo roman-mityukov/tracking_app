@@ -1,9 +1,11 @@
 @file:Suppress("UnusedParameter")
+
 package io.mityukov.geo.tracking.feature.profile
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.material.icons.Icons
@@ -33,10 +35,9 @@ fun ProfileScreen(
         contentWindowInsets = WindowInsets.safeContent,
     ) { paddingValues ->
         Column(
-            modifier = Modifier.padding(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+            modifier = Modifier
+                .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(paddingValues)
         ) {
 //            ProfileScreenItem(
 //                Modifier.clickable { onStatisticsSelected() },

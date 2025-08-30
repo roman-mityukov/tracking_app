@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -106,19 +104,28 @@ fun MapScreen(
         )
         MapPermissions(viewModelState = viewModelState.value, snackbarHostState = snackbarHostState)
         MapContent(mapViewHolder = mapViewHolder)
-        MapControls(
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 32.dp),
-            mapViewHolder = mapViewHolder,
-            currentLocationFlow = viewModel.currentLocationFlow,
-        )
-        MapInfoContent(
-            modifier = Modifier.align(Alignment.TopCenter),
-            viewModelState = viewModelState.value,
-            mapViewHolder = mapViewHolder,
-            snackbarHostState = snackbarHostState,
-        )
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            MapControls(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .safeDrawingPadding(),
+                mapViewHolder = mapViewHolder,
+                currentLocationFlow = viewModel.currentLocationFlow,
+            )
+            MapInfoContent(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .safeDrawingPadding(),
+                viewModelState = viewModelState.value,
+                mapViewHolder = mapViewHolder,
+                snackbarHostState = snackbarHostState,
+            )
+        }
     }
 }
 
@@ -191,82 +198,6 @@ private fun MapInfoContent(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-private fun MapPermissions(
-    viewModelState: MapState,
-    snackbarHostState: SnackbarHostState
-) {
-    val permissions = buildList {
-        add(android.Manifest.permission.ACCESS_COARSE_LOCATION)
-        add(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            add(android.Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
-    val multiplePermissionsState = rememberMultiplePermissionsState(permissions)
-    val showLocationRationale = remember { mutableStateOf(false) }
-
-    if (showLocationRationale.value) {
-        LocationRationaleDialog(
-            onNegative = {
-                showLocationRationale.value = false
-            },
-            onPositive = {
-                showLocationRationale.value = false
-                multiplePermissionsState.launchMultiplePermissionRequest()
-            },
-        )
-    }
-
-    if (viewModelState is MapState.NoLocation) {
-        NoLocation(
-            state = viewModelState,
-            snackbarHostState = snackbarHostState,
-            onPermissionsNotGranted = {
-                if (multiplePermissionsState.shouldShowRationale) {
-                    showLocationRationale.value = true
-                } else if (multiplePermissionsState.allPermissionsGranted.not()) {
-                    multiplePermissionsState.launchMultiplePermissionRequest()
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun MapLifecycle(
-    onStart: () -> Unit,
-    onResume: () -> Unit,
-    onStop: () -> Unit,
-) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = object : DefaultLifecycleObserver {
-            override fun onResume(owner: LifecycleOwner) {
-                super.onResume(owner)
-                onResume()
-            }
-
-            override fun onStart(owner: LifecycleOwner) {
-                super.onStart(owner)
-                onStart()
-            }
-
-            override fun onStop(owner: LifecycleOwner) {
-                super.onStop(owner)
-                onStop()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-}
-
 @Composable
 private fun MapControls(
     modifier: Modifier = Modifier,
@@ -285,7 +216,7 @@ private fun MapControls(
     }
 
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = 32.dp),
         horizontalAlignment = Alignment.End,
     ) {
         MapControlButton(
@@ -320,15 +251,7 @@ private fun CurrentGeolocation(
     geolocation: Geolocation,
     snackbarHostState: SnackbarHostState,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = WindowInsets.safeDrawing.asPaddingValues()
-                    .calculateTopPadding() + 16.dp
-            )
-    ) {
+    Box(modifier = modifier.fillMaxWidth()) {
         CurrentGeolocationSharing(geolocation = geolocation, snackbarHostState = snackbarHostState)
     }
 }
@@ -339,16 +262,8 @@ private fun CurrentTrack(
     viewModelState: MapState.CurrentTrack,
     snackbarHostState: SnackbarHostState,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = WindowInsets.safeDrawing.asPaddingValues()
-                    .calculateTopPadding() + 16.dp
-            )
-    ) {
-        Card(modifier = Modifier.fillMaxWidth()) {
+    Column {
+        Card(modifier = modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -382,13 +297,7 @@ private fun CurrentTrack(
 @Composable
 private fun CurrentTrackError(modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = WindowInsets.safeDrawing.asPaddingValues()
-                    .calculateTopPadding() + 16.dp
-            )
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.padding(8.dp),
@@ -567,6 +476,82 @@ private fun LocationRationaleDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun MapPermissions(
+    viewModelState: MapState,
+    snackbarHostState: SnackbarHostState
+) {
+    val permissions = buildList {
+        add(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+        add(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    val multiplePermissionsState = rememberMultiplePermissionsState(permissions)
+    val showLocationRationale = remember { mutableStateOf(false) }
+
+    if (showLocationRationale.value) {
+        LocationRationaleDialog(
+            onNegative = {
+                showLocationRationale.value = false
+            },
+            onPositive = {
+                showLocationRationale.value = false
+                multiplePermissionsState.launchMultiplePermissionRequest()
+            },
+        )
+    }
+
+    if (viewModelState is MapState.NoLocation) {
+        NoLocation(
+            state = viewModelState,
+            snackbarHostState = snackbarHostState,
+            onPermissionsNotGranted = {
+                if (multiplePermissionsState.shouldShowRationale) {
+                    showLocationRationale.value = true
+                } else if (multiplePermissionsState.allPermissionsGranted.not()) {
+                    multiplePermissionsState.launchMultiplePermissionRequest()
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun MapLifecycle(
+    onStart: () -> Unit,
+    onResume: () -> Unit,
+    onStop: () -> Unit,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                onResume()
+            }
+
+            override fun onStart(owner: LifecycleOwner) {
+                super.onStart(owner)
+                onStart()
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                super.onStop(owner)
+                onStop()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }

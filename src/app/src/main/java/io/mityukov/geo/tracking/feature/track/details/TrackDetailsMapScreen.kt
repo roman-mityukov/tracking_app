@@ -46,8 +46,7 @@ fun TrackDetailsMapScreen(
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             when (viewModelState.value) {
                 is TrackDetailsMapState.Data -> {

@@ -32,7 +32,14 @@ fun InstructionsScreen(onBack: () -> Unit) {
         },
         contentWindowInsets = WindowInsets.safeContent
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding(),
+            )
+        ) {
             Text(
                 text = stringResource(R.string.instructions_description),
                 style = MaterialTheme.typography.bodyLarge

@@ -108,14 +108,16 @@ fun TrackDetailsScreen(
 
         when (state.value) {
             TrackDetailsState.DeleteCompleted -> {
-                onBack()
+                LaunchedEffect(Unit) {
+                    onBack()
+                }
             }
 
             is TrackDetailsState.Data -> {
                 val track = (state.value as TrackDetailsState.Data).data
 
                 TrackDetailsContent(
-                    paddingValues = paddingValues,
+                    modifier = Modifier.padding(paddingValues),
                     detailedTrack = track,
                     onTrackMapSelected = onTrackMapSelected,
                     onDelete = {
@@ -174,7 +176,6 @@ private fun TrackDetailsTopBar(
 @Composable
 private fun TrackDetailsContent(
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues,
     detailedTrack: DetailedTrack,
     onTrackMapSelected: (String) -> Unit,
     onDelete: () -> Unit,
@@ -182,11 +183,7 @@ private fun TrackDetailsContent(
     val scrollState = rememberScrollState()
     Column(
         modifier = modifier
-            .padding(
-                start = 24.dp,
-                end = 24.dp,
-                top = paddingValues.calculateTopPadding(),
-            )
+            .padding(horizontal = 16.dp)
             .verticalScroll(scrollState)
     ) {
 

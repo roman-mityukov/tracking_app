@@ -3,6 +3,7 @@ package io.mityukov.geo.tracking.feature.settings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
@@ -32,18 +33,13 @@ fun AppSettingsScreen(onInstructionsSelected: () -> Unit, onBack: () -> Unit) {
         },
         contentWindowInsets = WindowInsets.safeContent
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = paddingValues.calculateTopPadding(),
-                    bottom = paddingValues.calculateBottomPadding()
-                )
+                .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(paddingValues)
         ) {
-            Column {
-                InstructionsView(onInstructionsSelected)
-                GeolocationUpdatesIntervalView()
-            }
+            InstructionsView(onInstructionsSelected)
+            GeolocationUpdatesIntervalView()
         }
     }
 }

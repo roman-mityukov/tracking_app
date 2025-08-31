@@ -1,10 +1,9 @@
 package io.mityukov.geo.tracking.feature.home
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -83,14 +82,12 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), currentSelectedItem: 
                 }
             }
         },
-        contentWindowInsets = WindowInsets.safeContent,
     ) { innerPadding ->
+        val bottomPadding = innerPadding.calculateBottomPadding()
         Box(
             modifier = Modifier
-                .padding(
-                    bottom = innerPadding.calculateBottomPadding(),
-                )
-                .fillMaxSize()
+                .padding(bottom = bottomPadding)
+                .consumeWindowInsets(PaddingValues(bottom = bottomPadding))
         ) {
             HomeNavHost(navController, snackbarHostState)
         }

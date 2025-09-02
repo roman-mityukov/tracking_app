@@ -1,6 +1,5 @@
 package io.mityukov.geo.tracking.feature.track.details
 
-import android.app.Activity
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -50,10 +49,8 @@ fun TrackDetailsMapScreen(
         ) {
             when (viewModelState.value) {
                 is TrackDetailsMapState.Data -> {
-                    logd("TrackDetailsMapState.Data")
                     val track = (viewModelState.value as TrackDetailsMapState.Data).data
                     val context = LocalContext.current
-                    logd("context is activity ${context is Activity}")
                     val mapView = remember { MapView(context) }
                     AndroidView(
                         factory = { context ->
@@ -118,7 +115,6 @@ fun TrackDetailsMapScreen(
                 }
 
                 TrackDetailsMapState.Pending -> {
-                    logd("TrackDetailsMapState.Pending")
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }

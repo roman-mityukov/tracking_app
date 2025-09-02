@@ -15,15 +15,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.utils.ui.FontScalePreviews
+import io.mityukov.geo.tracking.utils.ui.NightModePreview
 
 @Composable
-fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel(), onNext: () -> Unit) {
+fun OnboardingRoute(viewModel: OnboardingViewModel = hiltViewModel(), onNext: () -> Unit) {
 
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
     if (state.value is OnboardingState.OnboardingConsumed) {
@@ -32,19 +37,38 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel(), onNext: (
         }
     }
 
+    OnboardingScreen(
+        onConsumeOnboarding = {
+            viewModel.add(OnboardingEvent.ConsumeOnboarding)
+        },
+    )
+}
+
+@Composable
+fun OnboardingScreen(
+    modifier: Modifier = Modifier,
+    onConsumeOnboarding: () -> Unit,
+) {
+    val density = LocalDensity.current
+
+    val windowInfo = LocalWindowInfo.current
+    val screenWidth = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Image(
-            modifier = Modifier.size(192.dp),
+            modifier = Modifier.size((screenWidth / 2)),
             painter = painterResource(R.drawable.ic_launcher_round),
             contentDescription = stringResource(R.string.content_description_app_icon)
         )
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = stringResource(R.string.onboarding_instructions_label),
             style = MaterialTheme.typography.titleLarge
@@ -54,11 +78,19 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel(), onNext: (
             text = stringResource(R.string.onboarding_instructions_content),
             style = MaterialTheme.typography.bodyMedium
         )
-        Spacer(modifier = Modifier.height(48.dp))
-        Button(onClick = {
-            viewModel.add(OnboardingEvent.ConsumeOnboarding)
-        }) {
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(onClick = onConsumeOnboarding) {
             Text(text = stringResource(R.string.onboarding_button_label))
         }
     }
+}
+
+@Preview
+@FontScalePreviews
+@NightModePreview
+@Composable
+fun OnboardingScreenPreview() {
+    OnboardingScreen(
+        onConsumeOnboarding = {}
+    )
 }

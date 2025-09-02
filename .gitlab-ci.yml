@@ -40,9 +40,18 @@ unit_test:
   dependencies:
     - prebuild
   script:
-    - echo "running tests..."
     - cd src
     - ./gradlew :app:testDebugUnitTest
+
+screenshot_test:
+  stage: test
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - cd src
+    - ./gradlew :app:verifyRoborazziDebug
 
 instrumented_test:
   stage: test
@@ -54,7 +63,6 @@ instrumented_test:
     - emulator -avd Pixel9 &
     - adb wait-for-device
   script:
-    - echo "running instrumented tests..."
     - cd src
     - ./gradlew connectedAndroidTest && killall -INT crashpad_handler || true
     - adb emu kill || true

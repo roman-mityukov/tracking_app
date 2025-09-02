@@ -6,7 +6,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.mityukov.geo.tracking.BuildConfig
 import io.mityukov.geo.tracking.core.model.track.Track
 import io.mityukov.geo.tracking.di.DispatcherIO
-import io.mityukov.geo.tracking.di.TracksDirectory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File

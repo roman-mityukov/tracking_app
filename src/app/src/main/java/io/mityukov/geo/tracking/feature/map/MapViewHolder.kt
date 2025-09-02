@@ -14,13 +14,13 @@ import io.mityukov.geo.tracking.yandex.navigateTo
 import io.mityukov.geo.tracking.yandex.showTrack
 import io.mityukov.geo.tracking.yandex.zoom
 
-class MapViewHolder(val mapView: MapView, private val context: Context) {
+class MapViewHolder(val mapView: MapView, private val applicationContext: Context) {
     fun currentLocationPlacemark(geolocation: Geolocation) {
         mapView.map.mapObjects.clear()
         val placemark = mapView.map.mapObjects.addPlacemark()
         placemark.apply {
             geometry = Point(geolocation.latitude, geolocation.longitude)
-            setIcon(ImageProvider.fromResource(context, R.drawable.pin_my_location))
+            setIcon(ImageProvider.fromResource(applicationContext, R.drawable.pin_my_location))
         }
         placemark.setIconStyle(
             IconStyle().apply {
@@ -33,8 +33,14 @@ class MapViewHolder(val mapView: MapView, private val context: Context) {
         )
     }
 
-    fun updateTrack(geolocations: List<Geolocation>) {
-        mapView.showTrack(context, geolocations, false)
+    fun updateTrack(geolocations: List<Geolocation>, moveCamera: Boolean = false) {
+        if (geolocations.isNotEmpty()) {
+            mapView.showTrack(applicationContext, geolocations, moveCamera)
+        }
+    }
+
+    fun clearMap() {
+        mapView.map.mapObjects.clear()
     }
 
     fun zoomIn() {

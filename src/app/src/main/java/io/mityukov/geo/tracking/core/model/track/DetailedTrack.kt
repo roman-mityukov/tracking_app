@@ -4,7 +4,7 @@ import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.utils.geolocation.distanceTo
 
 data class DetailedTrack(
-    val data: Track,
+    val track: Track,
     val geolocations: List<Geolocation>
 ) {
     val altitudeByDistance: List<Pair<Int, Int>> by lazy {

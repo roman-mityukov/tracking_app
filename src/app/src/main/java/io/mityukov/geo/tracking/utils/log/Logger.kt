@@ -1,6 +1,5 @@
 package io.mityukov.geo.tracking.utils.log
 
-import android.content.Context
 import android.util.Log
 import fr.bipi.treessence.file.FileLoggerTree
 import kotlinx.coroutines.CoroutineScope

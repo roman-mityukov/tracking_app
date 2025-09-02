@@ -1,8 +1,10 @@
+@file:Suppress("TooManyFunctions")
+
 package io.mityukov.geo.tracking.feature.about
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -25,13 +26,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.MailTo
 import androidx.core.net.toUri
@@ -40,50 +42,77 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.BuildConfig
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.ui.ButtonBack
+import io.mityukov.geo.tracking.utils.test.AppTestTag
+import io.mityukov.geo.tracking.utils.ui.FontScalePreviews
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(
+fun AboutRoute(
     viewModel: AboutViewModel = hiltViewModel(),
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    val uriString by viewModel.logsStateFlow.collectAsStateWithLifecycle()
+    val uriStringState = viewModel.logsStateFlow.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    LaunchedEffect(uriString) {
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(uriStringState.value) {
+        val uriString = uriStringState.value
         if (uriString != null) {
-            val uri = Uri.parse(uriString)
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.putExtra(Intent.EXTRA_STREAM, uri)
-            intent.type = "application/zip"
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            context.startActivity(
-                Intent.createChooser(
-                    intent,
-                    context.getString(R.string.about_intent_logs_title)
-                )
-            )
+            shareLogs(uriString, context, coroutineScope, snackbarHostState)
             viewModel.add(AboutEvent.ConsumeLogs)
         }
     }
 
+    AboutScreen(
+        modifier = Modifier.testTag(AppTestTag.ABOUT_SCREEN),
+        onBack = onBack,
+        onShareLogs = {
+            viewModel.add(AboutEvent.ShareLogs)
+        },
+        onSendEmail = {
+            sendEmail(context, coroutineScope, snackbarHostState)
+        }
+    )
+}
+
+@Composable
+fun AboutScreen(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    onShareLogs: () -> Unit,
+    onSendEmail: () -> Unit,
+) {
     Scaffold(
         topBar = {
             AboutTopBar(onBack = onBack)
         },
         contentWindowInsets = WindowInsets.safeContent
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
             AboutContent(
-                onShareLogs = {
-                    viewModel.add(AboutEvent.ShareLogs)
-                },
-                snackbarHostState = snackbarHostState,
+                onShareLogs = onShareLogs,
+                onSendEmail = onSendEmail,
             )
         }
     }
+}
+
+@Preview
+@FontScalePreviews
+@Composable
+fun AboutScreenPreview() {
+    AboutScreen(
+        onBack = {},
+        onSendEmail = {},
+        onShareLogs = {},
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,9 +131,11 @@ fun AboutTopBar(
 }
 
 @Composable
-fun AboutContent(modifier: Modifier = Modifier, onShareLogs: () -> Unit, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+fun AboutContent(
+    modifier: Modifier = Modifier,
+    onShareLogs: () -> Unit,
+    onSendEmail: () -> Unit,
+) {
     Column(
         modifier = modifier.width(IntrinsicSize.Max),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,9 +145,7 @@ fun AboutContent(modifier: Modifier = Modifier, onShareLogs: () -> Unit, snackba
         Spacer(modifier = Modifier.height(16.dp))
         AppInfo()
         Spacer(modifier = Modifier.height(16.dp))
-        ContactButton(onClick = {
-            sendEmail(context, coroutineScope, snackbarHostState)
-        })
+        ContactButton(onClick = onSendEmail)
         Spacer(modifier = Modifier.height(8.dp))
         ShareLogsButton(onShareLogs = onShareLogs)
     }
@@ -172,6 +201,32 @@ private fun sendEmail(
             snackbarHostState.showSnackbar(
                 message = context.resources.getString(R.string.about_email_no_apps_message)
             )
+        }
+    }
+}
+
+private fun shareLogs(
+    uriString: String,
+    context: Context,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+) {
+    val sharingErrorMessage = context.resources.getString(R.string.error_sharing)
+    try {
+        val uri = uriString.toUri()
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        intent.type = "application/zip"
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        context.startActivity(
+            Intent.createChooser(
+                intent,
+                context.getString(R.string.about_intent_logs_title)
+            )
+        )
+    } catch (_: ActivityNotFoundException) {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(sharingErrorMessage)
         }
     }
 }

@@ -8,7 +8,9 @@ import java.io.InputStream
 import java.io.OutputStream
 
 object ProtoLocalTrackCaptureStatusSerializer : Serializer<ProtoLocalTrackCaptureStatus> {
-    override val defaultValue: ProtoLocalTrackCaptureStatus = ProtoLocalTrackCaptureStatus.getDefaultInstance()
+    override val defaultValue: ProtoLocalTrackCaptureStatus =
+        ProtoLocalTrackCaptureStatus.getDefaultInstance()
+
     override suspend fun readFrom(input: InputStream): ProtoLocalTrackCaptureStatus {
         try {
             return ProtoLocalTrackCaptureStatus.parseFrom(input)
@@ -17,5 +19,6 @@ object ProtoLocalTrackCaptureStatusSerializer : Serializer<ProtoLocalTrackCaptur
         }
     }
 
-    override suspend fun writeTo(t: ProtoLocalTrackCaptureStatus, output: OutputStream) = t.writeTo(output)
+    override suspend fun writeTo(t: ProtoLocalTrackCaptureStatus, output: OutputStream) =
+        t.writeTo(output)
 }

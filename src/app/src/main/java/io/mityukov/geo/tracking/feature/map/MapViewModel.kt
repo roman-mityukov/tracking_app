@@ -7,18 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
-import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
-import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
-import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
-import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackInProgress
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
-import io.mityukov.geo.tracking.utils.geolocation.toDomainGeolocation
 import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,60 +29,23 @@ sealed interface MapState {
         val timestamp: Long = System.currentTimeMillis()
     ) : MapState
 
-    data class CurrentTrack(
-        val trackInProgress: TrackInProgress,
-        val geolocations: List<Geolocation>,
-        val currentLocation: Geolocation?,
-    ) : MapState
-
-    data object CurrentTrackError : MapState
-
     data class NoLocation(val cause: GeolocationUpdateException?) : MapState
 }
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
-    private val trackCapturerController: TrackCapturerController,
-    private val tracksRepository: TracksRepository,
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
 
-    val stateFlow: StateFlow<MapState> = trackCapturerController.status
-        .combine(geolocationUpdatesRepository.currentLocation) { trackCaptureStatus, currentLocation ->
-            if (currentLocation.geolocation != null) {
+    val stateFlow: StateFlow<MapState> = geolocationUpdatesRepository.currentLocation
+        .map { currentLocation ->
+            val state = if (currentLocation.geolocation != null) {
                 lastKnownLocation = currentLocation.geolocation
-            }
-
-            val state = when (trackCaptureStatus) {
-                is TrackCaptureStatus.Run -> {
-                    //stopCurrentLocationUpdates()
-                    lastKnownLocation =
-                        trackCaptureStatus.trackInProgress.lastLocation?.toDomainGeolocation()
-                            ?: currentLocation.geolocation
-
-                    val geolocations = tracksRepository.getAllGeolocations()
-                    MapState.CurrentTrack(
-                        trackCaptureStatus.trackInProgress,
-                        geolocations,
-                        lastKnownLocation,
-                    )
-                }
-
-                is TrackCaptureStatus.Error -> {
-                    MapState.CurrentTrackError
-                }
-
-                is TrackCaptureStatus.Idle -> {
-                    //startCurrentLocationUpdates()
-                    val geolocation = lastKnownLocation
-                    if (geolocation != null) {
-                        MapState.CurrentLocation(data = geolocation)
-                    } else {
-                        MapState.NoLocation(cause = currentLocation.error)
-                    }
-                }
+                MapState.CurrentLocation(data = currentLocation.geolocation)
+            } else {
+                MapState.NoLocation(cause = currentLocation.error)
             }
             logd("MapViewModel state $state")
             state
@@ -99,44 +55,31 @@ class MapViewModel @Inject constructor(
             initialValue = MapState.PendingLocationUpdates
         )
     val currentLocationFlow =
-        stateFlow.filter { it is MapState.CurrentLocation || it is MapState.CurrentTrack }
+        stateFlow.filter { it is MapState.CurrentLocation }
             .map {
                 val geolocation = when (it) {
                     is MapState.CurrentLocation -> it.data
-                    is MapState.CurrentTrack -> it.currentLocation
                     else -> null
                 }
                 geolocation
             }
 
 
-    // Пермишены на локацию проверяются в MapScreen
+    // Пермишены на локацию проверяются в UI
+    @SuppressLint("MissingPermission")
     fun add(event: MapEvent) {
         when (event) {
             MapEvent.PauseCurrentLocationUpdate -> {
                 viewModelScope.launch {
-                    stopCurrentLocationUpdates()
+                    geolocationUpdatesRepository.stop()
                 }
             }
 
             MapEvent.ResumeCurrentLocationUpdate -> {
                 viewModelScope.launch {
-                    startCurrentLocationUpdates()
-                    val status = trackCapturerController.status.first()
-                    if (status is TrackCaptureStatus.Error) {
-                        trackCapturerController.bind()
-                    }
+                    geolocationUpdatesRepository.start()
                 }
             }
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    private suspend fun startCurrentLocationUpdates() {
-        geolocationUpdatesRepository.start()
-    }
-
-    private suspend fun stopCurrentLocationUpdates() {
-        geolocationUpdatesRepository.stop()
     }
 }

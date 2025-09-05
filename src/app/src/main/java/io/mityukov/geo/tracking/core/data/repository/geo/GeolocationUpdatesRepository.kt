@@ -17,6 +17,7 @@ data class GeolocationUpdateResult(
 
 interface GeolocationUpdatesRepository {
     val currentLocation: Flow<GeolocationUpdateResult>
+
     @androidx.annotation.RequiresPermission(
         allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
     )

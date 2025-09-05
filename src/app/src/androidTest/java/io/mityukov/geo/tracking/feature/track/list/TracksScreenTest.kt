@@ -60,7 +60,7 @@ class TracksScreenTest {
 
         composeRule.setContent {
             GeoAppTheme {
-                TracksScreen(
+                TracksRoute(
                     viewModel = hiltViewModel(),
                     onNavigateToTrack = mockOnNavigateToTrack,
                     onNavigateToTracksEditing = mockOnNavigateToTracksEditing

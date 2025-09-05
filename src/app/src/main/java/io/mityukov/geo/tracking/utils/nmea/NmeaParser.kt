@@ -1,4 +1,5 @@
 @file:Suppress("TooGenericExceptionCaught", "MagicNumber")
+
 package io.mityukov.geo.tracking.utils.nmea
 
 import io.mityukov.geo.tracking.utils.log.logd

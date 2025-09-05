@@ -27,6 +27,7 @@ navigationCompose = "2.9.3"
 protobuf = "4.31.1"
 protobufPlugin = "0.9.5"
 robolectric = "4.16"
+roborazzi = "1.50.0"
 room = "2.7.2"
 splashScreen = "1.0.1"
 striktCore = "0.35.1"
@@ -35,6 +36,7 @@ treessence = "1.1.2"
 turbine = "1.2.1"
 workRuntimeKtx = "2.10.3"
 yandexMapKit = "4.19.0-lite"
+lifecycleRuntimeTesting = "2.9.3"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -78,11 +80,15 @@ mockito-android = {module = "org.mockito:mockito-android", version.ref = "mockit
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
+roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
+roborazzi-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
 strikt-core = { module = "io.strikt:strikt-core", version.ref = "striktCore" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 treessence = { group = "com.github.bastienpaulfr", name = "Treessence", version.ref = "treessence" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 yandex-map-kit = { group = "com.yandex.android", name = "maps.mobile", version.ref = "yandexMapKit" }
+androidx-lifecycle-runtime-testing = { group = "androidx.lifecycle", name = "lifecycle-runtime-testing", version.ref = "lifecycleRuntimeTesting" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -94,5 +100,6 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
+roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 room = { id = "androidx.room", version.ref = "room" }
 

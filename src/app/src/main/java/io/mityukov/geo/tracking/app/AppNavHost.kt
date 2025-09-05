@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import io.mityukov.geo.tracking.feature.home.HomeBaseRoute
 import io.mityukov.geo.tracking.feature.home.HomeScreen
-import io.mityukov.geo.tracking.feature.onboarding.OnboardingScreen
+import io.mityukov.geo.tracking.feature.onboarding.OnboardingRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -32,7 +32,7 @@ fun AppNavHost(showOnboarding: Boolean) {
         },
     ) {
         composable<RouteOnboarding> {
-            OnboardingScreen(
+            OnboardingRoute(
                 onNext = {
                     navController.navigate(RouteHome) {
                         popUpTo(RouteOnboarding) {

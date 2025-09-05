@@ -11,6 +11,18 @@ data class Geolocation(
     val speed: Float,
     val time: Long,
 ) {
+    companion object Factory {
+        fun empty(): Geolocation {
+            return Geolocation(
+                latitude = 0.0,
+                longitude = 0.0,
+                altitude = 0.0,
+                speed = 0f,
+                time = 0,
+            )
+        }
+    }
+
     val localDateTime: LocalDateTime
         get() = LocalDateTime.ofInstant(
             Instant.ofEpochMilli(time),

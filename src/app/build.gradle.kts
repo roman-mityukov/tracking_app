@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.roborazzi)
     alias(libs.plugins.room)
 }
 detekt {
@@ -52,6 +53,9 @@ protobuf {
         }
     }
 }
+roborazzi {
+    outputDir.set(file("src/test/screenshots"))
+}
 
 android {
     namespace = "io.mityukov.geo.tracking"
@@ -61,8 +65,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 48
-        versionName = "0.39.0"
+        versionCode = 49
+        versionName = "0.40.0"
 
         testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 
@@ -98,7 +102,8 @@ android {
         debug {
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -169,7 +174,13 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.strikt.core)
     testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.hilt.android.testing)
+    testImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.rule)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.lifecycle.runtime.testing)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -178,4 +189,5 @@ dependencies {
     androidTestImplementation(libs.mockito.android)
     kspAndroidTest(libs.hilt.android.compiler)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(kotlin("test"))
 }

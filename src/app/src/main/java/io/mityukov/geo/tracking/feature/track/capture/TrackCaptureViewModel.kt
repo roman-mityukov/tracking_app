@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
+import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
+import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -19,15 +21,27 @@ sealed interface TrackCaptureEvent {
     data object StopCapture : TrackCaptureEvent
 }
 
-data class TrackCaptureState(val status: TrackCaptureStatus)
+data class TrackCaptureState(
+    val status: TrackCaptureStatus,
+    val geolocations: List<Geolocation> = listOf(),
+)
 
 @HiltViewModel
 class TrackCaptureViewModel @Inject constructor(
     private val trackCapturerController: TrackCapturerController,
+    private val tracksRepository: TracksRepository,
 ) : ViewModel() {
     val stateFlow = trackCapturerController.status
         .map {
-            TrackCaptureState(it)
+            val state = when (it) {
+                TrackCaptureStatus.Error -> TrackCaptureState(it)
+                TrackCaptureStatus.Idle -> TrackCaptureState(it)
+                is TrackCaptureStatus.Run -> {
+                    val geolocations = tracksRepository.getAllGeolocations()
+                    TrackCaptureState(it, geolocations)
+                }
+            }
+            state
         }
         .stateIn(
             viewModelScope,

@@ -9,7 +9,7 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
-    suspend fun getAppSettings() : AppSettings {
+    suspend fun getAppSettings(): AppSettings {
         return appSettingsRepository.appSettings.first()
     }
 }

@@ -38,9 +38,6 @@ data class HomeRouteTracksEditing(val trackId: String)
 data object HomeRouteProfile
 
 @Serializable
-data object HomeRouteStatistics
-
-@Serializable
 data object HomeRouteSettings
 
 @Serializable
@@ -78,9 +75,6 @@ fun HomeNavHost(navController: NavHostController, snackbarHostState: SnackbarHos
             snackbarHostState = snackbarHostState,
         )
         profileScreenNavigation(
-            onStatisticsSelected = {
-                navController.navigate(HomeRouteStatistics)
-            },
             onSettingsSelected = {
                 navController.navigate(HomeRouteSettings)
             },

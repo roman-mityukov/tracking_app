@@ -18,13 +18,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.utils.test.AppTestTag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onStatisticsSelected: () -> Unit,
     onSettingsSelected: () -> Unit,
     onAboutSelected: () -> Unit,
 ) {
@@ -39,16 +41,16 @@ fun ProfileScreen(
                 .padding(top = paddingValues.calculateTopPadding())
                 .consumeWindowInsets(paddingValues)
         ) {
-//            ProfileScreenItem(
-//                Modifier.clickable { onStatisticsSelected() },
-//                stringResource(R.string.profile_statistics_label),
-//            )
             ProfileScreenItem(
-                Modifier.clickable { onSettingsSelected() },
+                Modifier
+                    .clickable { onSettingsSelected() }
+                    .testTag(AppTestTag.BUTTON_SETTINGS),
                 stringResource(R.string.profile_settings_label),
             )
             ProfileScreenItem(
-                Modifier.clickable { onAboutSelected() },
+                Modifier
+                    .clickable { onAboutSelected() }
+                    .testTag(AppTestTag.BUTTON_ABOUT),
                 stringResource(R.string.profile_about_label),
             )
         }
@@ -69,4 +71,10 @@ private fun ProfileScreenItem(modifier: Modifier = Modifier, label: String) {
             )
         }
     )
+}
+
+@Preview
+@Composable
+fun ProfileScreenPreview() {
+    ProfileScreen({}, {})
 }

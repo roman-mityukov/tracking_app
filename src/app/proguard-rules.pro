@@ -11,6 +11,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keep class io.mityukov.geo.tracking.core.data.datastore.proto.** { *; }
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.

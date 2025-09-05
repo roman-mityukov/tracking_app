@@ -51,7 +51,7 @@ class TracksRepositoryImpl @Inject constructor(
             val geolocations = geolocationsFromGpx(inputStream)
             inputStream.close()
             DetailedTrack(
-                data = trackMapper.trackEntityToDomain(trackMetadata),
+                track = trackMapper.trackEntityToDomain(trackMetadata),
                 geolocations = geolocations,
             )
         }

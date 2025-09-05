@@ -14,8 +14,12 @@ interface GeolocationProvider {
         allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
     )
     suspend fun getLastKnownLocation(): PlatformLocationUpdateResult
+
     @androidx.annotation.RequiresPermission(
         allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
     )
-    fun locationUpdates(interval: Duration, minDistance: Float = 0f): Flow<PlatformLocationUpdateResult>
+    fun locationUpdates(
+        interval: Duration,
+        minDistance: Float = 0f
+    ): Flow<PlatformLocationUpdateResult>
 }

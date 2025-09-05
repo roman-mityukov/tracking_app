@@ -38,7 +38,8 @@ fun GeolocationUpdatesIntervalView(viewModel: GeolocationUpdatesIntervalViewMode
             when (state) {
                 is GeolocationUpdatesIntervalState.Data -> {
                     val selectedInterval = (state as GeolocationUpdatesIntervalState.Data).interval
-                    val availableIntervals = (state as GeolocationUpdatesIntervalState.Data).availableIntervals
+                    val availableIntervals =
+                        (state as GeolocationUpdatesIntervalState.Data).availableIntervals
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(

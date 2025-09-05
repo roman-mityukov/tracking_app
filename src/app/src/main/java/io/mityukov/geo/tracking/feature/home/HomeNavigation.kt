@@ -6,21 +6,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import io.mityukov.geo.tracking.app.DeepLinkProps
-import io.mityukov.geo.tracking.feature.about.AboutScreen
-import io.mityukov.geo.tracking.feature.map.MapScreen
+import io.mityukov.geo.tracking.feature.about.AboutRoute
+import io.mityukov.geo.tracking.feature.map.MapRoute
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
 import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
 import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsScreen
-import io.mityukov.geo.tracking.feature.statistics.StatisticsScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapScreen
-import io.mityukov.geo.tracking.feature.track.details.TrackDetailsScreen
-import io.mityukov.geo.tracking.feature.track.list.TracksScreen
+import io.mityukov.geo.tracking.feature.track.details.TrackDetailsRoute
+import io.mityukov.geo.tracking.feature.track.list.TracksRoute
 import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
 
 fun NavGraphBuilder.mapScreenNavigation(snackbarHostState: SnackbarHostState) {
     navigation<HomeBaseRoute.HomeBaseRouteMap>(startDestination = HomeRouteMapCurrentLocation) {
         composable<HomeRouteMapCurrentLocation> {
-            MapScreen(snackbarHostState = snackbarHostState)
+            MapRoute(snackbarHostState = snackbarHostState)
         }
     }
 }
@@ -34,7 +33,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
 ) {
     navigation<HomeBaseRoute.HomeBaseRouteTrack>(startDestination = HomeRouteTracksList) {
         composable<HomeRouteTracksList> {
-            TracksScreen(
+            TracksRoute(
                 onNavigateToTrack = onTrackSelected,
                 onNavigateToTracksEditing = onEditTracks,
             )
@@ -44,7 +43,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
                 uriPattern = DeepLinkProps.TRACK_DETAILS_URI_PATTERN
             })
         ) {
-            TrackDetailsScreen(
+            TrackDetailsRoute(
                 onBack = onBack,
                 onTrackMapSelected = onTrackMapSelected,
                 snackbarHostState = snackbarHostState
@@ -60,7 +59,6 @@ fun NavGraphBuilder.tracksScreenNavigation(
 }
 
 fun NavGraphBuilder.profileScreenNavigation(
-    onStatisticsSelected: () -> Unit,
     onSettingsSelected: () -> Unit,
     onAboutSelected: () -> Unit,
     onInstructionsSelected: () -> Unit,
@@ -69,16 +67,13 @@ fun NavGraphBuilder.profileScreenNavigation(
 ) {
     navigation<HomeBaseRoute.HomeBaseRouteProfile>(startDestination = HomeRouteProfile) {
         composable<HomeRouteProfile> {
-            ProfileScreen(onStatisticsSelected, onSettingsSelected, onAboutSelected)
-        }
-        composable<HomeRouteStatistics> {
-            StatisticsScreen(onBack = onBack)
+            ProfileScreen(onSettingsSelected, onAboutSelected)
         }
         composable<HomeRouteSettings> {
             AppSettingsScreen(onInstructionsSelected = onInstructionsSelected, onBack = onBack)
         }
         composable<HomeRouteAbout> {
-            AboutScreen(onBack = onBack, snackbarHostState = snackbarHostState)
+            AboutRoute(onBack = onBack, snackbarHostState = snackbarHostState)
         }
         composable<HomeRouteInstructions> {
             InstructionsScreen(onBack = onBack)

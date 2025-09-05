@@ -24,7 +24,7 @@ sealed interface TrackDetailsEvent {
 
 sealed interface TrackDetailsState {
     data object Pending : TrackDetailsState
-    data class Data(val data: DetailedTrack) : TrackDetailsState
+    data class Data(val detailedTrack: DetailedTrack) : TrackDetailsState
     data object DeleteCompleted : TrackDetailsState
 }
 

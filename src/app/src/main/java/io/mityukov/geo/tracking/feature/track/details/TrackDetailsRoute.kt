@@ -1,15 +1,17 @@
 package io.mityukov.geo.tracking.feature.track.details
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.text.format.DateUtils
+import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,9 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,47 +38,79 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.ButtonBack
 import io.mityukov.geo.tracking.app.ui.CommonAlertDialog
+import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.DetailedTrack
-import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.feature.map.MapLifecycle
+import io.mityukov.geo.tracking.feature.map.MapViewHolder
+import io.mityukov.geo.tracking.utils.test.AppTestTag
 import io.mityukov.geo.tracking.utils.time.TimeUtils
-import io.mityukov.geo.tracking.yandex.showTrack
+import io.mityukov.geo.tracking.utils.ui.FontScalePreviews
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackDetailsScreen(
+fun TrackDetailsRoute(
     viewModel: TrackDetailsViewModel = hiltViewModel(),
     onTrackMapSelected: (String) -> Unit,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    val openDeleteDialog = remember { mutableStateOf(false) }
-    val uriString by viewModel.sharingStateFlow.collectAsStateWithLifecycle()
+    val state = viewModel.stateFlow.collectAsStateWithLifecycle()
+    val uriStringState = viewModel.sharingStateFlow.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val coroutineScope = rememberCoroutineScope()
-    val errorMessage = stringResource(R.string.error_sharing)
+    val mapViewHolder = remember { MapViewHolder(MapView(context), context.applicationContext) }
 
-    LaunchedEffect(uriString) {
-        if (uriString != null) {
+    MapLifecycle(
+        onStart = {
+            mapViewHolder.onStart()
+        },
+        onStop = {
+            mapViewHolder.onStop()
+        },
+        onResume = {}
+    )
+    TrackDetailsScreen(
+        state = state.value,
+        sharingState = uriStringState.value,
+        mapViewFactory = { _ ->
+            val mapView = mapViewHolder.mapView
+            mapView.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+            mapView.setNoninteractive(false)
+            mapView
+        },
+        onPrepareShare = {
+            viewModel.add(TrackDetailsEvent.Share)
+        },
+        onShare = { uriString ->
             try {
-                val uri = Uri.parse(uriString)
+                val uri = uriString.toUri()
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.putExtra(Intent.EXTRA_STREAM, uri)
                 intent.type = "application/octet-stream"
@@ -91,22 +123,51 @@ fun TrackDetailsScreen(
                 )
             } catch (_: ActivityNotFoundException) {
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar(message = errorMessage)
+                    snackbarHostState.showSnackbar(message = resources.getString(R.string.error_sharing))
                 }
             } finally {
                 viewModel.add(TrackDetailsEvent.ConsumeShare)
             }
+        },
+        onDelete = {
+            viewModel.add(TrackDetailsEvent.Delete)
+            onBack()
+        },
+        onBack = onBack,
+        onShowTrack = { geolocations ->
+            mapViewHolder.updateTrack(geolocations = geolocations, moveCamera = true)
+        },
+        onTrackMapSelected = onTrackMapSelected,
+    )
+}
+
+@Composable
+fun TrackDetailsScreen(
+    state: TrackDetailsState,
+    sharingState: String?,
+    mapViewFactory: (Context) -> View,
+    onShowTrack: (List<Geolocation>) -> Unit,
+    onTrackMapSelected: (String) -> Unit,
+    onDelete: () -> Unit,
+    onPrepareShare: () -> Unit,
+    onShare: (String) -> Unit,
+    onBack: () -> Unit,
+) {
+    LaunchedEffect(sharingState) {
+        if (sharingState != null) {
+            onShare(sharingState)
         }
     }
 
+    val openDeleteDialog = remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
-            TrackDetailsTopBar(viewModel = viewModel, onBack = onBack)
+            TrackDetailsTopBar(onShare = onPrepareShare, onBack = onBack)
         },
     ) { paddingValues ->
-        val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-        when (state.value) {
+        when (state) {
             TrackDetailsState.DeleteCompleted -> {
                 LaunchedEffect(Unit) {
                     onBack()
@@ -114,44 +175,109 @@ fun TrackDetailsScreen(
             }
 
             is TrackDetailsState.Data -> {
-                val track = (state.value as TrackDetailsState.Data).data
+                val track = state.detailedTrack
 
                 TrackDetailsContent(
                     modifier = Modifier.padding(paddingValues),
                     detailedTrack = track,
+                    mapViewFactory = mapViewFactory,
                     onTrackMapSelected = onTrackMapSelected,
-                    onDelete = {
+                    onShowTrack = onShowTrack,
+                    onShowDeleteDialog = {
                         openDeleteDialog.value = true
                     },
                 )
             }
 
             TrackDetailsState.Pending -> {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         }
-
-        if (openDeleteDialog.value) {
-            CommonAlertDialog(
-                onDismiss = {
-                    openDeleteDialog.value = false
-                },
-                onConfirm = {
-                    viewModel.add(TrackDetailsEvent.Delete)
-                    onBack()
-                },
-                dialogTitle = stringResource(R.string.track_details_delete_dialog_title),
-                dialogText = stringResource(R.string.track_details_delete_dialog_text)
-            )
-        }
     }
+
+    if (openDeleteDialog.value) {
+        CommonAlertDialog(
+            modifier = Modifier.testTag(AppTestTag.DIALOG_DELETE),
+            onDismiss = {
+                openDeleteDialog.value = false
+            },
+            onConfirm = onDelete,
+            dialogTitle = stringResource(R.string.track_details_delete_dialog_title),
+            dialogText = stringResource(R.string.track_details_delete_dialog_text)
+        )
+    }
+}
+
+@Preview
+@FontScalePreviews
+@Composable
+fun TrackDetailsScreenPreview(@PreviewParameter(TrackDetailsStateProvider::class) state: TrackDetailsState) {
+    TrackDetailsScreen(
+        state = state,
+        sharingState = null,
+        mapViewFactory = { View(it) },
+        onShowTrack = {},
+        onTrackMapSelected = {},
+        onDelete = {},
+        onPrepareShare = {},
+        onShare = {},
+        onBack = {},
+    )
+}
+
+class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetailsState> {
+    override val values: Sequence<TrackDetailsState> = sequenceOf(
+        TrackDetailsState.Pending,
+        TrackDetailsState.Data(
+            detailedTrack = DetailedTrack(
+                track = Track(
+                    id = "49defd14-ae28-4705-9334-59761914de0c",
+                    name = "Тестовый трек 1",
+                    start = 1757038748000,
+                    duration = 78.seconds,
+                    end = 1757038758000,
+                    distance = 1547f,
+                    altitudeUp = 32f,
+                    altitudeDown = 12f,
+                    sumSpeed = 256f,
+                    maxSpeed = 1.2f,
+                    minSpeed = 1.0f,
+                    geolocationCount = 2,
+                    filePath = "",
+                ),
+                geolocations = listOf(
+                    Geolocation(
+                        latitude = 53.654810,
+                        longitude = 87.450375,
+                        altitude = 310.2,
+                        speed = 1.4f,
+                        time = 1756964259,
+                    ),
+                    Geolocation(
+                        latitude = 53.657810,
+                        longitude = 87.458375,
+                        altitude = 210.2,
+                        speed = 1.2f,
+                        time = 1756964270,
+                    )
+                ),
+            )
+        )
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TrackDetailsTopBar(
     modifier: Modifier = Modifier,
-    viewModel: TrackDetailsViewModel,
+    onShare: () -> Unit,
     onBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
@@ -161,9 +287,7 @@ private fun TrackDetailsTopBar(
             ButtonBack(onBack = onBack)
         },
         actions = {
-            IconButton(onClick = {
-                viewModel.add(TrackDetailsEvent.Share)
-            }) {
+            IconButton(modifier = Modifier.testTag(AppTestTag.BUTTON_SHARE), onClick = onShare) {
                 Icon(
                     painterResource(R.drawable.icon_share),
                     contentDescription = stringResource(R.string.content_description_share),
@@ -177,8 +301,10 @@ private fun TrackDetailsTopBar(
 private fun TrackDetailsContent(
     modifier: Modifier = Modifier,
     detailedTrack: DetailedTrack,
+    mapViewFactory: (Context) -> View,
     onTrackMapSelected: (String) -> Unit,
-    onDelete: () -> Unit,
+    onShowTrack: (List<Geolocation>) -> Unit,
+    onShowDeleteDialog: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -204,11 +330,16 @@ private fun TrackDetailsContent(
             })
         )
         Spacer(modifier = Modifier.height(16.dp))
-        TrackDetailsMap(track = detailedTrack, onTrackMapSelected = onTrackMapSelected)
+        TrackDetailsMap(
+            track = detailedTrack,
+            mapViewFactory = mapViewFactory,
+            onTrackMapSelected = onTrackMapSelected,
+            onShowTrack = onShowTrack,
+        )
         Spacer(modifier = Modifier.height(16.dp))
         ButtonDeleteTrack(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            onDelete = onDelete,
+            onDelete = onShowDeleteDialog,
         )
     }
 }
@@ -217,32 +348,25 @@ private fun TrackDetailsContent(
 private fun TrackDetailsMap(
     modifier: Modifier = Modifier,
     track: DetailedTrack,
+    mapViewFactory: (Context) -> View,
+    onShowTrack: (List<Geolocation>) -> Unit,
     onTrackMapSelected: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-    val mapView = remember { MapView(context) }
-
     Box {
         AndroidView(
             modifier = modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio = 1f),
-            factory = { context ->
-                mapView.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-                mapView.setNoninteractive(true)
-                mapView
-            }
+            factory = mapViewFactory
         )
         Button(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .size(48.dp)
-                .padding(8.dp),
+                .padding(8.dp)
+                .testTag(AppTestTag.BUTTON_TRACK_DETAILS_MAP),
             onClick = {
-                onTrackMapSelected(track.data.id)
+                onTrackMapSelected(track.track.id)
             },
             shape = CircleShape,
             contentPadding = PaddingValues(0.dp),
@@ -254,37 +378,16 @@ private fun TrackDetailsMap(
         }
     }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = object : DefaultLifecycleObserver {
-            override fun onStart(owner: LifecycleOwner) {
-                logd("onStart1")
-                super.onStart(owner)
-                mapView.onStart()
-            }
-
-            override fun onStop(owner: LifecycleOwner) {
-                logd("onStop1")
-                super.onStop(owner)
-                mapView.onStop()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
     if (track.geolocations.isNotEmpty()) {
         LaunchedEffect(track.geolocations.last()) {
-            mapView.showTrack(context, track.geolocations, true)
+            onShowTrack(track.geolocations)
         }
     }
 }
 
 @Composable
 private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: DetailedTrack) {
-    val track = detailedTrack.data
+    val track = detailedTrack.track
     Column(modifier = modifier) {
         Text(
             text = stringResource(
@@ -349,7 +452,7 @@ private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: Detai
 @Composable
 fun ButtonDeleteTrack(modifier: Modifier = Modifier, onDelete: () -> Unit) {
     Button(
-        modifier = modifier,
+        modifier = modifier.testTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE),
         onClick = {
             onDelete()
         },

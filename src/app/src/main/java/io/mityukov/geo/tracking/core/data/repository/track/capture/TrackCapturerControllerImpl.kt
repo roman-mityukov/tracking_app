@@ -1,4 +1,5 @@
 @file:Suppress("CyclomaticComplexMethod")
+
 package io.mityukov.geo.tracking.core.data.repository.track.capture
 
 import android.content.Context

@@ -66,7 +66,7 @@ private class TestTrackRepository : TracksRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllGeolocations(): List<Geolocation> {
+    override suspend fun getCapturedTrackGeolocations(): List<Geolocation> {
         return listOf()
     }
 

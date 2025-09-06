@@ -37,7 +37,7 @@ class TrackCaptureViewModel @Inject constructor(
                 TrackCaptureStatus.Error -> TrackCaptureState(it)
                 TrackCaptureStatus.Idle -> TrackCaptureState(it)
                 is TrackCaptureStatus.Run -> {
-                    val geolocations = tracksRepository.getAllGeolocations()
+                    val geolocations = tracksRepository.getCapturedTrackGeolocations()
                     TrackCaptureState(it, geolocations)
                 }
             }

@@ -65,8 +65,13 @@ fun AboutRoute(
         }
     }
 
+    val appInfo = {
+        "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+    }
+
     AboutScreen(
         modifier = Modifier.testTag(AppTestTag.ABOUT_SCREEN),
+        appInfo = appInfo,
         onBack = onBack,
         onShareLogs = {
             viewModel.add(AboutEvent.ShareLogs)
@@ -80,6 +85,7 @@ fun AboutRoute(
 @Composable
 fun AboutScreen(
     modifier: Modifier = Modifier,
+    appInfo: () -> String,
     onBack: () -> Unit,
     onShareLogs: () -> Unit,
     onSendEmail: () -> Unit,
@@ -97,10 +103,65 @@ fun AboutScreen(
             contentAlignment = Alignment.Center
         ) {
             AboutContent(
+                appInfo = appInfo,
                 onShareLogs = onShareLogs,
                 onSendEmail = onSendEmail,
             )
         }
+    }
+}
+
+@Composable
+fun AboutContent(
+    modifier: Modifier = Modifier,
+    appInfo: () -> String,
+    onShareLogs: () -> Unit,
+    onSendEmail: () -> Unit,
+) {
+    Column(
+        modifier = modifier.width(IntrinsicSize.Max),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        AppIcon()
+        Spacer(modifier = Modifier.height(16.dp))
+        AppInfo(appInfo = appInfo)
+        Spacer(modifier = Modifier.height(16.dp))
+        ContactButton(onClick = onSendEmail)
+        Spacer(modifier = Modifier.height(8.dp))
+        ShareLogsButton(onShareLogs = onShareLogs)
+    }
+}
+
+@Composable
+private fun AppInfo(modifier: Modifier = Modifier, appInfo: () -> String) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = stringResource(R.string.app_name))
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = appInfo())
+    }
+}
+
+@Composable
+private fun AppIcon(modifier: Modifier = Modifier) {
+    Image(
+        modifier = modifier,
+        painter = painterResource(R.drawable.ic_launcher_round),
+        contentDescription = stringResource(R.string.content_description_app_icon),
+    )
+}
+
+@Composable
+private fun ContactButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Button(modifier = modifier.fillMaxWidth(), onClick = onClick) {
+        Text(text = stringResource(R.string.about_button_label_email), maxLines = 1)
+    }
+}
+
+@Composable
+private fun ShareLogsButton(modifier: Modifier = Modifier, onShareLogs: () -> Unit) {
+    Button(modifier = modifier.fillMaxWidth(), onClick = onShareLogs) {
+        Text(text = stringResource(R.string.about_button_send_logs), maxLines = 1)
     }
 }
 
@@ -109,6 +170,7 @@ fun AboutScreen(
 @Composable
 fun AboutScreenPreview() {
     AboutScreen(
+        appInfo = {"0.40.1(50)"},
         onBack = {},
         onSendEmail = {},
         onShareLogs = {},
@@ -128,59 +190,6 @@ fun AboutTopBar(
             ButtonBack(onBack = onBack)
         }
     )
-}
-
-@Composable
-fun AboutContent(
-    modifier: Modifier = Modifier,
-    onShareLogs: () -> Unit,
-    onSendEmail: () -> Unit,
-) {
-    Column(
-        modifier = modifier.width(IntrinsicSize.Max),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        AppIcon()
-        Spacer(modifier = Modifier.height(16.dp))
-        AppInfo()
-        Spacer(modifier = Modifier.height(16.dp))
-        ContactButton(onClick = onSendEmail)
-        Spacer(modifier = Modifier.height(8.dp))
-        ShareLogsButton(onShareLogs = onShareLogs)
-    }
-}
-
-@Composable
-private fun AppIcon(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier,
-        painter = painterResource(R.drawable.ic_launcher_round),
-        contentDescription = stringResource(R.string.content_description_app_icon),
-    )
-}
-
-@Composable
-private fun AppInfo(modifier: Modifier = Modifier) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = stringResource(R.string.app_name))
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
-    }
-}
-
-@Composable
-private fun ContactButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(modifier = modifier.fillMaxWidth(), onClick = onClick) {
-        Text(text = stringResource(R.string.about_button_label_email), maxLines = 1)
-    }
-}
-
-@Composable
-private fun ShareLogsButton(modifier: Modifier = Modifier, onShareLogs: () -> Unit) {
-    Button(modifier = modifier.fillMaxWidth(), onClick = onShareLogs) {
-        Text(text = stringResource(R.string.about_button_send_logs), maxLines = 1)
-    }
 }
 
 private fun sendEmail(

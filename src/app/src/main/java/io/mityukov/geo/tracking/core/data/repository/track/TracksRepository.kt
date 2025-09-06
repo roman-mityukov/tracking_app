@@ -10,7 +10,7 @@ interface TracksRepository {
     val tracks: Flow<List<Track>>
     suspend fun getTrack(trackId: String): Track
     suspend fun getDetailedTrack(trackId: String): DetailedTrack
-    suspend fun getAllGeolocations(): List<Geolocation>
+    suspend fun getCapturedTrackGeolocations(): List<Geolocation>
     suspend fun deleteTrack(trackId: String)
     suspend fun insertTrack(trackInProgress: TrackInProgress)
     suspend fun insertTrackPoint(location: Geolocation)

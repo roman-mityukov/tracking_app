@@ -31,6 +31,7 @@ class TracksRepositoryImpl @Inject constructor(
     @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
 ) : TracksRepository {
     private val tempTrackFileName = "temp.gpx"
+    private val cachedGeolocations = mutableListOf<Geolocation>()
 
     override val tracks: Flow<List<Track>> = trackDao.getAllTracks().map {
         it.map {
@@ -56,21 +57,24 @@ class TracksRepositoryImpl @Inject constructor(
             )
         }
 
-    override suspend fun getAllGeolocations(): List<Geolocation> =
+    override suspend fun getCapturedTrackGeolocations(): List<Geolocation> =
         withContext(coroutineDispatcher) {
-            val trackFile = File(tracksDirectory, tempTrackFileName)
-            val listStrings = if (trackFile.exists()) trackFile.readLines() else listOf()
-            val geolocations = listStrings.map {
-                val parts = it.split(",")
-                Geolocation(
-                    latitude = parts[1].toDouble(),
-                    longitude = parts[2].toDouble(),
-                    altitude = parts[3].toDouble(),
-                    speed = 0f,
-                    time = parts[5].toLong(),
-                )
+            if (cachedGeolocations.isEmpty()) {
+                val trackFile = File(tracksDirectory, tempTrackFileName)
+                val listStrings = if (trackFile.exists()) trackFile.readLines() else listOf()
+                cachedGeolocations.addAll(listStrings.map {
+                    val parts = it.split(",")
+                    Geolocation(
+                        latitude = parts[1].toDouble(),
+                        longitude = parts[2].toDouble(),
+                        altitude = parts[3].toDouble(),
+                        speed = 0f,
+                        time = parts[5].toLong(),
+                    )
+                })
             }
-            geolocations
+
+            cachedGeolocations
         }
 
     override suspend fun deleteTrack(trackId: String) = withContext(coroutineDispatcher) {
@@ -83,6 +87,7 @@ class TracksRepositoryImpl @Inject constructor(
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun insertTrack(trackInProgress: TrackInProgress) =
         withContext(coroutineDispatcher) {
+            cachedGeolocations.clear()
             val trackFile = File(tracksDirectory, tempTrackFileName)
 
             val gpxFile =
@@ -153,6 +158,7 @@ class TracksRepositoryImpl @Inject constructor(
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun insertTrackPoint(location: Geolocation) =
         withContext(coroutineDispatcher) {
+            cachedGeolocations.add(location)
             val trackFile = File(tracksDirectory, tempTrackFileName)
             trackFile.appendText(
                 "point,${location.latitude},${location.longitude}," +

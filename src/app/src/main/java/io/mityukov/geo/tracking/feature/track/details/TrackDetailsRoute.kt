@@ -6,6 +6,7 @@ import android.content.Intent
 import android.text.format.DateUtils
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -177,16 +179,27 @@ fun TrackDetailsScreen(
             is TrackDetailsState.Data -> {
                 val track = state.detailedTrack
 
-                TrackDetailsContent(
-                    modifier = Modifier.padding(paddingValues),
-                    detailedTrack = track,
-                    mapViewFactory = mapViewFactory,
-                    onTrackMapSelected = onTrackMapSelected,
-                    onShowTrack = onShowTrack,
-                    onShowDeleteDialog = {
-                        openDeleteDialog.value = true
-                    },
-                )
+                if (track.geolocations.isEmpty()) {
+                    TrackEmptyContent(
+                        modifier = Modifier.padding(paddingValues).fillMaxSize(),
+                        onShowDeleteDialog = {
+                            openDeleteDialog.value = true
+                        }
+                    )
+                } else {
+                    TrackDetailsContent(
+                        modifier = Modifier.padding(paddingValues),
+                        detailedTrack = track,
+                        mapViewFactory = mapViewFactory,
+                        onTrackMapSelected = onTrackMapSelected,
+                        onShowTrack = onShowTrack,
+                        onShowDeleteDialog = {
+                            openDeleteDialog.value = true
+                        },
+                    )
+                }
+
+
             }
 
             TrackDetailsState.Pending -> {
@@ -269,6 +282,26 @@ class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetailsState> {
                     )
                 ),
             )
+        ),
+        TrackDetailsState.Data(
+            detailedTrack = DetailedTrack(
+                track = Track(
+                    id = "49defd14-ae28-4705-9334-59761914de0c",
+                    name = "Тестовый трек 1",
+                    start = 1757038748000,
+                    duration = 78.seconds,
+                    end = 1757038758000,
+                    distance = 1547f,
+                    altitudeUp = 32f,
+                    altitudeDown = 12f,
+                    sumSpeed = 256f,
+                    maxSpeed = 1.2f,
+                    minSpeed = 1.0f,
+                    geolocationCount = 2,
+                    filePath = "",
+                ),
+                geolocations = listOf(),
+            )
         )
     )
 }
@@ -295,6 +328,28 @@ private fun TrackDetailsTopBar(
             }
         }
     )
+}
+
+@Composable
+private fun TrackEmptyContent(
+    modifier: Modifier = Modifier,
+    onShowDeleteDialog: () -> Unit,
+){
+    Column(
+        modifier = modifier.padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = "Трек не содержит записанных геолокаций.",
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ButtonDeleteTrack(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            onDelete = onShowDeleteDialog,
+        )
+    }
 }
 
 @Composable

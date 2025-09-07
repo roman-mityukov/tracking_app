@@ -42,7 +42,25 @@ class TrackDetailsScreenshotTest {
     fun dataState() {
         composeTestRule.setContent {
             TrackDetailsScreen(
-                state = TrackDetailsStateProvider().values.first { it is TrackDetailsState.Data },
+                state = TrackDetailsStateProvider().values.first { it is TrackDetailsState.Data && it.detailedTrack.geolocations.isNotEmpty() },
+                sharingState = null,
+                mapViewFactory = { View(it) },
+                onShowTrack = {},
+                onTrackMapSelected = {},
+                onDelete = {},
+                onPrepareShare = {},
+                onShare = {},
+                onBack = {},
+            )
+        }
+        composeTestRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun dataEmptyState() {
+        composeTestRule.setContent {
+            TrackDetailsScreen(
+                state = TrackDetailsStateProvider().values.first { it is TrackDetailsState.Data && it.detailedTrack.geolocations.isEmpty() },
                 sharingState = null,
                 mapViewFactory = { View(it) },
                 onShowTrack = {},

@@ -28,7 +28,11 @@ class TrackDetailsScreenTest {
     private lateinit var mockOnTrackMapSelected: (String) -> Unit
 
     private val dataState: TrackDetailsState.Data =
-        TrackDetailsStateProvider().values.first { it is TrackDetailsState.Data } as TrackDetailsState.Data
+        TrackDetailsStateProvider().values
+            .first { it is TrackDetailsState.Data && it.detailedTrack.geolocations.isNotEmpty() } as TrackDetailsState.Data
+    private val dataEmptyState: TrackDetailsState.Data =
+        TrackDetailsStateProvider().values
+            .first { it is TrackDetailsState.Data && it.detailedTrack.geolocations.isEmpty() } as TrackDetailsState.Data
 
     @Before
     fun setUp() {
@@ -85,6 +89,27 @@ class TrackDetailsScreenTest {
 
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE).performScrollTo()
         composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE).performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.track_details_delete_dialog_title))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.track_details_delete_dialog_text))
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_NO).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_YES).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_YES).performClick()
+        verify(mockOnDelete).invoke()
+    }
+
+    @Test
+    fun buttonDeleteClicked_emptyTrack_showDialog() {
+        composeTestRule.setContent {
+            TrackDetailsScreenUnderTest(dataEmptyState)
+        }
+
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE).performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()

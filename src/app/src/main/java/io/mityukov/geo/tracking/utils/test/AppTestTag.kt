@@ -15,6 +15,10 @@ object AppTestTag {
     const val BUTTON_BACK = "ButtonBack"
     const val BUTTON_SHARE = "ButtonShare"
     const val BUTTON_TRACK_DETAILS_MAP = "ButtonTrackDetailsMap"
-    const val BUTTON_TRACK_DETAILS_DELETE = "ButtonTrackDetailsDelete"
+    const val BUTTON_DELETE = "ButtonDelete"
+    const val BUTTON_INSTRUCTIONS = "ButtonInstructions"
+    const val DROPDOWN_GEOLOCATIONS_UPDATES_INTERVAL = "DropdownGeolocationsUpdatesInterval"
+    const val DROPDOWN_ITEM_GEOLOCATIONS_UPDATES_INTERVAL = "DropdownItemGeolocationsUpdatesInterval"
     const val DIALOG_DELETE = "DialogDelete"
+    const val TRACK_ITEM = "TrackItem"
 }

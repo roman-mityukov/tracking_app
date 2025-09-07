@@ -16,10 +16,7 @@ import org.mockito.kotlin.verifyNoInteractions
 
 class ProfileScreenTest {
     @get:Rule
-    val composeTestRule by lazy {
-        println("hello")
-        createAndroidComposeRule<ComponentActivity>()
-    }
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private lateinit var mockOnSettingsSelected: () -> Unit
     private lateinit var mockOnAboutSelected: () -> Unit

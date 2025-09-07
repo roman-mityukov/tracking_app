@@ -1,6 +1,7 @@
 package io.mityukov.geo.tracking.feature.track.list
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
@@ -22,11 +23,7 @@ class TracksListScreenshotTest {
     @Test
     fun pending() {
         composeTestRule.setContent {
-            TrackList(
-                state = TracksState.Pending,
-                onClick = {},
-                onLongPress = {},
-            )
+            TrackListUnderTest(state = TracksState.Pending)
         }
 
         composeTestRule.onRoot().captureRoboImage()
@@ -35,11 +32,7 @@ class TracksListScreenshotTest {
     @Test
     fun emptyList() {
         composeTestRule.setContent {
-            TrackList(
-                state = TracksState.Data(listOf()),
-                onClick = {},
-                onLongPress = {},
-            )
+            TrackListUnderTest(state = TracksState.Data(listOf()))
         }
 
         composeTestRule.onRoot().captureRoboImage()
@@ -47,18 +40,23 @@ class TracksListScreenshotTest {
 
     @Test
     fun populatedList() {
-        val tracks =
-            (TracksStateProvider().values.first {
+        val state =
+            TracksStateProvider().values.first {
                 it is TracksState.Data && it.tracks.isNotEmpty()
-            } as TracksState.Data).tracks
+            }
         composeTestRule.setContent {
-            TrackList(
-                state = TracksState.Data(tracks = tracks),
-                onClick = {},
-                onLongPress = {},
-            )
+            TrackListUnderTest(state = state)
         }
 
         composeTestRule.onRoot().captureRoboImage()
+    }
+
+    @Composable
+    fun TrackListUnderTest(state: TracksState) {
+        TrackList(
+            state = state,
+            onClick = {},
+            onLongPress = {},
+        )
     }
 }

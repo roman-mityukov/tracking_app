@@ -8,13 +8,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.utils.test.AppTestTag
 
 @Composable
 fun InstructionsView(onInstructionsSelected: () -> Unit) {
     ListItem(
-        modifier = Modifier.clickable {
+        modifier = Modifier.testTag(AppTestTag.BUTTON_INSTRUCTIONS).clickable {
             onInstructionsSelected()
         },
         headlineContent = {

@@ -21,6 +21,7 @@ import io.mityukov.geo.tracking.core.database.AppDatabase
 import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.hilt.HiltTestActivity
+import io.mityukov.geo.tracking.utils.test.AppTestTag
 import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
@@ -96,7 +97,7 @@ class TracksScreenTest {
     fun performClick_onNavigateToTrackCalled() {
         insertTrackToDb()
         composeRule.waitUntil(100) { true }
-        composeRule.onNodeWithTag("TrackItem").performClick()
+        composeRule.onNodeWithTag(AppTestTag.TRACK_ITEM).performClick()
         verify(mockOnNavigateToTrack).invoke("trackId")
     }
 
@@ -104,7 +105,7 @@ class TracksScreenTest {
     fun performLongClick_onNavigateToTrackEditingCalled() {
         insertTrackToDb()
         composeRule.waitUntil(100) { true }
-        composeRule.onNodeWithTag("TrackItem").performTouchInput {
+        composeRule.onNodeWithTag(AppTestTag.TRACK_ITEM).performTouchInput {
             longClick(durationMillis = 500)
         }
         verify(mockOnNavigateToTracksEditing).invoke("trackId")

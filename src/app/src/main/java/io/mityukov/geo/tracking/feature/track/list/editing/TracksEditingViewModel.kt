@@ -37,7 +37,7 @@ class TracksEditingViewModel @Inject constructor(
 ) :
     ViewModel() {
     private val routeTracksEditing = savedStateHandle.toRoute<HomeRouteTracksEditing>()
-    private val selectedTracks = mutableListOf<String>(routeTracksEditing.trackId)
+    private val selectedTracks = mutableListOf(routeTracksEditing.trackId)
     private val mutableStateFlow = MutableStateFlow<TracksEditingState>(TracksEditingState.Pending)
     val stateFlow = mutableStateFlow.asStateFlow()
 

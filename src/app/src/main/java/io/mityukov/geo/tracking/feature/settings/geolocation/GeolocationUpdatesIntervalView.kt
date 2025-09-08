@@ -18,15 +18,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
+import io.mityukov.geo.tracking.utils.test.AppTestTag
+import kotlin.time.Duration
 
 @Composable
-fun GeolocationUpdatesIntervalView(viewModel: GeolocationUpdatesIntervalViewModel = hiltViewModel()) {
-    val state by viewModel.stateFlow.collectAsStateWithLifecycle()
+fun GeolocationUpdatesIntervalView(state: GeolocationUpdatesIntervalState, onIntervalSelect: (Duration) -> Unit,) {
 
     ListItem(
         headlineContent = {
@@ -37,9 +37,8 @@ fun GeolocationUpdatesIntervalView(viewModel: GeolocationUpdatesIntervalViewMode
         trailingContent = {
             when (state) {
                 is GeolocationUpdatesIntervalState.Data -> {
-                    val selectedInterval = (state as GeolocationUpdatesIntervalState.Data).interval
-                    val availableIntervals =
-                        (state as GeolocationUpdatesIntervalState.Data).availableIntervals
+                    val selectedInterval = state.interval
+                    val availableIntervals = state.availableIntervals
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(
@@ -50,6 +49,7 @@ fun GeolocationUpdatesIntervalView(viewModel: GeolocationUpdatesIntervalViewMode
                         Text(
                             text = selectedInterval.inWholeSeconds.toString(),
                             modifier = Modifier
+                                .testTag(AppTestTag.DROPDOWN_GEOLOCATIONS_UPDATES_INTERVAL)
                                 .clickable { expanded = true }
                                 .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
                                 .padding(8.dp)
@@ -61,14 +61,11 @@ fun GeolocationUpdatesIntervalView(viewModel: GeolocationUpdatesIntervalViewMode
                         ) {
                             availableIntervals.forEach { interval ->
                                 DropdownMenuItem(
+                                    modifier = Modifier.testTag(AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_UPDATES_INTERVAL),
                                     text = { Text(interval.inWholeSeconds.toString()) },
                                     onClick = {
                                         expanded = false
-                                        viewModel.add(
-                                            GeolocationUpdatesIntervalEvent.SelectInterval(
-                                                interval
-                                            )
-                                        )
+                                        onIntervalSelect(interval)
                                     }
                                 )
                             }

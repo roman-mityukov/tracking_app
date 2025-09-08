@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.core.model.track.Track
+import io.mityukov.geo.tracking.utils.test.AppTestTag
 import io.mityukov.geo.tracking.utils.time.TimeUtils
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -138,7 +139,7 @@ private fun TrackItem(
     val haptics = LocalHapticFeedback.current
     ListItem(
         modifier = modifier
-            .testTag("TrackItem")
+            .testTag(AppTestTag.TRACK_ITEM)
             .combinedClickable(
                 enabled = true,
                 onClick = {

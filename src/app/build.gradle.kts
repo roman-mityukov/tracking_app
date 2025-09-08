@@ -65,8 +65,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 51
-        versionName = "0.40.2"
+        versionCode = 53
+        versionName = "0.42.0"
 
         testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
 

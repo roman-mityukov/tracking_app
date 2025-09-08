@@ -87,9 +87,9 @@ class TrackDetailsScreenTest {
             TrackDetailsScreenUnderTest(dataState)
         }
 
-        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE).performScrollTo()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_DELETE).performScrollTo()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE).performClick()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_DELETE).performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()
         composeTestRule
@@ -110,7 +110,7 @@ class TrackDetailsScreenTest {
             TrackDetailsScreenUnderTest(dataEmptyState)
         }
 
-        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE).performClick()
+        composeTestRule.onNodeWithTag(AppTestTag.BUTTON_DELETE).performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()
         composeTestRule

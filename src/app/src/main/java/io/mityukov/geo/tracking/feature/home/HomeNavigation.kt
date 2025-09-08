@@ -9,12 +9,12 @@ import io.mityukov.geo.tracking.app.DeepLinkProps
 import io.mityukov.geo.tracking.feature.about.AboutRoute
 import io.mityukov.geo.tracking.feature.map.MapRoute
 import io.mityukov.geo.tracking.feature.profile.ProfileScreen
-import io.mityukov.geo.tracking.feature.settings.AppSettingsScreen
+import io.mityukov.geo.tracking.feature.settings.AppSettingsRoute
 import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapScreen
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsRoute
 import io.mityukov.geo.tracking.feature.track.list.TracksRoute
-import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
+import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingRoute
 
 fun NavGraphBuilder.mapScreenNavigation(snackbarHostState: SnackbarHostState) {
     navigation<HomeBaseRoute.HomeBaseRouteMap>(startDestination = HomeRouteMapCurrentLocation) {
@@ -53,7 +53,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
             TrackDetailsMapScreen(onBack = onBack)
         }
         composable<HomeRouteTracksEditing> {
-            TracksEditingScreen(onBack = onBack)
+            TracksEditingRoute(onBack = onBack)
         }
     }
 }
@@ -70,7 +70,7 @@ fun NavGraphBuilder.profileScreenNavigation(
             ProfileScreen(onSettingsSelected, onAboutSelected)
         }
         composable<HomeRouteSettings> {
-            AppSettingsScreen(onInstructionsSelected = onInstructionsSelected, onBack = onBack)
+            AppSettingsRoute(onInstructionsSelected = onInstructionsSelected, onBack = onBack)
         }
         composable<HomeRouteAbout> {
             AboutRoute(onBack = onBack, snackbarHostState = snackbarHostState)

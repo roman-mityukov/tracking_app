@@ -507,7 +507,7 @@ private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: Detai
 @Composable
 fun ButtonDeleteTrack(modifier: Modifier = Modifier, onDelete: () -> Unit) {
     Button(
-        modifier = modifier.testTag(AppTestTag.BUTTON_TRACK_DETAILS_DELETE),
+        modifier = modifier.testTag(AppTestTag.BUTTON_DELETE),
         onClick = {
             onDelete()
         },

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,7 +32,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), currentSelectedItem: 
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
     val routes = state.value.navigationItems.map { it.route }
-    var selectedItem by remember { mutableIntStateOf(routes.indexOf(currentSelectedItem)) }
+    var selectedItem by rememberSaveable { mutableIntStateOf(routes.indexOf(currentSelectedItem)) }
     var oldItem = selectedItem
 
     val snackbarHostState = remember { SnackbarHostState() }

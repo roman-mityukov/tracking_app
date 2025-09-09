@@ -18,6 +18,7 @@ import io.mityukov.geo.tracking.app.AppProps
 import io.mityukov.geo.tracking.app.ui.theme.GeoAppTheme
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettings
 import io.mityukov.geo.tracking.feature.splash.SplashViewModel
+import io.mityukov.geo.tracking.utils.log.logd
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,6 +30,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        logd("MainActivity::onCreate savedInstanceState $savedInstanceState")
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager

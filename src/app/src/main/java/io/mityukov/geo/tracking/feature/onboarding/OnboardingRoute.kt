@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,31 +57,34 @@ fun OnboardingScreen(
         windowInfo.containerSize.width.toDp()
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Image(
-            modifier = Modifier.size((screenWidth / 2)),
-            painter = painterResource(R.drawable.ic_launcher_round),
-            contentDescription = stringResource(R.string.content_description_app_icon)
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = stringResource(R.string.onboarding_instructions_label),
-            style = MaterialTheme.typography.titleLarge
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.onboarding_instructions_content),
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = onConsumeOnboarding) {
-            Text(text = stringResource(R.string.onboarding_button_label))
+    Scaffold { paddingValues ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                modifier = Modifier.size((screenWidth / 2)),
+                painter = painterResource(R.drawable.ic_launcher_round),
+                contentDescription = stringResource(R.string.content_description_app_icon)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = stringResource(R.string.onboarding_instructions_label),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.onboarding_instructions_content),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            Button(onClick = onConsumeOnboarding) {
+                Text(text = stringResource(R.string.onboarding_button_label))
+            }
         }
     }
 }

@@ -1,0 +1,6 @@
+<resources>
+    <string name="onboarding_instructions_label">Рекомендации</string>
+    <string name="onboarding_instructions_content">1. Дайте для этого приложения разрешение \"Местоположение\". Это позволит получать геолокацию устройства и записывать трек. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
+    <string name="onboarding_button_label">Хорошо</string>
+    <string name="content_description_app_icon">Иконка приложения</string>
+</resources>

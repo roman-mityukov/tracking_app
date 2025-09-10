@@ -10,15 +10,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.mityukov.geo.tracking.app.AppNavHost
 import io.mityukov.geo.tracking.app.AppProps
-import io.mityukov.geo.tracking.app.ui.theme.GeoAppTheme
+import io.mityukov.geo.tracking.core.designsystem.theme.GeoAppTheme
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettings
 import io.mityukov.geo.tracking.feature.splash.SplashViewModel
-import io.mityukov.geo.tracking.utils.log.logd
+import io.mityukov.geo.tracking.log.logd
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,7 +26,6 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var splashViewModel: SplashViewModel
 
-    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

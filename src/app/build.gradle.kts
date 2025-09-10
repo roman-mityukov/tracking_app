@@ -12,9 +12,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.roborazzi)
-    alias(libs.plugins.room)
 }
 detekt {
     buildUponDefaultConfig = true
@@ -27,30 +25,10 @@ hilt {
 ksp {
     useKsp2 = false
 }
-room {
-    schemaDirectory("$projectDir/schemas")
-}
 tracer {
     create("defaultConfig") {
         pluginToken = "HxrlPZRUlHnIFY25LM3l4KbL2B5buvYzwKZJ6wYZKqP"
         appToken = "iraH9CUhf6BvaKxHvXCwM8dTMRpffoXr4aCDovFdPyh1"
-    }
-}
-protobuf {
-    protoc {
-        artifact = libs.protobuf.protoc.get().toString()
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                register("java") {
-                    option("lite")
-                }
-                register("kotlin") {
-                    option("lite")
-                }
-            }
-        }
     }
 }
 roborazzi {
@@ -65,10 +43,10 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 54
-        versionName = "0.43.0"
+        versionCode = 55
+        versionName = "0.44.0"
 
-        testInstrumentationRunner = "io.mityukov.geo.tracking.hilt.HiltAndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val yandexMapKitKey = "YANDEX_MAPKIT_API_KEY"
         buildConfigField(
@@ -134,16 +112,29 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:data"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:log"))
+    implementation(project(":core:model"))
+    implementation(project(":core:sharing"))
+    implementation(project(":core:test"))
+    implementation(project(":core:ui"))
+    implementation(project(":feature:about"))
+    implementation(project(":feature:map"))
+    implementation(project(":feature:onboarding"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:settings"))
+    implementation(project(":feature:splash"))
+    implementation(project(":feature:track-capture"))
+    implementation(project(":feature:track-details"))
+    implementation(project(":feature:track-list"))
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.datastore)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-    implementation(libs.accompanist.permissions)
+
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -161,9 +152,6 @@ dependencies {
     implementation(libs.apptracer.crash.report.native)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.protobuf.kotlin.lite)
-    implementation(libs.timber)
-    implementation(libs.treessence)
     implementation(libs.yandex.map.kit)
     debugImplementation(libs.leak.canary)
     testImplementation(libs.junit)

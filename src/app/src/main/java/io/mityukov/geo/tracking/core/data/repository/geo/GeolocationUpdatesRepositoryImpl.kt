@@ -29,6 +29,7 @@ class GeolocationUpdatesRepositoryImpl @Inject constructor(
         )
     )
 
+    //TODO Возможно переписать на cold flow
     override val currentLocation = mutableStateFlow.asStateFlow()
 
     private var geolocationSubscription: Job? = null

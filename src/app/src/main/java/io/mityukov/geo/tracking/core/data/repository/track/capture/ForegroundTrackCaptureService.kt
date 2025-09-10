@@ -27,6 +27,8 @@ import kotlin.uuid.ExperimentalUuidApi
 class ForegroundTrackCaptureService : LifecycleService() {
     @Inject
     lateinit var trackCapturerController: TrackCapturerController
+    // TODO возможно обойтись без вэйклока и считать продолжительность трека? Но пользователь может
+    // спуфить системное время.
     private lateinit var wakeLock: PowerManager.WakeLock
 
     override fun onBind(intent: Intent): IBinder? {

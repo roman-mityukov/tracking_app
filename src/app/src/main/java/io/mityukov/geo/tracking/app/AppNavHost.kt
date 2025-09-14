@@ -7,23 +7,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import io.mityukov.geo.tracking.feature.home.HomeBaseRoute
-import io.mityukov.geo.tracking.feature.home.HomeScreen
-import io.mityukov.geo.tracking.feature.onboarding.OnboardingRoute
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object RouteOnboarding
-
-@Serializable
-data object RouteHome
+import io.mityukov.geo.tracking.feature.map.navigation.MapRoute
+import io.mityukov.geo.tracking.feature.onboarding.navigation.OnboardingRoute
+import io.mityukov.geo.tracking.feature.onboarding.navigation.onboardingScreen
 
 @Composable
 fun AppNavHost(showOnboarding: Boolean) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = if (showOnboarding) RouteOnboarding else RouteHome,
+        startDestination = if (showOnboarding) OnboardingRoute else HomeRoute,
         enterTransition = {
             EnterTransition.None
         },
@@ -31,18 +24,14 @@ fun AppNavHost(showOnboarding: Boolean) {
             ExitTransition.None
         },
     ) {
-        composable<RouteOnboarding> {
-            OnboardingRoute(
-                onNext = {
-                    navController.navigate(RouteHome) {
-                        popUpTo(RouteOnboarding) {
-                            inclusive = true
-                        }
-                    }
-                },
-            )
-        }
-        composable<RouteHome>(
+        onboardingScreen(onNext = {
+            navController.navigate(HomeRoute) {
+                popUpTo(OnboardingRoute) {
+                    inclusive = true
+                }
+            }
+        })
+        composable<HomeRoute>(
             deepLinks = listOf(navDeepLink {
                 uriPattern = DeepLinkProps.TRACK_DETAILS_URI_PATTERN
             })
@@ -50,9 +39,9 @@ fun AppNavHost(showOnboarding: Boolean) {
             val trackId = backStackEntry.arguments?.getString(DeepLinkProps.TRACK_DETAILS_PATH)
             HomeScreen(
                 currentSelectedItem = if (trackId == null) {
-                    HomeBaseRoute.HomeBaseRouteMap
+                    MapRoute
                 } else {
-                    HomeBaseRoute.HomeBaseRouteTrack
+                    TracksParentRoute
                 }
             )
         }

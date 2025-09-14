@@ -1,0 +1,35 @@
+package io.mityukov.geo.tracking.feature.about
+
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onRoot
+import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import com.github.takahirom.roborazzi.captureRoboImage
+import io.mityukov.geo.tracking.core.model.AppInfo
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = RobolectricDeviceQualifiers.SmallPhone)
+class AboutScreenshotTest {
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun initialState() {
+        composeTestRule.setContent {
+            AboutScreen(
+                appInfo = AppInfo(versionName = "0.40.1", versionCode = 50),
+                onBack = {},
+                onShareLogs = {},
+                onSendEmail = {},
+            )
+        }
+        composeTestRule.onRoot().captureRoboImage()
+    }
+}

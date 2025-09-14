@@ -7,6 +7,8 @@ naming:
     excludeClassPattern: '$^'
     ignoreOverridden: true
     ignoreAnnotated: [ 'Composable' ]
+  MatchingDeclarationName:
+    active: false
 complexity:
   LongMethod:
     threshold: 73
@@ -20,3 +22,5 @@ style:
     ignoreLocalVariableDeclaration: true
   DestructuringDeclarationWithTooManyEntries:
     maxDestructuringEntries: 4
+  UnusedPrivateMember:
+    active: false

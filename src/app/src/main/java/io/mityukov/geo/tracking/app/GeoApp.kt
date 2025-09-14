@@ -5,8 +5,8 @@ import android.os.StrictMode
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.HiltAndroidApp
 import io.mityukov.geo.tracking.BuildConfig
-import io.mityukov.geo.tracking.di.LogsDirectory
-import io.mityukov.geo.tracking.utils.log.Logger
+import io.mityukov.geo.tracking.core.common.di.LogsDirectory
+import io.mityukov.geo.tracking.log.Logger
 import ru.ok.tracer.HasTracerConfiguration
 import ru.ok.tracer.TracerConfiguration
 import ru.ok.tracer.crash.report.CrashFreeConfiguration

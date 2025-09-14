@@ -1,0 +1,13 @@
+<resources>
+    <string name="about_title">О приложении</string>
+    <string name="about_button_label_email">Написать разработчику</string>
+    <string name="about_button_send_logs">Отправить логи</string>
+    <string name="about_intent_logs_title">Отправка логов</string>
+    <string name="about_developer_email">romsvm@gmail.com</string>
+    <string name="about_email_subject">Приложение Запись трека</string>
+    <string name="about_email_app_chooser">Выберите приложение для отправки письма.</string>
+    <string name="about_email_no_apps_message">На устройстве нет почтовых приложений.</string>
+    <string name="error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
+    <string name="about_app_name">Запись трека</string>
+    <string name="content_description_app_icon">Запись трека</string>
+</resources>

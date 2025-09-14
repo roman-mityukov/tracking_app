@@ -31,7 +31,7 @@ detekt:
   script:
     - echo "running detekt..."
     - cd src
-    - ./gradlew :app:detekt
+    - ./gradlew detekt
 
 unit_test:
   stage: test
@@ -41,7 +41,7 @@ unit_test:
     - prebuild
   script:
     - cd src
-    - ./gradlew :app:testDebugUnitTest
+    - ./gradlew testDebugUnitTest
 
 screenshot_test:
   stage: test
@@ -51,7 +51,7 @@ screenshot_test:
     - prebuild
   script:
     - cd src
-    - ./gradlew :app:verifyRoborazziDebug
+    - ./gradlew verifyRoborazziDebug
 
 instrumented_test:
   stage: test

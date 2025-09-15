@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.protobuf)
 }
 android {
-    namespace = "io.mityukov.geo.tracking.core.datastore_proto"
+    namespace = "io.mityukov.geo.tracking.core.datastore.proto"
 }
 protobuf {
     protoc {

@@ -3,6 +3,7 @@ package io.mityukov.geo.tracking.core.data.repository.track
 import android.location.Location
 import android.os.Parcel
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting.Companion.PACKAGE_PRIVATE
 import com.google.protobuf.ByteString
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackInProgress
@@ -110,7 +111,6 @@ internal class TrackMapper @Inject constructor() {
     }
 }
 
-@VisibleForTesting
 internal fun locationFromByteArray(bytes: ByteArray): Location {
     val parcel = Parcel.obtain()
     parcel.unmarshall(bytes, 0, bytes.size)

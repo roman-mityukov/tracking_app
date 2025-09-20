@@ -23,7 +23,7 @@ hilt {
     enableAggregatingTask = false
 }
 ksp {
-    useKsp2 = false
+    useKsp2 = true
 }
 tracer {
     create("defaultConfig") {

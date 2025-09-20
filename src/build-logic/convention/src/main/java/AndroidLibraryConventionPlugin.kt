@@ -16,6 +16,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.library")
             apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "io.gitlab.arturbosch.detekt")
+            apply(plugin = "geo.tracking.lint")
 
             extensions.configure<DetektExtension> {
                 buildUponDefaultConfig = true

@@ -141,3 +141,4 @@ geo-tracking-android-feature = {id = "geo.tracking.android.feature"}
 geo-tracking-android-room = {id = "geo.tracking.android.room"}
 geo-tracking-hilt = {id = "geo.tracking.hilt"}
 geo-tracking-jvm-library = {id = "geo.tracking.jvm.library"}
+geo-tracking-lint = {id = "geo.tracking.lint"}

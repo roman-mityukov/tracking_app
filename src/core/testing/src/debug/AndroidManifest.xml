@@ -3,10 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <application>
         <activity
-            android:name="io.mityukov.geo.tracking.hilt.HiltTestActivity"
-            android:label="@string/app_name_test"
-            android:exported="true"
-            android:theme="@style/Theme.GeoApp">
+            android:name="io.mityukov.geo.tracking.core.testing.HiltTestActivity"
+            android:exported="true">
         </activity>
     </application>
 </manifest>

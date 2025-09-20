@@ -31,7 +31,7 @@ internal fun ProfileScreen(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = stringResource(R.string.profile_title)) })
+            CenterAlignedTopAppBar(title = { Text(text = stringResource(R.string.feature_profile_title)) })
         },
         contentWindowInsets = WindowInsets.safeContent,
     ) { paddingValues ->
@@ -44,13 +44,13 @@ internal fun ProfileScreen(
                 Modifier
                     .clickable { onSettingsSelected() }
                     .testTag(AppTestTag.BUTTON_SETTINGS),
-                stringResource(R.string.profile_settings_label),
+                stringResource(R.string.feature_profile_settings_label),
             )
             ProfileScreenItem(
                 Modifier
                     .clickable { onAboutSelected() }
                     .testTag(AppTestTag.BUTTON_ABOUT),
-                stringResource(R.string.profile_about_label),
+                stringResource(R.string.feature_profile_about_label),
             )
         }
     }
@@ -66,7 +66,7 @@ private fun ProfileScreenItem(modifier: Modifier = Modifier, label: String) {
         trailingContent = {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = stringResource(R.string.content_description_arrow_right)
+                contentDescription = stringResource(R.string.feature_profile_content_description_arrow_right)
             )
         }
     )

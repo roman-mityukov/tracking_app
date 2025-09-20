@@ -66,22 +66,22 @@ internal fun OnboardingScreen(
         ) {
             Image(
                 modifier = Modifier.size((screenWidth / 2)),
-                painter = painterResource(R.drawable.ic_launcher_round),
-                contentDescription = stringResource(R.string.content_description_app_icon)
+                painter = painterResource(R.drawable.feature_onboarding_ic_launcher_round),
+                contentDescription = stringResource(R.string.feature_onboarding_content_description_app_icon)
             )
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = stringResource(R.string.onboarding_instructions_label),
+                text = stringResource(R.string.feature_onboarding_instructions_label),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.onboarding_instructions_content),
+                text = stringResource(R.string.feature_onboarding_instructions_content),
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = onConsumeOnboarding) {
-                Text(text = stringResource(R.string.onboarding_button_label))
+                Text(text = stringResource(R.string.feature_onboarding_button_label))
             }
         }
     }

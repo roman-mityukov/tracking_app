@@ -36,27 +36,27 @@ fun TrackProperties(
             text = DateUtils.formatElapsedTime(
                 duration.inWholeSeconds
             ),
-            contentDescription = stringResource(R.string.content_description_track_time),
+            contentDescription = stringResource(R.string.core_ui_content_description_track_time),
         )
         TrackItemProperty(
             imageVector = AppIcons.Distance,
             text = "${distance.roundToInt()}м",
-            contentDescription = stringResource(R.string.content_description_track_distance),
+            contentDescription = stringResource(R.string.core_ui_content_description_track_distance),
         )
         TrackItemProperty(
             imageVector = AppIcons.AltitudeUp,
             text = "${altitudeUp.roundToInt()}м",
-            contentDescription = stringResource(R.string.content_description_track_altitude_up),
+            contentDescription = stringResource(R.string.core_ui_content_description_track_altitude_up),
         )
         TrackItemProperty(
             imageVector = AppIcons.AltitudeDown,
             text = "${altitudeDown.roundToInt()}м",
-            contentDescription = stringResource(R.string.content_description_track_altitude_down),
+            contentDescription = stringResource(R.string.core_ui_content_description_track_altitude_down),
         )
         TrackItemProperty(
             imageVector = AppIcons.Speed,
             text = "${String.format(Locale.getDefault(), "%.2f", speed)}м/с",
-            contentDescription = stringResource(R.string.content_description_track_average_speed),
+            contentDescription = stringResource(R.string.core_ui_content_description_track_average_speed),
         )
     }
 }

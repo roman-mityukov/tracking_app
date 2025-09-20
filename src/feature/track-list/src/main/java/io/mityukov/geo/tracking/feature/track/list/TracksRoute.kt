@@ -65,7 +65,7 @@ fun TrackList(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.tracks_title)) },
+                title = { Text(text = stringResource(R.string.feature_track_list_title)) },
             )
         },
     ) { paddingValues ->
@@ -85,7 +85,7 @@ fun TrackList(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(stringResource(R.string.tracks_empty_list_message))
+                                    Text(stringResource(R.string.feature_track_list_empty_list_message))
                                 }
                             }
                         }

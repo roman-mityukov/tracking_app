@@ -93,7 +93,7 @@ private fun LocationRationaleDialog(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = stringResource(R.string.map_location_permission_description),
+                    text = stringResource(R.string.feature_map_location_permission_description),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
@@ -102,11 +102,15 @@ private fun LocationRationaleDialog(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(onClick = onNegative) {
-                        Text(text = stringResource(io.mityukov.geo.tracking.core.designsystem.R.string.dialog_no))
+                        Text(
+                            text = stringResource(
+                                io.mityukov.geo.tracking.core.designsystem.R.string.core_designsystem_dialog_no
+                            )
+                        )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(onClick = onPositive) {
-                        Text(text = stringResource(R.string.map_location_permission_consent))
+                        Text(text = stringResource(R.string.feature_map_location_permission_consent))
                     }
                 }
             }
@@ -120,8 +124,8 @@ private fun NoLocation(
     onLocationDisabled: (String, String) -> Unit,
     onPermissionsNotGranted: () -> Unit,
 ) {
-    val message = stringResource(R.string.map_disabled_location_permission_description)
-    val actionLabel = stringResource(R.string.map_disabled_location_permission_consent)
+    val message = stringResource(R.string.feature_map_disabled_location_permission_description)
+    val actionLabel = stringResource(R.string.feature_map_disabled_location_permission_consent)
     LaunchedEffect(state) {
         when (state.cause) {
             GeolocationUpdateException.LocationDisabled -> {

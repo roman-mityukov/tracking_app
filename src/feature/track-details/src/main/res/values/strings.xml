@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="content_description_track_details_map_fullscreen">Открыть карту</string>
-    <string name="altitude_chart_title">График высоты</string>
-    <string name="altitude_chart_axis_altitude">Высота, м</string>
-    <string name="altitude_chart_axis_distance">Расстояние, м</string>
-    <string name="speed_chart_title">График скорости</string>
-    <string name="speed_chart_axis_speed">Скорость, м/с</string>
-    <string name="speed_chart_axis_distance">Расстояние, м</string>
-    <string name="track_details_start">Старт %1$s</string>
-    <string name="track_details_finish">Финиш %1$s</string>
-    <string name="track_details_duration">Продолжительность %1$s</string>
-    <string name="track_details_distance">Расстояние %1$dм</string>
-    <string name="track_details_altitude_up">Набор высоты %1$dм</string>
-    <string name="track_details_altitude_down">Сброс высоты %1$dм</string>
-    <string name="track_details_average_speed">Средняя скорость %1$sм/с</string>
-    <string name="track_details_min_speed">Мин скорость %1$sм/с</string>
-    <string name="track_details_max_speed">Макс скорость %1$sм/с</string>
-    <string name="track_details_map_title">Карта трека</string>
-    <string name="track_details_title">Детали трека</string>
-    <string name="track_details_delete_dialog_title">Внимание!</string>
-    <string name="track_details_delete_dialog_text">Вы действительно хотите удалить трек?</string>
-    <string name="track_details_button_delete_label">Удалить трек</string>
-    <string name="track_details_sharing_chooser_title">Отправить трек</string>
+    <string name="feature_track_details_content_description_map_fullscreen">Открыть карту</string>
+    <string name="feature_track_details_altitude_chart_title">График высоты</string>
+    <string name="feature_track_details_altitude_chart_axis_altitude">Высота, м</string>
+    <string name="feature_track_details_altitude_chart_axis_distance">Расстояние, м</string>
+    <string name="feature_track_details_speed_chart_title">График скорости</string>
+    <string name="feature_track_details_speed_chart_axis_speed">Скорость, м/с</string>
+    <string name="feature_track_details_speed_chart_axis_distance">Расстояние, м</string>
+    <string name="feature_track_details_start">Старт %1$s</string>
+    <string name="feature_track_details_finish">Финиш %1$s</string>
+    <string name="feature_track_details_duration">Продолжительность %1$s</string>
+    <string name="feature_track_details_distance">Расстояние %1$dм</string>
+    <string name="feature_track_details_altitude_up">Набор высоты %1$dм</string>
+    <string name="feature_track_details_altitude_down">Сброс высоты %1$dм</string>
+    <string name="feature_track_details_average_speed">Средняя скорость %1$sм/с</string>
+    <string name="feature_track_details_min_speed">Мин скорость %1$sм/с</string>
+    <string name="feature_track_details_max_speed">Макс скорость %1$sм/с</string>
+    <string name="feature_track_details_map_title">Карта трека</string>
+    <string name="feature_track_details_title">Детали трека</string>
+    <string name="feature_track_details_delete_dialog_title">Внимание!</string>
+    <string name="feature_track_details_delete_dialog_text">Вы действительно хотите удалить трек?</string>
+    <string name="feature_track_details_button_delete_label">Удалить трек</string>
+    <string name="feature_track_details_sharing_chooser_title">Отправить трек</string>
 </resources>

@@ -16,7 +16,7 @@ fun ButtonBack(modifier: Modifier = Modifier, onBack: () -> Unit) {
     IconButton(modifier = modifier.testTag(AppTestTag.BUTTON_BACK), onClick = onBack) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = stringResource(R.string.content_description_back_button),
+            contentDescription = stringResource(R.string.core_designsystem_content_description_back_button),
         )
     }
 }

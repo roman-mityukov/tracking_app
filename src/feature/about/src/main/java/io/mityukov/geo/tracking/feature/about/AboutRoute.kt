@@ -133,7 +133,7 @@ private fun AboutContent(
 @Composable
 private fun AppInfo(modifier: Modifier = Modifier, appInfo: AppInfo) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = stringResource(R.string.about_app_name))
+        Text(text = stringResource(R.string.feature_about_app_name))
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "${appInfo.versionName}(${appInfo.versionCode})")
     }
@@ -143,22 +143,22 @@ private fun AppInfo(modifier: Modifier = Modifier, appInfo: AppInfo) {
 private fun AppIcon(modifier: Modifier = Modifier) {
     Image(
         modifier = modifier,
-        painter = painterResource(R.drawable.ic_launcher_round),
-        contentDescription = stringResource(R.string.content_description_app_icon),
+        painter = painterResource(R.drawable.feature_about_ic_launcher_round),
+        contentDescription = stringResource(R.string.feature_about_content_description_app_icon),
     )
 }
 
 @Composable
 private fun ContactButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(modifier = modifier.fillMaxWidth(), onClick = onClick) {
-        Text(text = stringResource(R.string.about_button_label_email), maxLines = 1)
+        Text(text = stringResource(R.string.feature_about_button_label_email), maxLines = 1)
     }
 }
 
 @Composable
 private fun ShareLogsButton(modifier: Modifier = Modifier, onShareLogs: () -> Unit) {
     Button(modifier = modifier.fillMaxWidth(), onClick = onShareLogs) {
-        Text(text = stringResource(R.string.about_button_send_logs), maxLines = 1)
+        Text(text = stringResource(R.string.feature_about_button_send_logs), maxLines = 1)
     }
 }
 
@@ -182,7 +182,7 @@ private fun AboutTopBar(
 ) {
     CenterAlignedTopAppBar(
         modifier = modifier,
-        title = { Text(text = stringResource(R.string.about_title)) },
+        title = { Text(text = stringResource(R.string.feature_about_title)) },
         navigationIcon = {
             ButtonBack(onBack = onBack)
         }
@@ -199,13 +199,13 @@ private fun sendEmail(
         context.startActivity(
             Intent.createChooser(
                 intent,
-                context.resources.getString(R.string.about_email_app_chooser)
+                context.resources.getString(R.string.feature_about_email_app_chooser)
             )
         )
     } else {
         coroutineScope.launch {
             snackbarHostState.showSnackbar(
-                message = context.resources.getString(R.string.about_email_no_apps_message)
+                message = context.resources.getString(R.string.feature_about_email_no_apps_message)
             )
         }
     }
@@ -217,7 +217,7 @@ private fun shareLogs(
     coroutineScope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
 ) {
-    val sharingErrorMessage = context.resources.getString(R.string.error_sharing)
+    val sharingErrorMessage = context.resources.getString(R.string.feature_about_error_sharing)
     try {
         val uri = uriString.toUri()
         val intent = Intent(Intent.ACTION_SEND)
@@ -227,7 +227,7 @@ private fun shareLogs(
         context.startActivity(
             Intent.createChooser(
                 intent,
-                context.getString(R.string.about_intent_logs_title)
+                context.getString(R.string.feature_about_intent_logs_title)
             )
         )
     } catch (_: ActivityNotFoundException) {
@@ -242,11 +242,11 @@ private fun createEmailIntent(context: Context): Intent {
         data = MailTo.MAILTO_SCHEME.toUri()
         putExtra(
             Intent.EXTRA_EMAIL,
-            arrayOf(context.resources.getString(R.string.about_developer_email))
+            arrayOf(context.resources.getString(R.string.feature_about_developer_email))
         )
         putExtra(
             Intent.EXTRA_SUBJECT,
-            context.resources.getString(R.string.about_email_subject)
+            context.resources.getString(R.string.feature_about_email_subject)
         )
     }
 }

@@ -51,7 +51,7 @@ internal fun AltitudeChart(
             .fillMaxWidth()
             .aspectRatio(3f)
     ) {
-        Text(stringResource(R.string.altitude_chart_title))
+        Text(stringResource(R.string.feature_track_details_altitude_chart_title))
         Spacer(modifier = Modifier.height(8.dp))
         AltitudeChartCanvas(
             modifier = Modifier.fillMaxSize(),
@@ -62,8 +62,8 @@ internal fun AltitudeChart(
 
 @Composable
 private fun AltitudeChartCanvas(modifier: Modifier = Modifier, chartData: AltitudeChartData) {
-    val altitudeAxisLabel = stringResource(R.string.altitude_chart_axis_altitude)
-    val distanceAxisLabel = stringResource(R.string.altitude_chart_axis_distance)
+    val altitudeAxisLabel = stringResource(R.string.feature_track_details_altitude_chart_axis_altitude)
+    val distanceAxisLabel = stringResource(R.string.feature_track_details_altitude_chart_axis_distance)
 
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer(cacheSize = 0)

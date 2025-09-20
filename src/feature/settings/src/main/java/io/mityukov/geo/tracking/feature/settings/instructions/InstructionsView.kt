@@ -22,14 +22,14 @@ fun InstructionsView(onInstructionsSelected: () -> Unit) {
                 onInstructionsSelected()
             },
         headlineContent = {
-            Text(text = stringResource(R.string.instructions_view_label))
+            Text(text = stringResource(R.string.feature_settings_instructions_view_label))
         },
         trailingContent = {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription =
                     stringResource(
-                        io.mityukov.geo.tracking.core.ui.R.string.content_description_arrow_right
+                        io.mityukov.geo.tracking.core.ui.R.string.core_ui_content_description_arrow_right
                     )
             )
         }

@@ -111,8 +111,8 @@ internal fun TracksEditingScreen(
                             openDeleteDialog.value = false
                         },
                         onConfirm = onDeleteConfirm,
-                        dialogTitle = stringResource(R.string.tracks_editing_delete_dialog_title),
-                        dialogText = stringResource(R.string.tracks_editing_delete_dialog_text)
+                        dialogTitle = stringResource(R.string.feature_track_list_editing_delete_dialog_title),
+                        dialogText = stringResource(R.string.feature_track_list_editing_delete_dialog_text)
                     )
                 }
             }
@@ -155,7 +155,7 @@ private fun TracksEditingTopBar(
 ) {
     CenterAlignedTopAppBar(
         modifier = modifier,
-        title = { Text(text = stringResource(R.string.tracks_editing_title)) },
+        title = { Text(text = stringResource(R.string.feature_track_list_editing_title)) },
         navigationIcon = {
             ButtonBack(onBack = onBack)
         },
@@ -167,7 +167,7 @@ private fun TracksEditingTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.content_description_delete)
+                        contentDescription = stringResource(R.string.feature_track_list_content_description_delete)
                     )
                 }
             }
@@ -208,7 +208,7 @@ private fun TrackItem(
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(R.string.content_description_checked)
+                        contentDescription = stringResource(R.string.feature_track_list_content_description_checked)
                     )
                 }
             }

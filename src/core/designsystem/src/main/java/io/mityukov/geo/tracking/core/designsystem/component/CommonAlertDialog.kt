@@ -26,7 +26,7 @@ fun CommonAlertDialog(
         icon = {
             Icon(
                 imageVector = AppIcons.Attention,
-                contentDescription = stringResource(R.string.content_description_attention)
+                contentDescription = stringResource(R.string.core_designsystem_content_description_attention)
             )
         },
         title = {
@@ -41,7 +41,7 @@ fun CommonAlertDialog(
                 modifier = Modifier.testTag(AppTestTag.BUTTON_YES),
                 onClick = onConfirm
             ) {
-                Text(stringResource(R.string.dialog_yes))
+                Text(stringResource(R.string.core_designsystem_dialog_yes))
             }
         },
         dismissButton = if (showDismissButton) {
@@ -50,7 +50,7 @@ fun CommonAlertDialog(
                     modifier = Modifier.testTag(AppTestTag.BUTTON_NO),
                     onClick = onDismiss
                 ) {
-                    Text(stringResource(R.string.dialog_no))
+                    Text(stringResource(R.string.core_designsystem_dialog_no))
                 }
             }
         } else {

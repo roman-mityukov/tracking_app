@@ -126,7 +126,7 @@ private fun CurrentGeolocation(
                     .weight(1f)
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 text = stringResource(
-                    R.string.map_current_location_message,
+                    R.string.feature_map_current_location_message,
                     geolocation.localDateTime.format(UiProps.DEFAULT_DATE_TIME_FORMATTER),
                     geolocation.latitude,
                     geolocation.longitude,

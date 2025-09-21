@@ -47,7 +47,7 @@ class TrackCaptureTest {
             .assertHasClickAction()
         composeTestRule.onNodeWithContentDescription(
             composeTestRule.activity.resources.getString(
-                R.string.content_description_map_start_track
+                R.string.feature_track_capture_content_description_start
             )
         )
             .assertIsDisplayed()
@@ -80,7 +80,7 @@ class TrackCaptureTest {
             .assertHasClickAction()
         composeTestRule.onNodeWithContentDescription(
             composeTestRule.activity.resources.getString(
-                R.string.content_description_map_start_track
+                R.string.feature_track_capture_content_description_start
             )
         )
             .assertIsDisplayed()
@@ -119,7 +119,7 @@ class TrackCaptureTest {
             .assertHasClickAction()
         composeTestRule.onNodeWithContentDescription(
             composeTestRule.activity.resources.getString(
-                R.string.content_description_map_pause_track
+                R.string.feature_track_capture_content_description_pause
             )
         )
             .assertIsDisplayed()
@@ -183,7 +183,7 @@ class TrackCaptureTest {
             .assertHasClickAction()
         composeTestRule.onNodeWithContentDescription(
             composeTestRule.activity.resources.getString(
-                R.string.content_description_map_resume_track
+                R.string.feature_track_capture_content_description_resume
             )
         )
             .assertIsDisplayed()

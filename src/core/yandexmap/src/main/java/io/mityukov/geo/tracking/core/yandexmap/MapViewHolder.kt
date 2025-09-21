@@ -15,7 +15,7 @@ class MapViewHolder(val mapView: MapView, private val applicationContext: Contex
         val placemark = mapView.map.mapObjects.addPlacemark()
         placemark.apply {
             geometry = Point(geolocation.latitude, geolocation.longitude)
-            setIcon(ImageProvider.fromResource(applicationContext, R.drawable.pin_my_location))
+            setIcon(ImageProvider.fromResource(applicationContext, R.drawable.core_ui_pin_my_location))
         }
         placemark.setIconStyle(
             IconStyle().apply {

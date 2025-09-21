@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="error_track_capture">Ошибка записи трека. Дайте разрешение Местоположение и перезапустите приложение.</string>
-    <string name="tracks_item_title_capturing">Запись…</string>
-    <string name="tracks_item_title_pause">Пауза…</string>
-    <string name="content_description_map_capture_track">Запись трека</string>
-    <string name="content_description_map_pause_track">Пауза записи трека</string>
-    <string name="content_description_map_resume_track">Возобновить запись трека</string>
-    <string name="content_description_map_start_track">Начать запись трека</string>
-    <string name="content_description_map_stop_track">Остановить запись трека</string>
+    <string name="feature_track_capture_error">Ошибка записи трека. Дайте разрешение Местоположение и перезапустите приложение.</string>
+    <string name="feature_track_capture_title_capturing">Запись…</string>
+    <string name="feature_track_capture_title_pause">Пауза…</string>
+    <string name="feature_track_capture_content_description_capture">Запись трека</string>
+    <string name="feature_track_capture_content_description_pause">Пауза записи трека</string>
+    <string name="feature_track_capture_content_description_resume">Возобновить запись трека</string>
+    <string name="feature_track_capture_content_description_start">Начать запись трека</string>
+    <string name="feature_track_capture_content_description_stop">Остановить запись трека</string>
 </resources>

@@ -25,7 +25,7 @@ internal fun InstructionsScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.instructions_title)) },
+                title = { Text(text = stringResource(R.string.feature_settings_instructions_title)) },
                 navigationIcon = {
                     ButtonBack(onBack = onBack)
                 }
@@ -42,12 +42,12 @@ internal fun InstructionsScreen(onBack: () -> Unit) {
             )
         ) {
             Text(
-                text = stringResource(R.string.instructions_description),
+                text = stringResource(R.string.feature_settings_instructions_description),
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.instructions_content),
+                text = stringResource(R.string.feature_settings_instructions_content),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

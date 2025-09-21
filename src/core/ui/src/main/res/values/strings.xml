@@ -1,10 +1,10 @@
 <resources>
-    <string name="content_description_arrow_right">Выбрать</string>
-    <string name="content_description_share">Поделиться</string>
-    <string name="content_description_track_time">Затраченное время</string>
-    <string name="content_description_track_distance">Пройденное расстояние</string>
-    <string name="content_description_track_altitude_up">Набор высоты</string>
-    <string name="content_description_track_altitude_down">Сброс высоты</string>
-    <string name="content_description_track_average_speed">Средняя скорость</string>
-    <string name="error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
+    <string name="core_ui_content_description_arrow_right">Выбрать</string>
+    <string name="core_ui_content_description_share">Поделиться</string>
+    <string name="core_ui_content_description_track_time">Затраченное время</string>
+    <string name="core_ui_content_description_track_distance">Пройденное расстояние</string>
+    <string name="core_ui_content_description_track_altitude_up">Набор высоты</string>
+    <string name="core_ui_content_description_track_altitude_down">Сброс высоты</string>
+    <string name="core_ui_content_description_track_average_speed">Средняя скорость</string>
+    <string name="core_ui_error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
 </resources>

@@ -78,10 +78,10 @@ class TracksEditingScreenTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.tracks_editing_delete_dialog_title))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.feature_track_list_editing_delete_dialog_title))
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.tracks_editing_delete_dialog_text))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.feature_track_list_editing_delete_dialog_text))
             .assertIsDisplayed()
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_NO).assertIsDisplayed()
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_YES).assertIsDisplayed()

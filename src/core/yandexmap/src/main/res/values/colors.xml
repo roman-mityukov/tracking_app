@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="track">#06B8A6</color>
+    <color name="core_yandexmap_track">#06B8A6</color>
 </resources>

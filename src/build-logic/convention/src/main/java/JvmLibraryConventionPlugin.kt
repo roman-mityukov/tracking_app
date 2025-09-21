@@ -13,6 +13,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "java-library")
             apply(plugin = "org.jetbrains.kotlin.jvm")
             apply(plugin = "io.gitlab.arturbosch.detekt")
+            apply(plugin = "geo.tracking.lint")
 
             extensions.configure<DetektExtension> {
                 buildUponDefaultConfig = true

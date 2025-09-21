@@ -52,7 +52,7 @@ internal fun SpeedChart(
             .fillMaxWidth()
             .aspectRatio(3f)
     ) {
-        Text(stringResource(R.string.speed_chart_title))
+        Text(stringResource(R.string.feature_track_details_speed_chart_title))
         Spacer(modifier = Modifier.height(8.dp))
         SpeedChartCanvas(
             modifier = Modifier.fillMaxSize(),
@@ -63,8 +63,8 @@ internal fun SpeedChart(
 
 @Composable
 private fun SpeedChartCanvas(modifier: Modifier = Modifier, chartData: SpeedChartData) {
-    val speedAxisLabel = stringResource(R.string.speed_chart_axis_speed)
-    val distanceAxisLabel = stringResource(R.string.speed_chart_axis_distance)
+    val speedAxisLabel = stringResource(R.string.feature_track_details_speed_chart_axis_speed)
+    val distanceAxisLabel = stringResource(R.string.feature_track_details_speed_chart_axis_distance)
 
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer(cacheSize = 0)

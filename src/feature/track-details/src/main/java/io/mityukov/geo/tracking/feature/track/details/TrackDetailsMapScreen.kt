@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.core.designsystem.icon.AppIcons
 import io.mityukov.geo.tracking.core.yandexmap.showTrack
+import io.mityukov.geo.tracking.core.designsystem.R
 
 @Composable
 internal fun TrackDetailsMapScreen(
@@ -84,7 +85,7 @@ internal fun TrackDetailsMapScreen(
                         Icon(
                             imageVector = AppIcons.Back,
                             contentDescription = stringResource(
-                                io.mityukov.geo.tracking.core.designsystem.R.string.content_description_back_button
+                                R.string.core_designsystem_content_description_back_button
                             )
                         )
                     }

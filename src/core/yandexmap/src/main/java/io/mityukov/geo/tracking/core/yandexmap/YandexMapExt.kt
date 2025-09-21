@@ -44,9 +44,9 @@ fun MapView.showTrack(context: Context, geolocations: List<Geolocation>, moveCam
         Point(it.latitude, it.longitude)
     }
     val startImageProvider =
-        ImageProvider.fromResource(context, R.drawable.pin_start)
+        ImageProvider.fromResource(context, R.drawable.core_ui_pin_start)
     val finishImageProvider =
-        ImageProvider.fromResource(context, R.drawable.pin_finish)
+        ImageProvider.fromResource(context, R.drawable.core_ui_pin_finish)
     val pinsCollection = map.mapObjects.addCollection()
     val placemarkIconStyle = IconStyle().apply {
         anchor = PointF(
@@ -90,7 +90,7 @@ fun MapView.showTrack(context: Context, geolocations: List<Geolocation>, moveCam
                 setStrokeColor(
                     ContextCompat.getColor(
                         context,
-                        io.mityukov.geo.tracking.core.yandexmap.R.color.track
+                        io.mityukov.geo.tracking.core.yandexmap.R.color.core_yandexmap_track
                     )
                 )
             }

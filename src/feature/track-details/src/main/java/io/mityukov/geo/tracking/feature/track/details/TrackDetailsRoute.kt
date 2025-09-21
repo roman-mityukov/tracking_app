@@ -118,13 +118,13 @@ internal fun TrackDetailsRoute(
                 context.startActivity(
                     Intent.createChooser(
                         intent,
-                        context.getString(R.string.track_details_sharing_chooser_title)
+                        context.getString(R.string.feature_track_details_sharing_chooser_title)
                     )
                 )
             } catch (_: ActivityNotFoundException) {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(
-                        message = resources.getString(io.mityukov.geo.tracking.core.ui.R.string.error_sharing)
+                        message = resources.getString(io.mityukov.geo.tracking.core.ui.R.string.core_ui_error_sharing)
                     )
                 }
             } finally {
@@ -224,8 +224,8 @@ internal fun TrackDetailsScreen(
                 openDeleteDialog.value = false
             },
             onConfirm = onDelete,
-            dialogTitle = stringResource(R.string.track_details_delete_dialog_title),
-            dialogText = stringResource(R.string.track_details_delete_dialog_text)
+            dialogTitle = stringResource(R.string.feature_track_details_delete_dialog_title),
+            dialogText = stringResource(R.string.feature_track_details_delete_dialog_text)
         )
     }
 }
@@ -317,7 +317,7 @@ private fun TrackDetailsTopBar(
 ) {
     CenterAlignedTopAppBar(
         modifier = modifier,
-        title = { Text(text = stringResource(R.string.track_details_title)) },
+        title = { Text(text = stringResource(R.string.feature_track_details_title)) },
         navigationIcon = {
             ButtonBack(onBack = onBack)
         },
@@ -326,7 +326,7 @@ private fun TrackDetailsTopBar(
                 Icon(
                     imageVector = AppIcons.Share,
                     contentDescription = stringResource(
-                        io.mityukov.geo.tracking.core.ui.R.string.content_description_share
+                        io.mityukov.geo.tracking.core.ui.R.string.core_ui_content_description_share
                     ),
                 )
             }
@@ -432,7 +432,7 @@ private fun TrackDetailsMap(
         ) {
             Icon(
                 imageVector = AppIcons.FullScreen,
-                contentDescription = stringResource(R.string.content_description_track_details_map_fullscreen),
+                contentDescription = stringResource(R.string.feature_track_details_content_description_map_fullscreen),
             )
         }
     }
@@ -450,58 +450,58 @@ private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: Detai
     Column(modifier = modifier) {
         Text(
             text = stringResource(
-                R.string.track_details_start,
+                R.string.feature_track_details_start,
                 TimeUtils.getFormattedLocalFromUTC(track.start, UiProps.DEFAULT_DATE_TIME_FORMATTER)
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_finish,
+                R.string.feature_track_details_finish,
                 TimeUtils.getFormattedLocalFromUTC(track.end, UiProps.DEFAULT_DATE_TIME_FORMATTER)
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_duration,
+                R.string.feature_track_details_duration,
                 DateUtils.formatElapsedTime(track.duration.toLong(DurationUnit.SECONDS)),
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.track_details_distance, track.distance.roundToInt()))
+        Text(text = stringResource(R.string.feature_track_details_distance, track.distance.roundToInt()))
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_altitude_up,
+                R.string.feature_track_details_altitude_up,
                 track.altitudeUp.roundToInt()
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_altitude_down,
+                R.string.feature_track_details_altitude_down,
                 track.altitudeDown.roundToInt()
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_average_speed,
+                R.string.feature_track_details_average_speed,
                 String.format(Locale.getDefault(), "%.2f", track.averageSpeed)
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_min_speed,
+                R.string.feature_track_details_min_speed,
                 String.format(Locale.getDefault(), "%.2f", track.minSpeed)
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(
-                R.string.track_details_max_speed,
+                R.string.feature_track_details_max_speed,
                 String.format(Locale.getDefault(), "%.2f", track.maxSpeed)
             )
         )
@@ -519,6 +519,6 @@ private fun ButtonDeleteTrack(modifier: Modifier = Modifier, onDelete: () -> Uni
             containerColor = Color.Red
         )
     ) {
-        Text(stringResource(R.string.track_details_button_delete_label))
+        Text(stringResource(R.string.feature_track_details_button_delete_label))
     }
 }

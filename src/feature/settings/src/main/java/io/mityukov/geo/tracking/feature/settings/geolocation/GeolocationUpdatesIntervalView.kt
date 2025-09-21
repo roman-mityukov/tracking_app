@@ -33,7 +33,7 @@ internal fun GeolocationUpdatesIntervalView(
     ListItem(
         headlineContent = {
             Text(
-                text = stringResource(R.string.geolocation_updates_rate_label)
+                text = stringResource(R.string.feature_settings_geolocation_updates_rate_label)
             )
         },
         trailingContent = {

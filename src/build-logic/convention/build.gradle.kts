@@ -62,5 +62,9 @@ gradlePlugin {
             id = libs.plugins.geo.tracking.jvm.library.get().pluginId
             implementationClass = "JvmLibraryConventionPlugin"
         }
+        register("lint") {
+            id = libs.plugins.geo.tracking.lint.get().pluginId
+            implementationClass = "AndroidLintConventionPlugin"
+        }
     }
 }

@@ -29,9 +29,18 @@ detekt:
   dependencies:
     - prebuild
   script:
-    - echo "running detekt..."
     - cd src
     - ./gradlew detekt
+
+lint:
+  stage: check
+  tags:
+    - android
+  dependencies:
+    - prebuild
+  script:
+    - cd src
+    - ./gradlew lint
 
 unit_test:
   stage: test

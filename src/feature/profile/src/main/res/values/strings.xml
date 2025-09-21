@@ -1,7 +1,7 @@
 <resources>
-    <string name="content_description_arrow_right">Выбрать</string>
-    <string name="profile_title">Профиль</string>
-    <string name="profile_statistics_label">Статистика</string>
-    <string name="profile_settings_label">Настройки</string>
-    <string name="profile_about_label">О приложении</string>
+    <string name="feature_profile_content_description_arrow_right">Выбрать</string>
+    <string name="feature_profile_title">Профиль</string>
+    <string name="feature_profile_statistics_label">Статистика</string>
+    <string name="feature_profile_settings_label">Настройки</string>
+    <string name="feature_profile_about_label">О приложении</string>
 </resources>

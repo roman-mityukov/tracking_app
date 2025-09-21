@@ -47,21 +47,21 @@ internal fun MapControls(
             modifier = Modifier.testTag(AppTestTag.BUTTON_ZOOM_IN),
             onClick = onZoomIn,
             imageVector = AppIcons.Plus,
-            contentDescription = stringResource(R.string.content_description_map_zoom_in),
+            contentDescription = stringResource(R.string.feature_map_content_description_map_zoom_in),
         )
         Spacer(modifier = Modifier.height(8.dp))
         MapControlButton(
             modifier = Modifier.testTag(AppTestTag.BUTTON_ZOOM_OUT),
             onClick = onZoomOut,
             imageVector = AppIcons.Minus,
-            contentDescription = stringResource(R.string.content_description_map_zoom_out),
+            contentDescription = stringResource(R.string.feature_map_content_description_map_zoom_out),
         )
         Spacer(modifier = Modifier.height(8.dp))
         MapControlButton(
             modifier = Modifier.testTag(AppTestTag.BUTTON_NAVIGATE_TO_LOCATION),
             onClick = mapNavigateTo,
             imageVector = AppIcons.MyLocation,
-            contentDescription = stringResource(R.string.content_description_map_my_location),
+            contentDescription = stringResource(R.string.feature_map_content_description_map_my_location),
         )
     }
 }

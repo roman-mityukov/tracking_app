@@ -107,18 +107,18 @@ internal fun MapRoute(
                             .setType("text/plain")
                             .setText(
                                 resources.getString(
-                                    R.string.map_current_location_share_text,
+                                    R.string.feature_map_current_location_share_text,
                                     geolocation.latitude,
                                     geolocation.longitude
                                 )
                             )
-                            .setChooserTitle(resources.getString(R.string.map_current_location_share_title))
+                            .setChooserTitle(resources.getString(R.string.feature_map_current_location_share_title))
                             .startChooser()
                     } catch (_: ActivityNotFoundException) {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(
                                 resources.getString(
-                                    io.mityukov.geo.tracking.core.ui.R.string.error_sharing
+                                    io.mityukov.geo.tracking.core.ui.R.string.core_ui_error_sharing
                                 )
                             )
                         }
@@ -127,7 +127,7 @@ internal fun MapRoute(
             },
             onPendingLocation = {
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar(resources.getString(R.string.map_update_location))
+                    snackbarHostState.showSnackbar(resources.getString(R.string.feature_map_update_location))
                 }
             },
             onPendingLocationComplete = {

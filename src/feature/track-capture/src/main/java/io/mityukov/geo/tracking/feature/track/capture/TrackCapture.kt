@@ -96,7 +96,7 @@ private fun ButtonStopTrackCapture(modifier: Modifier = Modifier, onClick: () ->
     ) {
         Icon(
             imageVector = AppIcons.Stop,
-            contentDescription = stringResource(R.string.content_description_map_stop_track),
+            contentDescription = stringResource(R.string.feature_track_capture_content_description_stop),
         )
     }
 }
@@ -138,18 +138,18 @@ private fun ButtonStartTrackCapture(
             if (trackCaptureStatus.trackInProgress.paused) {
                 Icon(
                     imageVector = AppIcons.Play,
-                    contentDescription = stringResource(R.string.content_description_map_resume_track),
+                    contentDescription = stringResource(R.string.feature_track_capture_content_description_resume),
                 )
             } else {
                 Icon(
                     imageVector = AppIcons.Pause,
-                    contentDescription = stringResource(R.string.content_description_map_pause_track),
+                    contentDescription = stringResource(R.string.feature_track_capture_content_description_pause),
                 )
             }
         } else {
             Icon(
                 imageVector = AppIcons.Track,
-                contentDescription = stringResource(R.string.content_description_map_start_track)
+                contentDescription = stringResource(R.string.feature_track_capture_content_description_start)
             )
         }
     }
@@ -202,9 +202,9 @@ private fun InProgressTrackHeadline(
                 )
             ) {
                 if (paused) {
-                    append(stringResource(R.string.tracks_item_title_pause))
+                    append(stringResource(R.string.feature_track_capture_title_pause))
                 } else {
-                    append(stringResource(R.string.tracks_item_title_capturing))
+                    append(stringResource(R.string.feature_track_capture_title_capturing))
                 }
             }
         })
@@ -220,7 +220,7 @@ private fun CurrentTrackError(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.error_track_capture),
+                text = stringResource(R.string.feature_track_capture_error),
                 style = TextStyle(color = Color.Red, fontWeight = FontWeight.Bold),
             )
         }

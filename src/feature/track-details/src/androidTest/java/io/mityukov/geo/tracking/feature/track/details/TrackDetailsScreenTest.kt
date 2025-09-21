@@ -92,10 +92,10 @@ class TrackDetailsScreenTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.track_details_delete_dialog_title))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.feature_track_details_delete_dialog_title))
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.track_details_delete_dialog_text))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.feature_track_details_delete_dialog_text))
             .assertIsDisplayed()
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_NO).assertIsDisplayed()
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_YES).assertIsDisplayed()
@@ -113,10 +113,10 @@ class TrackDetailsScreenTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag(AppTestTag.DIALOG_DELETE).assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.track_details_delete_dialog_title))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.feature_track_details_delete_dialog_title))
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.track_details_delete_dialog_text))
+            .onNodeWithText(composeTestRule.activity.resources.getString(R.string.feature_track_details_delete_dialog_text))
             .assertIsDisplayed()
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_NO).assertIsDisplayed()
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_YES).assertIsDisplayed()

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="content_description_map_zoom_in">Приблизить</string>
-    <string name="content_description_map_zoom_out">Отдалить</string>
-    <string name="content_description_map_my_location">Моя локация</string>
-    <string name="map_location_permission_description">Чтобы узнать Ваше текущее местоположение нужно дать разрешение на доступ к геолокации устройства.</string>
-    <string name="map_location_permission_consent">Дать разрешение</string>
-    <string name="map_disabled_location_permission_description">Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы</string>
-    <string name="map_disabled_location_permission_consent">Включить</string>
-    <string name="map_current_location_message">Текущая геопозиция %s\nШирота %f, Долгота %f\nВысота %d м, Скорость %s м/с</string>
-    <string name="map_current_location_share_text">Моя текущая геопозиция %f,%f</string>
-    <string name="map_current_location_share_title">Поделиться геопозицией</string>
-    <string name="map_update_location">Обновление местоположения…</string>
+    <string name="feature_map_content_description_map_zoom_in">Приблизить</string>
+    <string name="feature_map_content_description_map_zoom_out">Отдалить</string>
+    <string name="feature_map_content_description_map_my_location">Моя локация</string>
+    <string name="feature_map_location_permission_description">Чтобы узнать Ваше текущее местоположение нужно дать разрешение на доступ к геолокации устройства.</string>
+    <string name="feature_map_location_permission_consent">Дать разрешение</string>
+    <string name="feature_map_disabled_location_permission_description">Для отображения вашего местоположения на карте необходимо включить локацию в настройка системы</string>
+    <string name="feature_map_disabled_location_permission_consent">Включить</string>
+    <string name="feature_map_current_location_message">Текущая геопозиция %s\nШирота %f, Долгота %f\nВысота %d м, Скорость %s м/с</string>
+    <string name="feature_map_current_location_share_text">Моя текущая геопозиция %f,%f</string>
+    <string name="feature_map_current_location_share_title">Поделиться геопозицией</string>
+    <string name="feature_map_update_location">Обновление местоположения…</string>
 </resources>

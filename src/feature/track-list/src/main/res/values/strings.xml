@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="content_description_checked">Выбранный</string>
-    <string name="content_description_delete">Удалить</string>
-    <string name="tracks_title">Треки</string>
-    <string name="tracks_empty_list_message">Пока не записано ни одного трека</string>
-    <string name="tracks_editing_title">Редактирование</string>
-    <string name="tracks_editing_delete_dialog_title">Внимание!</string>
-    <string name="tracks_editing_delete_dialog_text">Вы действительно хотите удалить выбранные треки?</string>
+    <string name="feature_track_list_content_description_checked">Выбранный</string>
+    <string name="feature_track_list_content_description_delete">Удалить</string>
+    <string name="feature_track_list_title">Треки</string>
+    <string name="feature_track_list_empty_list_message">Пока не записано ни одного трека</string>
+    <string name="feature_track_list_editing_title">Редактирование</string>
+    <string name="feature_track_list_editing_delete_dialog_title">Внимание!</string>
+    <string name="feature_track_list_editing_delete_dialog_text">Вы действительно хотите удалить выбранные треки?</string>
 </resources>

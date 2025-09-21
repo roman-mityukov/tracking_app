@@ -2,23 +2,23 @@
 
     <string name="app_name">Запись трека</string>
     <string name="app_name_test">Тест</string>
-    <string name="content_description_back_button">Кнопка назад</string>
-    <string name="content_description_arrow_right">Выбрать</string>
+    <string name="core_designsystem_content_description_back_button">Кнопка назад</string>
+    <string name="core_ui_content_description_arrow_right">Выбрать</string>
 
-    <string name="content_description_attention">Внимание!</string>
-    <string name="content_description_app_icon">Иконка приложения</string>
+    <string name="core_designsystem_content_description_attention">Внимание!</string>
+    <string name="feature_about_content_description_app_icon">Иконка приложения</string>
 
-    <string name="content_description_track_time">Затраченное время</string>
-    <string name="content_description_track_distance">Пройденное расстояние</string>
-    <string name="content_description_track_altitude_up">Набор высоты</string>
-    <string name="content_description_track_altitude_down">Сброс высоты</string>
-    <string name="content_description_track_average_speed">Средняя скорость</string>
+    <string name="core_ui_content_description_track_time">Затраченное время</string>
+    <string name="core_ui_content_description_track_distance">Пройденное расстояние</string>
+    <string name="core_ui_content_description_track_altitude_up">Набор высоты</string>
+    <string name="core_ui_content_description_track_altitude_down">Сброс высоты</string>
+    <string name="core_ui_content_description_track_average_speed">Средняя скорость</string>
 
     <string name="track_capture_notification_channel_description">Оповещение о записи трека</string>
     <string name="track_capture_notification_title">Построение трека</string>
     <string name="track_capture_notification_text">Сбор геолокации…</string>
 
-    <string name="error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
+    <string name="feature_about_error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
 
     <string name="home_navigation_map">Карта</string>
     <string name="home_navigation_user_tracks">Треки</string>

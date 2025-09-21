@@ -57,7 +57,7 @@ fun AppSettingsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.settings_title)) },
+                title = { Text(text = stringResource(R.string.feature_settings_title)) },
                 navigationIcon = {
                     ButtonBack(onBack = onBack)
                 }

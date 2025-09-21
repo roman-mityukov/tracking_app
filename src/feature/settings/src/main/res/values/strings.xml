@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="settings_title">Настройки</string>
-    <string name="instructions_view_label">Инструкции по настройке геолокации</string>
-    <string name="instructions_title">Инструкции</string>
-    <string name="instructions_description">Настройка стабильной работы геолокации</string>
-    <string name="instructions_content">1. Дайте для этого приложения разрешение \"Местоположение\". Это позволит получать геолокацию устройства и записывать трек. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
-    <string name="geolocation_updates_rate_label">Интервал обновления трека, секунды</string>
+    <string name="feature_settings_title">Настройки</string>
+    <string name="feature_settings_instructions_view_label">Инструкции по настройке геолокации</string>
+    <string name="feature_settings_instructions_title">Инструкции</string>
+    <string name="feature_settings_instructions_description">Настройка стабильной работы геолокации</string>
+    <string name="feature_settings_instructions_content">1. Дайте для этого приложения разрешение \"Местоположение\". Это позволит получать геолокацию устройства и записывать трек. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
+    <string name="feature_settings_geolocation_updates_rate_label">Интервал обновления трека, секунды</string>
 </resources>

@@ -1,0 +1,45 @@
+name: Build QA app
+on:
+  workflow_call:
+
+env:
+  ANDROID_HOME: /home/roman/Android/Sdk
+
+jobs:
+  prebuild:
+    uses: ./.github/workflows/prebuild.yml
+
+  check:
+    uses: ./.github/workflows/checks.yml
+    needs: prebuild
+
+  tests:
+    uses: ./.github/workflows/tests.yml
+    needs: check
+
+  build:
+    name: Build QA app
+    runs-on: self-hosted
+    needs: [ prebuild, check, tests ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download local.properties
+        uses: actions/download-artifact@v4
+        with:
+          name: local-properties
+          path: src/
+
+      - name: Build debug
+        run: |
+          cd src
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease
+
+      - name: Upload QA app
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: src/app/build/outputs/apk/release/app-release.apk
+          retention-days: 1

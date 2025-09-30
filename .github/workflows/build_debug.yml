@@ -1,0 +1,41 @@
+name: Build debug app
+on:
+  push:
+    branches-ignore:
+      - master
+      - develop
+
+env:
+  ANDROID_HOME: /home/roman/Android/Sdk
+
+jobs:
+  prebuild:
+    uses: ./.github/workflows/prebuild.yml
+
+  check:
+    uses: ./.github/workflows/checks.yml
+    needs: prebuild
+
+  tests:
+    uses: ./.github/workflows/tests.yml
+    needs: check
+
+  build:
+    name: Build debug app
+    runs-on: self-hosted
+    needs: [ prebuild, check, tests ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download local.properties
+        uses: actions/download-artifact@v4
+        with:
+          name: local-properties
+          path: src/
+
+      - name: Build debug
+        run: |
+          cd src
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug

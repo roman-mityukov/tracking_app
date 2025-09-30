@@ -1,0 +1,27 @@
+name: Code quality checks
+on:
+  workflow_call:
+
+env:
+  ANDROID_HOME: /home/roman/Android/Sdk
+
+jobs:
+  check:
+    name: Code Quality Checks
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download local.properties
+        uses: actions/download-artifact@v4
+        with:
+          name: local-properties
+          path: src/
+
+      - name: Run detekt and lint
+        run: |
+          cd src
+          chmod +x ./gradlew
+          ./gradlew detekt
+          ./gradlew lint

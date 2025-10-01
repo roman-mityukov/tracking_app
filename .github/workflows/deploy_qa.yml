@@ -1,0 +1,65 @@
+name: Build debug app
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-qa:
+    uses: ./.github/workflows/build_qa.yml
+
+  build-cicd-jar:
+    name: Build CI/CD Tools
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build CI/CD JAR
+        run: |
+          cd cicd
+          chmod +x ./gradlew
+          ./gradlew jar
+
+      - name: Upload CI/CD JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: cicd-jar
+          path: cicd/build/libs/cicd-1.0.jar
+          retention-days: 1
+
+  deploy-qa:
+    name: Deploy QA
+    runs-on: self-hosted
+    needs: [build-qa, build-cicd-jar]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release
+          path: src/app/build/outputs/apk/release/
+
+      - name: Download CI/CD JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: cicd-jar
+          path: cicd/build/libs/
+
+      - name: Make scripts executable
+        run: |
+          chmod +x cicd/scripts/getApkVersionNameAndCode.sh
+          chmod +x cicd/scripts/generateChangelog.sh
+
+      - name: Deploy to QA
+        run: |
+          APK_VERSION=$(cicd/scripts/getApkVersionNameAndCode.sh 'src/app/build/outputs/apk/release/app-release.apk')
+          NEW_APK_FILE_NAME=src/app/build/outputs/apk/release/qa-app-release-"$APK_VERSION".apk
+          CHANGELOG_FILE_NAME=qa-changelog-"$APK_VERSION".txt
+          mv src/app/build/outputs/apk/release/app-release.apk $NEW_APK_FILE_NAME
+          cicd/scripts/generateChangelog.sh > $CHANGELOG_FILE_NAME
+          YANDEX_DISK_APK_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0.jar' UPLOAD_TO_YANDEX_DISK '${{ secrets.YANDEX_DISK_API_TOKEN }}' $NEW_APK_FILE_NAME)
+          YANDEX_DISK_CHANGELOG_PUBLIC_URL=$(java -jar 'cicd/build/libs/cicd-1.0.jar' UPLOAD_TO_YANDEX_DISK '${{ secrets.YANDEX_DISK_API_TOKEN }}' ./"$CHANGELOG_FILE_NAME")
+          java -jar 'cicd/build/libs/cicd-1.0.jar' SEND_RELEASE_INFO_TO_TELEGRAM $APK_VERSION $YANDEX_DISK_APK_PUBLIC_URL $YANDEX_DISK_CHANGELOG_PUBLIC_URL '${{ secrets.TELEGRAM_CHAT_ID }}' '${{ secrets.TELEGRAM_BOT_TOKEN }}'

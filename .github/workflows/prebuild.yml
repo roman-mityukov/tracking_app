@@ -1,0 +1,33 @@
+name: Prebuild
+on:
+  workflow_call:
+
+jobs:
+  prebuild:
+    name: Prebuild
+    runs-on: self-hosted
+    outputs:
+      artifacts-path: ${{ steps.set-outputs.outputs.artifacts-path }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create local.properties
+        run: |
+          cd src
+          touch local.properties
+          echo "YANDEX_MAPKIT_API_KEY=\"${{ secrets.YANDEX_MAPKIT_API_KEY }}\"" > local.properties
+          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> local.properties
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> local.properties
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> local.properties
+
+      - name: Upload local.properties
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-properties
+          path: src/local.properties
+          retention-days: 1
+
+      - name: Set outputs
+        id: set-outputs
+        run: echo "artifacts-path=$(pwd)" >> $GITHUB_OUTPUT

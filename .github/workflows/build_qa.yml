@@ -8,6 +8,7 @@ env:
 jobs:
   prebuild:
     uses: ./.github/workflows/prebuild.yml
+    secrets: inherit
 
   check:
     uses: ./.github/workflows/checks.yml

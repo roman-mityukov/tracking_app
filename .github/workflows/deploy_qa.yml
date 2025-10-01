@@ -4,6 +4,9 @@ on:
     branches:
       - develop
 
+env:
+  ANDROID_HOME: /home/roman/Android/Sdk
+
 jobs:
   build-qa:
     uses: ./.github/workflows/build_qa.yml

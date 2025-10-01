@@ -7,6 +7,7 @@ on:
 jobs:
   build-qa:
     uses: ./.github/workflows/build_qa.yml
+    secrets: inherit
 
   build-cicd-jar:
     name: Build CI/CD Tools

@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.google.services)
 }
 detekt {
     buildUponDefaultConfig = true
@@ -118,6 +119,7 @@ dependencies {
     implementation(project(":core:log"))
     implementation(project(":core:model"))
     implementation(project(":core:sharing"))
+    implementation(project(":core:sync"))
     implementation(project(":core:test"))
     implementation(project(":core:ui"))
     implementation(project(":feature:about"))
@@ -134,7 +136,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -6,7 +6,11 @@ import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.HiltAndroidApp
 import io.mityukov.geo.tracking.BuildConfig
 import io.mityukov.geo.tracking.core.common.di.LogsDirectory
+import io.mityukov.geo.tracking.core.sync.SyncSubscriber
 import io.mityukov.geo.tracking.log.Logger
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.ok.tracer.HasTracerConfiguration
 import ru.ok.tracer.TracerConfiguration
 import ru.ok.tracer.crash.report.CrashFreeConfiguration
@@ -16,6 +20,8 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class GeoApp : Application(), HasTracerConfiguration {
+    private val applicationScope = MainScope()
+
     override val tracerConfiguration: List<TracerConfiguration>
         get() = listOf(
             CrashReportConfiguration.build {
@@ -31,6 +37,9 @@ class GeoApp : Application(), HasTracerConfiguration {
     @LogsDirectory
     lateinit var logsDirectory: File
 
+    @Inject
+    lateinit var syncSubscriber: SyncSubscriber
+
     override fun onCreate() {
         super.onCreate()
 
@@ -44,5 +53,10 @@ class GeoApp : Application(), HasTracerConfiguration {
         MapKitFactory.setApiKey(BuildConfig.YANDEX_MAPKIT_API_KEY)
 
         Logger.initLogs(logsDirectory)
+
+        applicationScope.launch {
+            delay(1000)
+            syncSubscriber.subscribe()
+        }
     }
 }

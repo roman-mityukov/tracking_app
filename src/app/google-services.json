@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "22266865486",
+    "project_id": "tracking-672ab",
+    "storage_bucket": "tracking-672ab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22266865486:android:8e9309e2d06726ffb1201f",
+        "android_client_info": {
+          "package_name": "io.mityukov.geo.tracking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkmq3AQixD0JG7ED528cnzywFeHZ6-YTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

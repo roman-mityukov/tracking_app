@@ -44,8 +44,7 @@ internal fun MapRoute(
     val resources = LocalResources.current
     val mapViewHolder = remember { MapViewHolder(MapView(context), context.applicationContext) }
     val mapViewModelState = mapViewModel.stateFlow.collectAsStateWithLifecycle()
-    val currentLocationState =
-        mapViewModel.currentLocationFlow.collectAsStateWithLifecycle(null)
+    val currentLocationState = mapViewModel.currentLocationFlow.collectAsStateWithLifecycle(null)
     val trackCaptureState = trackCaptureViewModel.stateFlow.collectAsStateWithLifecycle()
 
     MapLifecycle(

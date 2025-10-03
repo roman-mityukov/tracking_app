@@ -4,16 +4,18 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.mityukov.geo.tracking.core.common.CommonAppProps
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdateException
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.log.logd
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,25 +40,13 @@ class MapViewModel @Inject constructor(
 ) :
     ViewModel() {
     private var lastKnownLocation: Geolocation? = null
-
-    val stateFlow: StateFlow<MapState> = geolocationUpdatesRepository.currentLocation
-        .map { currentLocation ->
-            val geolocation = currentLocation.geolocation
-            val state = if (geolocation != null) {
-                lastKnownLocation = geolocation
-                MapState.CurrentLocation(data = geolocation)
-            } else {
-                MapState.NoLocation(cause = currentLocation.error)
-            }
-            logd("MapViewModel state $state")
-            state
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = CommonAppProps.STOP_TIMEOUT_MILLISECONDS),
-            initialValue = MapState.PendingLocationUpdates
-        )
-    val currentLocationFlow =
-        stateFlow.filter { it is MapState.CurrentLocation }
+    private var repositorySubscription: Job? = null
+    private val mutableStateFlow = MutableStateFlow<MapState>(MapState.PendingLocationUpdates)
+    val stateFlow: StateFlow<MapState> = mutableStateFlow.asStateFlow()
+    val currentLocationFlow: Flow<Geolocation?> =
+        stateFlow.filter {
+            it is MapState.CurrentLocation
+        }
             .map {
                 val geolocation = when (it) {
                     is MapState.CurrentLocation -> it.data
@@ -71,14 +61,30 @@ class MapViewModel @Inject constructor(
     fun add(event: MapEvent) {
         when (event) {
             MapEvent.PauseCurrentLocationUpdate -> {
-                viewModelScope.launch {
-                    geolocationUpdatesRepository.stop()
-                }
+                repositorySubscription?.cancel()
+                repositorySubscription = null
             }
 
             MapEvent.ResumeCurrentLocationUpdate -> {
                 viewModelScope.launch {
-                    geolocationUpdatesRepository.start()
+                    repositorySubscription = launch {
+                        geolocationUpdatesRepository.currentLocation
+                            .map { currentLocation ->
+                                val geolocation = currentLocation.geolocation
+                                val state = if (geolocation != null) {
+                                    lastKnownLocation = geolocation
+                                    MapState.CurrentLocation(data = geolocation)
+                                } else {
+                                    MapState.NoLocation(cause = currentLocation.error)
+                                }
+                                logd("MapViewModel state $state")
+                                state
+                            }.collect { mapState ->
+                                mutableStateFlow.update {
+                                    mapState
+                                }
+                            }
+                    }
                 }
             }
         }

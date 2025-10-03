@@ -1,5 +1,7 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import kotlinx.coroutines.flow.Flow
 
@@ -17,10 +19,4 @@ data class GeolocationUpdateResult(
 
 interface GeolocationUpdatesRepository {
     val currentLocation: Flow<GeolocationUpdateResult>
-
-    @androidx.annotation.RequiresPermission(
-        allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
-    )
-    suspend fun start()
-    suspend fun stop()
 }

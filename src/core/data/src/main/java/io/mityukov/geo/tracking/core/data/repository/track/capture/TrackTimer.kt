@@ -1,28 +1,26 @@
 package io.mityukov.geo.tracking.core.data.repository.track.capture
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.Timer
 import kotlin.concurrent.timer
 
-internal class TrackTimer(val period: Long = 1000L, private val coroutineScope: CoroutineScope) {
-    private val channel = Channel<Unit>()
-    private val _events = MutableSharedFlow<Unit>()
-    val events: Flow<Unit> = channel.consumeAsFlow()
+internal class TrackTimer(val period: Long = 1000L) {
+    private var duration: Int = 0
+    private val _events = MutableStateFlow(duration)
+    val events: StateFlow<Int> = _events.asStateFlow()
     private var isPaused: Boolean = false
     private var timer: Timer? = null
-    private var timerJob: Job? = null
 
     fun start() {
-        timerJob = coroutineScope.launch {
-            timer(period = period) {
-                if (!isPaused) {
-                    _events.tryEmit(Unit)
+        duration = 0
+        timer = timer(period = period) {
+            if (!isPaused) {
+                duration++
+                _events.update {
+                    duration
                 }
             }
         }

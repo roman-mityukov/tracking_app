@@ -44,7 +44,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
     private var timerSubscriptionJob: Job? = null
     private var geolocationSubscription: Job? = null
     private val mutex = Mutex()
-    private val timer = TrackTimer(coroutineScope = coroutineScope)
+    private val timer = TrackTimer()
 
     @androidx.annotation.RequiresPermission(
         allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]
@@ -151,13 +151,13 @@ internal class TrackCapturerControllerImpl @Inject constructor(
         if (permissionChecker.locationGranted) {
             startForegroundService()
             timerSubscriptionJob = coroutineScope.launch {
-                timer.events.collect {
+                timer.events.collect { timerDuration ->
                     val currentStatus = trackCaptureStatusRepository.status.first()
                     if (currentStatus is TrackCaptureStatus.Run) {
                         trackCaptureStatusRepository.update(
                             TrackCaptureStatus.Run(
                                 trackInProgress = currentStatus.trackInProgress.copy(
-                                    duration = (currentStatus.trackInProgress.duration.inWholeSeconds + 1).seconds
+                                    duration = timerDuration.seconds
                                 )
                             )
                         )

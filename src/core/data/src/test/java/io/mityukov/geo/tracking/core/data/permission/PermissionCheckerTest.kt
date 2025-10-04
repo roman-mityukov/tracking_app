@@ -2,7 +2,6 @@ package io.mityukov.geo.tracking.core.data.permission
 
 import android.Manifest
 import android.app.Application
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Before
 import org.junit.Test
@@ -12,7 +11,7 @@ import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
 class PermissionCheckerTest {
-    private lateinit var context: Context
+    private lateinit var context: Application
     private lateinit var permissionCheckerImpl: PermissionChecker
 
     @Before
@@ -28,7 +27,7 @@ class PermissionCheckerTest {
 
     @Test
     fun `locationGranted returns false if there is only fine location`() {
-        Shadows.shadowOf(context as Application).grantPermissions(
+        Shadows.shadowOf(context).grantPermissions(
             Manifest.permission.ACCESS_FINE_LOCATION,
         )
         assert(!permissionCheckerImpl.locationGranted)
@@ -36,7 +35,7 @@ class PermissionCheckerTest {
 
     @Test
     fun `locationGranted returns false if there is only coarse location`() {
-        Shadows.shadowOf(context as Application).grantPermissions(
+        Shadows.shadowOf(context).grantPermissions(
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
         assert(!permissionCheckerImpl.locationGranted)
@@ -44,7 +43,7 @@ class PermissionCheckerTest {
 
     @Test
     fun locationGranted_returnsTrue() {
-        Shadows.shadowOf(context as Application).grantPermissions(
+        Shadows.shadowOf(context).grantPermissions(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )

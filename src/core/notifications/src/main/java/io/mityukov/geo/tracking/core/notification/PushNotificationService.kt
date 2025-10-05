@@ -49,7 +49,7 @@ internal class PushNotificationService : FirebaseMessagingService() {
                 )
                 .setContentTitle(notification.title)
                 .setContentText(notification.body)
-                .setSmallIcon(R.drawable.ic_launcher_round)
+                .setSmallIcon(R.drawable.core_notifications_ic_launcher_round)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .build()
 

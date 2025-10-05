@@ -20,7 +20,9 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.random.Random
 import kotlin.time.Duration
 
-internal class HardwareGeolocationProviderImpl @Inject constructor(@param:ApplicationContext private val context: Context) :
+internal class HardwareGeolocationProviderImpl @Inject constructor(
+    @param:ApplicationContext private val context: Context
+) :
     GeolocationProvider {
     private val locationManager = context.getSystemService<LocationManager>() as LocationManager
     private val random = Random.nextLong()

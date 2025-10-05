@@ -15,15 +15,15 @@ object Logger {
     private var isInitialized: Boolean = false
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val lock = Any()
-    private val tag: String = "GEO_APP"
+    private const val TAG: String = "GEO_APP"
     @SuppressLint("LogNotTimber")
     fun logd(message: String) {
         if (isInitialized) {
             coroutineScope.launch {
-                Timber.tag(tag).log(Log.DEBUG, message)
+                Timber.tag(TAG).log(Log.DEBUG, message)
             }
         } else {
-            Log.w(tag, "log before initialization")
+            Log.w(TAG, "log before initialization")
         }
     }
 
@@ -31,10 +31,10 @@ object Logger {
     fun logw(message: String) {
         if (isInitialized) {
             coroutineScope.launch {
-                Timber.tag(tag).log(Log.WARN, message)
+                Timber.tag(TAG).log(Log.WARN, message)
             }
         } else {
-            Log.w(tag, "log before initialization")
+            Log.w(TAG, "log before initialization")
         }
     }
 

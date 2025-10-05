@@ -14,7 +14,7 @@ import io.mityukov.geo.tracking.core.data.permission.PermissionCheckerImpl
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepository
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationUpdatesRepositoryImpl
-import io.mityukov.geo.tracking.core.data.repository.geo.HardwareGeolocationProvider
+import io.mityukov.geo.tracking.core.data.repository.geo.HardwareGeolocationProviderImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
@@ -49,7 +49,7 @@ abstract class DataModule {
 
     @Binds
     internal abstract fun bindGeolocationProvider(
-        impl: HardwareGeolocationProvider
+        impl: HardwareGeolocationProviderImpl
     ): GeolocationProvider
 
     @Binds

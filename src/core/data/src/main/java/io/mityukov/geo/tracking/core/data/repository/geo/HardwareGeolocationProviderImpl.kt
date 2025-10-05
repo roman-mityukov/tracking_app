@@ -20,7 +20,9 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.random.Random
 import kotlin.time.Duration
 
-internal class HardwareGeolocationProvider @Inject constructor(@param:ApplicationContext private val context: Context) :
+internal class HardwareGeolocationProviderImpl @Inject constructor(
+    @param:ApplicationContext private val context: Context
+) :
     GeolocationProvider {
     private val locationManager = context.getSystemService<LocationManager>() as LocationManager
     private val random = Random.nextLong()
@@ -70,8 +72,6 @@ internal class HardwareGeolocationProvider @Inject constructor(@param:Applicatio
                 }
 
                 override fun onProviderDisabled(provider: String) {
-                    super.onProviderDisabled(provider)
-
                     if (provider == LocationManager.GPS_PROVIDER) {
                         trySendBlocking(
                             PlatformLocationUpdateResult(

@@ -1,7 +1,5 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
-import android.Manifest
-import androidx.annotation.RequiresPermission
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import kotlinx.coroutines.flow.Flow
 

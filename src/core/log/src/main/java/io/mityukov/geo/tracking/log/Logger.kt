@@ -1,5 +1,6 @@
 package io.mityukov.geo.tracking.log
 
+import android.annotation.SuppressLint
 import android.util.Log
 import fr.bipi.treessence.file.FileLoggerTree
 import kotlinx.coroutines.CoroutineScope
@@ -14,46 +15,45 @@ object Logger {
     private var isInitialized: Boolean = false
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val lock = Any()
-    private var initializationJob: Job? = null
-    private lateinit var tag: String
+    private val tag: String = "GEO_APP"
+    @SuppressLint("LogNotTimber")
     fun logd(message: String) {
-        if (isInitialized.not()) {
-            error("logd before initialization")
-        }
-        coroutineScope.launch {
-            Timber.tag(tag).log(Log.DEBUG, message)
+        if (isInitialized) {
+            coroutineScope.launch {
+                Timber.tag(tag).log(Log.DEBUG, message)
+            }
+        } else {
+            Log.w(tag, "log before initialization")
         }
     }
 
+    @SuppressLint("LogNotTimber")
     fun logw(message: String) {
-        if (isInitialized.not()) {
-            error("logw before initialization")
-        }
-        coroutineScope.launch {
-            Timber.tag(tag).log(Log.WARN, message)
+        if (isInitialized) {
+            coroutineScope.launch {
+                Timber.tag(tag).log(Log.WARN, message)
+            }
+        } else {
+            Log.w(tag, "log before initialization")
         }
     }
 
-    fun initLogs(logsDirectory: File, tag: String = "GEO_APP") {
+    fun initLogs(logsDirectory: File) {
         synchronized(lock) {
-            if (isInitialized || (initializationJob != null && initializationJob!!.isActive)) {
+            if (isInitialized) {
                 return
             }
-            initializationJob = coroutineScope.launch {
-                this@Logger.tag = tag
-                Timber.plant(Timber.DebugTree())
-                val fileLoggerTree = FileLoggerTree.Builder()
-                    .withFileName("file%g.log")
-                    .withDirName(logsDirectory.absolutePath)
-                    .withSizeLimit(nbBytes = 1_000_000)
-                    .withFileLimit(f = 3)
-                    .withMinPriority(Log.DEBUG)
-                    .appendToFile(true)
-                    .build()
-                Timber.plant(fileLoggerTree)
-                initializationJob = null
-                isInitialized = true
-            }
+            Timber.plant(Timber.DebugTree())
+            val fileLoggerTree = FileLoggerTree.Builder()
+                .withFileName("file%g.log")
+                .withDirName(logsDirectory.absolutePath)
+                .withSizeLimit(nbBytes = 1_000_000)
+                .withFileLimit(f = 3)
+                .withMinPriority(Log.DEBUG)
+                .appendToFile(true)
+                .build()
+            Timber.plant(fileLoggerTree)
+            isInitialized = true
         }
     }
 }

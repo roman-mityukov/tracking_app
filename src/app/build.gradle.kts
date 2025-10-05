@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.google.services)
 }
 detekt {
     buildUponDefaultConfig = true
@@ -43,8 +44,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 62
-        versionName = "0.51.0"
+        versionCode = 63
+        versionName = "0.52.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -117,6 +118,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:log"))
     implementation(project(":core:model"))
+    implementation(project(":core:notifications"))
     implementation(project(":core:sharing"))
     implementation(project(":core:test"))
     implementation(project(":core:ui"))
@@ -134,7 +136,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

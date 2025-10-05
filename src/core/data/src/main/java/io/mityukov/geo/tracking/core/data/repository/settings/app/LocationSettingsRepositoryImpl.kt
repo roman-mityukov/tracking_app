@@ -12,6 +12,6 @@ internal class LocationSettingsRepositoryImpl @Inject constructor(
         get() {
             val locationManager =
                 context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            return locationManager.isLocationEnabled
+            return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         }
 }

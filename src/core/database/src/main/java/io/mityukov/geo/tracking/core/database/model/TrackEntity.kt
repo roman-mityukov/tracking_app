@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class TrackEntity(
     @PrimaryKey val id: String,
     val name: String,
+    val description: String?,
     val start: Long,
     val end: Long,
     val duration: Long,

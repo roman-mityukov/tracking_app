@@ -35,7 +35,7 @@ protobufPlugin = "0.9.5"
 retrofit = "3.0.0"
 robolectric = "4.16"
 roborazzi = "1.50.0"
-room = "2.8.0"
+room = "2.8.1"
 splashScreen = "1.0.1"
 striktCore = "0.35.1"
 timber = "5.0.1"
@@ -78,6 +78,7 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 androidx-tracing-ktx = { group = "androidx.tracing", name = "tracing-ktx", version.ref = "androidxTracing" }
 apptracer-tracer-platform = { module = "ru.ok.tracer:tracer-platform", version.ref = "apptracer" }
 apptracer-crash-report = { module = "ru.ok.tracer:tracer-crash-report" }

@@ -1,4 +1,5 @@
 import androidx.room.gradle.RoomExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.google.devtools.ksp.gradle.KspExtension
 import io.mityukov.android.build.convention.libsExt
 import org.gradle.api.Plugin
@@ -29,6 +30,7 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                 "implementation"(libsExt.findLibrary("androidx.room.runtime").get())
                 "implementation"(libsExt.findLibrary("androidx.room.ktx").get())
                 "ksp"(libsExt.findLibrary("androidx.room.compiler").get())
+                "testImplementation"(libsExt.findLibrary("androidx.room.testing").get())
             }
         }
     }

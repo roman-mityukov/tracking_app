@@ -12,7 +12,7 @@ import io.mityukov.geo.tracking.core.database.model.TrackEntity
     entities = [
         TrackEntity::class,
     ],
-    version = 1,
+    version = 2,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun trackDao(): TrackDao
@@ -29,10 +29,13 @@ abstract class AppDatabase : RoomDatabase() {
         fun getInstance(context: Context): AppDatabase {
             return db ?: synchronized(lock) {
                 if (db == null) {
-                    db = Room.databaseBuilder(
-                        context,
-                        AppDatabase::class.java, "database"
-                    )
+                    db = Room
+                        .databaseBuilder(
+                            context = context,
+                            klass = AppDatabase::class.java,
+                            name = "database"
+                        )
+                        .addMigrations(MIGRATION_1_2)
                         .build()
                 }
 

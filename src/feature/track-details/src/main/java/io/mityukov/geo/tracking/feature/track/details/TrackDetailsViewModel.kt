@@ -43,9 +43,11 @@ class TrackDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val completedTrack = tracksRepository.getDetailedTrack(routeTrackDetails.trackId)
-            mutableStateFlow.update {
-                TrackDetailsState.Data(completedTrack)
+            tracksRepository.getTrackUpdates(routeTrackDetails.trackId).collect {
+                val completedTrack = tracksRepository.getDetailedTrack(routeTrackDetails.trackId)
+                mutableStateFlow.update {
+                    TrackDetailsState.Data(completedTrack)
+                }
             }
         }
     }

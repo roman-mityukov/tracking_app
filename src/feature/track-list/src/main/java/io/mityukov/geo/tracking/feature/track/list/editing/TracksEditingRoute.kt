@@ -226,6 +226,7 @@ internal class TracksEditingStateProvider : PreviewParameterProvider<TracksEditi
     val track1 = Track(
         id = "49defd14-ae28-4705-9334-59761914de0c",
         name = "Тестовый трек 1",
+        description = "Описание",
         start = 1757038748000,
         duration = 78.seconds,
         end = 1757038758000,
@@ -241,6 +242,7 @@ internal class TracksEditingStateProvider : PreviewParameterProvider<TracksEditi
     val track2 = Track(
         id = "87f958b4-9d10-400f-8c12-19f650bc7db4",
         name = "Тестовый трек 2",
+        description = "Описание",
         start = 1757038798000,
         duration = 135.seconds,
         end = 1757038858000,

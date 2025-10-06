@@ -8,8 +8,8 @@ android {
 
 dependencies {
     implementation(project(":core:test"))
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.compose.material.iconsExtended)
+    api(libs.androidx.material3)
+    api(libs.androidx.compose.material.iconsExtended)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

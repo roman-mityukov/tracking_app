@@ -7,4 +7,6 @@
     <string name="core_ui_content_description_track_altitude_down">Сброс высоты</string>
     <string name="core_ui_content_description_track_average_speed">Средняя скорость</string>
     <string name="core_ui_error_sharing">На устройстве нет приложения с которым можно поделиться.</string>
+    <string name="core_ui_cancel">Отмена</string>
+    <string name="core_ui_save">Сохранить</string>
 </resources>

@@ -11,8 +11,10 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:data"))
+    implementation(project(":core:log"))
     implementation(project(":core:model"))
     implementation(project(":core:sharing"))
+    implementation(project(":core:ui"))
     implementation(project(":core:yandexmap"))
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)

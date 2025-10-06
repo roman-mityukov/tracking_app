@@ -9,9 +9,11 @@ import kotlinx.coroutines.flow.Flow
 interface TracksRepository {
     val tracks: Flow<List<Track>>
     suspend fun getTrack(trackId: String): Track
+    fun getTrackUpdates(trackId: String): Flow<Track>
     suspend fun getDetailedTrack(trackId: String): DetailedTrack
     suspend fun getCapturedTrackGeolocations(): List<Geolocation>
     suspend fun deleteTrack(trackId: String)
     suspend fun insertTrack(trackInProgress: TrackInProgress)
     suspend fun insertTrackPoint(location: Geolocation)
+    suspend fun updateTrack(track:Track)
 }

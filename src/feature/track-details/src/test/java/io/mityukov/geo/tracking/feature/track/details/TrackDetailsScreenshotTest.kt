@@ -6,6 +6,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.github.takahirom.roborazzi.captureRoboImage
+import io.mityukov.geo.tracking.core.data.validation.TrackValidationResult
+import io.mityukov.geo.tracking.feature.track.editing.TrackEditingSheet
+import io.mityukov.geo.tracking.feature.track.editing.TrackEditingState
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,6 +78,51 @@ class TrackDetailsScreenshotTest {
                 onBack = {},
             )
         }
+        composeTestRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun editingValidData() {
+        composeTestRule.setContent {
+            TrackEditingSheet(
+                track = track,
+                viewModelState = TrackEditingState.Initial,
+                onSave = {},
+                onSaveCompleted = {},
+                onDismiss = {}
+            )
+        }
+
+        composeTestRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun editingInvalidName() {
+        composeTestRule.setContent {
+            TrackEditingSheet(
+                track = track,
+                viewModelState = TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Name),
+                onSave = {},
+                onSaveCompleted = {},
+                onDismiss = {}
+            )
+        }
+
+        composeTestRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun editingInvalidDescription() {
+        composeTestRule.setContent {
+            TrackEditingSheet(
+                track = track,
+                viewModelState = TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Description),
+                onSave = {},
+                onSaveCompleted = {},
+                onDismiss = {}
+            )
+        }
+
         composeTestRule.onRoot().captureRoboImage()
     }
 }

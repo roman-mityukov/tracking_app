@@ -5,6 +5,16 @@ plugins {
 }
 android {
     namespace = "io.mityukov.geo.tracking.core.database"
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
+    sourceSets {
+        getByName("test").assets.srcDir(files("$projectDir/schemas"))
+    }
 }
 
 dependencies {

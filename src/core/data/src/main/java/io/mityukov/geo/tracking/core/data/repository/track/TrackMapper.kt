@@ -3,7 +3,6 @@ package io.mityukov.geo.tracking.core.data.repository.track
 import android.location.Location
 import android.os.Parcel
 import androidx.annotation.VisibleForTesting
-import androidx.annotation.VisibleForTesting.Companion.PACKAGE_PRIVATE
 import com.google.protobuf.ByteString
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackInProgress
@@ -14,9 +13,29 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 internal class TrackMapper @Inject constructor() {
+    fun trackDomainToEntity(track: Track): TrackEntity {
+        return TrackEntity(
+            id = track.id,
+            description = track.description,
+            name = track.name,
+            start = track.start,
+            end = track.end,
+            distance = track.distance,
+            altitudeUp = track.altitudeUp,
+            altitudeDown = track.altitudeDown,
+            duration = track.duration.inWholeSeconds,
+            sumSpeed = track.sumSpeed,
+            minSpeed = track.minSpeed,
+            maxSpeed = track.maxSpeed,
+            geolocationCount = track.geolocationCount,
+            filePath = track.filePath,
+        )
+    }
+
     fun trackEntityToDomain(entity: TrackEntity): Track {
         return Track(
             id = entity.id,
+            description = entity.description ?: "",
             name = entity.name,
             start = entity.start,
             end = entity.end,

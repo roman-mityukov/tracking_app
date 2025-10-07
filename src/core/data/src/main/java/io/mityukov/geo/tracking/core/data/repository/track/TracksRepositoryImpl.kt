@@ -45,6 +45,11 @@ internal class TracksRepositoryImpl @Inject constructor(
         trackMapper.trackEntityToDomain(entity)
     }
 
+    override fun getTrackUpdates(trackId: String): Flow<Track> {
+        return trackDao.getTrackUpdates(trackId)
+            .map { entity -> trackMapper.trackEntityToDomain(entity) }
+    }
+
     override suspend fun getDetailedTrack(trackId: String): DetailedTrack =
         withContext(coroutineDispatcher) {
             val trackMetadata = trackDao.getTrack(trackId)
@@ -138,7 +143,8 @@ internal class TracksRepositoryImpl @Inject constructor(
 
             val track = TrackEntity(
                 id = Uuid.random().toString(),
-                name = "name",
+                name = "Track name",
+                description = null,
                 start = trackInProgress.start,
                 end = System.currentTimeMillis(),
                 duration = trackInProgress.duration.inWholeSeconds,
@@ -210,4 +216,9 @@ internal class TracksRepositoryImpl @Inject constructor(
         }
         return points
     }
+
+    override suspend fun updateTrack(track: Track) =
+        withContext(coroutineDispatcher) {
+            trackDao.updateTrack(trackMapper.trackDomainToEntity(track))
+        }
 }

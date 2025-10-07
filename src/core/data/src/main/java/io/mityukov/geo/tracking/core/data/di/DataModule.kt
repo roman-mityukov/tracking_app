@@ -26,6 +26,8 @@ import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureS
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerControllerImpl
+import io.mityukov.geo.tracking.core.data.validation.TrackValidator
+import io.mityukov.geo.tracking.core.data.validation.TrackValidatorImpl
 import java.io.File
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -85,6 +87,9 @@ abstract class DataModule {
     internal abstract fun bindTrackCaptureStatusProvider(
         impl: TrackCaptureStatusRepositoryImpl
     ): TrackCaptureStatusProvider
+
+    @Binds
+    internal abstract fun bindTrackValidator(impl: TrackValidatorImpl): TrackValidator
 
     companion object {
         @Provides

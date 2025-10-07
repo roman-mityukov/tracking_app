@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.Person
@@ -30,6 +31,7 @@ object AppIcons {
     val Back = Icons.AutoMirrored.Filled.ArrowBack
     val Distance = Icons.AutoMirrored.Filled.DirectionsWalk
     val Duration = Icons.Outlined.Timer
+    val Edit = Icons.Outlined.Edit
     val FullScreen = Icons.Default.Fullscreen
     val HomeMapFilled = Icons.Filled.Map
     val HomeMapOutlined = Icons.Outlined.Map

@@ -62,6 +62,10 @@ private class TestTrackRepository : TracksRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getTrackUpdates(trackId: String): Flow<Track> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getDetailedTrack(trackId: String): DetailedTrack {
         TODO("Not yet implemented")
     }
@@ -79,6 +83,10 @@ private class TestTrackRepository : TracksRepository {
     }
 
     override suspend fun insertTrackPoint(location: Geolocation) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateTrack(track: Track) {
         TODO("Not yet implemented")
     }
 }

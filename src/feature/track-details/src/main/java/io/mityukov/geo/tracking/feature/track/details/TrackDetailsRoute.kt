@@ -1,3 +1,4 @@
+@file:Suppress("TooManyFunctions", "LongMethod")
 package io.mityukov.geo.tracking.feature.track.details
 
 import android.content.ActivityNotFoundException
@@ -63,6 +64,8 @@ import io.mityukov.geo.tracking.core.test.AppTestTag
 import io.mityukov.geo.tracking.core.ui.FontScalePreviews
 import io.mityukov.geo.tracking.core.ui.UiProps
 import io.mityukov.geo.tracking.core.yandexmap.MapViewHolder
+import io.mityukov.geo.tracking.feature.track.editing.TrackEditingRoute
+import io.mityukov.geo.tracking.feature.track.editing.TrackEditingViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -143,6 +146,7 @@ internal fun TrackDetailsRoute(
     )
 }
 
+// TODO Длинный - порефакторить
 @Composable
 internal fun TrackDetailsScreen(
     state: TrackDetailsState,
@@ -162,24 +166,24 @@ internal fun TrackDetailsScreen(
     }
 
     val openDeleteDialog = remember { mutableStateOf(false) }
+    val openEditSheet = remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TrackDetailsTopBar(onShare = onPrepareShare, onBack = onBack)
-        },
-    ) { paddingValues ->
-
-        when (state) {
-            TrackDetailsState.DeleteCompleted -> {
-                LaunchedEffect(Unit) {
-                    onBack()
-                }
+    when (state) {
+        TrackDetailsState.DeleteCompleted -> {
+            LaunchedEffect(Unit) {
+                onBack()
             }
+        }
 
-            is TrackDetailsState.Data -> {
-                val track = state.detailedTrack
+        is TrackDetailsState.Data -> {
+            val detailedTrack = state.detailedTrack
 
-                if (track.geolocations.isEmpty()) {
+            if (detailedTrack.geolocations.isEmpty()) {
+                Scaffold(
+                    topBar = {
+                        TrackEmptyTopBar(onBack = onBack)
+                    },
+                ) { paddingValues ->
                     TrackEmptyContent(
                         modifier = Modifier
                             .padding(paddingValues)
@@ -188,10 +192,22 @@ internal fun TrackDetailsScreen(
                             openDeleteDialog.value = true
                         }
                     )
-                } else {
+                }
+            } else {
+                Scaffold(
+                    topBar = {
+                        TrackDetailsTopBar(
+                            onShare = onPrepareShare,
+                            onEdit = {
+                                openEditSheet.value = true
+                            },
+                            onBack = onBack,
+                        )
+                    },
+                ) { paddingValues ->
                     TrackDetailsContent(
                         modifier = Modifier.padding(paddingValues),
-                        detailedTrack = track,
+                        detailedTrack = detailedTrack,
                         mapViewFactory = mapViewFactory,
                         onTrackMapSelected = onTrackMapSelected,
                         onShowTrack = onShowTrack,
@@ -201,10 +217,21 @@ internal fun TrackDetailsScreen(
                     )
                 }
 
-
+                if (openEditSheet.value) {
+                    TrackEditingRoute(
+                        track = detailedTrack.track,
+                        onDismiss = {
+                            openEditSheet.value = false
+                        }
+                    )
+                }
             }
+        }
 
-            TrackDetailsState.Pending -> {
+        TrackDetailsState.Pending -> {
+            Scaffold(topBar = {
+                TrackEmptyTopBar(onBack = onBack)
+            }) { paddingValues ->
                 Box(
                     modifier = Modifier
                         .padding(paddingValues)
@@ -255,6 +282,7 @@ internal class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetails
                 track = Track(
                     id = "49defd14-ae28-4705-9334-59761914de0c",
                     name = "Тестовый трек 1",
+                    description = "Описание",
                     start = 1757038748000,
                     duration = 78.seconds,
                     end = 1757038758000,
@@ -290,6 +318,7 @@ internal class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetails
                 track = Track(
                     id = "49defd14-ae28-4705-9334-59761914de0c",
                     name = "Тестовый трек 1",
+                    description = "Описание",
                     start = 1757038748000,
                     duration = 78.seconds,
                     end = 1757038758000,
@@ -310,9 +339,25 @@ internal class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetails
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+private fun TrackEmptyTopBar(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        title = { Text(text = stringResource(R.string.feature_track_details_title)) },
+        navigationIcon = {
+            ButtonBack(onBack = onBack)
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun TrackDetailsTopBar(
     modifier: Modifier = Modifier,
     onShare: () -> Unit,
+    onEdit: () -> Unit,
     onBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
@@ -322,6 +367,14 @@ private fun TrackDetailsTopBar(
             ButtonBack(onBack = onBack)
         },
         actions = {
+            IconButton(modifier = Modifier.testTag(AppTestTag.BUTTON_EDIT), onClick = onEdit) {
+                Icon(
+                    imageVector = AppIcons.Edit,
+                    contentDescription = stringResource(
+                        R.string.feature_track_details_button_edit
+                    ),
+                )
+            }
             IconButton(modifier = Modifier.testTag(AppTestTag.BUTTON_SHARE), onClick = onShare) {
                 Icon(
                     imageVector = AppIcons.Share,
@@ -448,64 +501,77 @@ private fun TrackDetailsMap(
 private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: DetailedTrack) {
     val track = detailedTrack.track
     Column(modifier = modifier) {
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            "${stringResource(R.string.feature_track_details_label_name)} ${
+                track.name.ifBlank { stringResource(R.string.feature_track_details_no_name) }
+            }"
+        )
+        TrackPropertyItem(
+            "${stringResource(R.string.feature_track_details_label_description)} ${
+                track.description.ifBlank { stringResource(R.string.feature_track_details_no_description) }
+            }"
+        )
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_start,
                 TimeUtils.getFormattedLocalFromUTC(track.start, UiProps.DEFAULT_DATE_TIME_FORMATTER)
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_finish,
                 TimeUtils.getFormattedLocalFromUTC(track.end, UiProps.DEFAULT_DATE_TIME_FORMATTER)
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_duration,
                 DateUtils.formatElapsedTime(track.duration.toLong(DurationUnit.SECONDS)),
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.feature_track_details_distance, track.distance.roundToInt()))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
+                R.string.feature_track_details_distance,
+                track.distance.roundToInt()
+            )
+        )
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_altitude_up,
                 track.altitudeUp.roundToInt()
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_altitude_down,
                 track.altitudeDown.roundToInt()
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_average_speed,
                 String.format(Locale.getDefault(), "%.2f", track.averageSpeed)
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_min_speed,
                 String.format(Locale.getDefault(), "%.2f", track.minSpeed)
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(
+        TrackPropertyItem(
+            stringResource(
                 R.string.feature_track_details_max_speed,
                 String.format(Locale.getDefault(), "%.2f", track.maxSpeed)
             )
         )
     }
+}
+
+@Composable
+private fun TrackPropertyItem(text: String) {
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(text = text)
 }
 
 @Composable

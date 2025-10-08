@@ -13,6 +13,7 @@ import io.mityukov.geo.tracking.core.model.track.DetailedTrack
 import io.mityukov.geo.tracking.core.model.track.Track
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
@@ -47,6 +48,7 @@ internal class TracksRepositoryImpl @Inject constructor(
 
     override fun getTrackUpdates(trackId: String): Flow<Track> {
         return trackDao.getTrackUpdates(trackId)
+            .filterNotNull()
             .map { entity -> trackMapper.trackEntityToDomain(entity) }
     }
 

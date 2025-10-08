@@ -6,10 +6,12 @@ import android.content.Context
 import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -119,12 +121,12 @@ private fun CurrentGeolocation(
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Row(
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .weight(1f),
                 text = stringResource(
                     R.string.feature_map_current_location_message,
                     geolocation.localDateTime.format(UiProps.DEFAULT_DATE_TIME_FORMATTER),
@@ -133,8 +135,9 @@ private fun CurrentGeolocation(
                     geolocation.altitude.roundToInt(),
                     String.format(Locale.getDefault(), "%.1f", geolocation.speed),
                 ),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
             )
+            Spacer(modifier = Modifier.width(8.dp))
             IconButton(
                 modifier = Modifier.testTag(AppTestTag.BUTTON_SHARE_CURRENT_LOCATION),
                 onClick = onShare

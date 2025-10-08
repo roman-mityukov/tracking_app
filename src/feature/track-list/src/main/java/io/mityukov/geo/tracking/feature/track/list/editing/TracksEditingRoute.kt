@@ -1,22 +1,26 @@
 package io.mityukov.geo.tracking.feature.track.list.editing
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -99,7 +104,6 @@ internal fun TracksEditingScreen(
                                 onClick = {
                                     onChangeSelection(track.id)
                                 })
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
                 }
@@ -182,37 +186,52 @@ private fun TrackItem(
     isSelected: Boolean,
     onClick: (String) -> Unit,
 ) {
-    Row(modifier = modifier) {
-        ListItem(
-            modifier = Modifier
-                .testTag(AppTestTag.TRACK_ITEM)
-                .clickable(
-                    enabled = true,
-                    onClick = {
-                        onClick(track.id)
-                    }
-                ),
-            headlineContent = {
-                CompletedTrackHeadline(startTime = track.start)
-            },
-            supportingContent = {
-                TrackProperties(
-                    duration = track.duration,
-                    distance = track.distance,
-                    altitudeUp = track.altitudeUp,
-                    altitudeDown = track.altitudeDown,
-                    speed = track.averageSpeed,
+    Card(
+        modifier = modifier
+            .testTag(AppTestTag.TRACK_ITEM)
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            .combinedClickable(
+                enabled = true,
+                onClick = {
+                    onClick(track.id)
+                },
+            ),
+        colors = if (isSelected) {
+            CardDefaults.cardColors()
+                .copy(containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = track.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium
+            )
+            if (track.description.isNotBlank()) {
+                Text(
+                    text = track.description,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
                 )
-            },
-            trailingContent = {
-                if (isSelected) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(R.string.feature_track_list_content_description_checked)
-                    )
-                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-        )
+            CompletedTrackHeadline(startTime = track.start)
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
+            TrackProperties(
+                duration = track.duration,
+                distance = track.distance,
+                altitudeUp = track.altitudeUp,
+                altitudeDown = track.altitudeDown,
+                speed = track.averageSpeed,
+            )
+        }
     }
 }
 

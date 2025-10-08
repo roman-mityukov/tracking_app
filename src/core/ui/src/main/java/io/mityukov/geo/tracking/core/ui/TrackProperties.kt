@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -75,7 +76,7 @@ fun TrackItemProperty(
             contentDescription = contentDescription
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = text, fontSize = 12.sp, overflow = TextOverflow.Clip)
-        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = text, overflow = TextOverflow.Clip, style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.width(8.dp))
     }
 }

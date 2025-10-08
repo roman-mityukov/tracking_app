@@ -1,4 +1,5 @@
 @file:Suppress("TooManyFunctions", "LongMethod")
+
 package io.mityukov.geo.tracking.feature.track.details
 
 import android.content.ActivityNotFoundException
@@ -23,11 +24,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -274,6 +277,7 @@ internal fun TrackDetailsScreenPreview(@PreviewParameter(TrackDetailsStateProvid
     )
 }
 
+@Suppress("MaxLineLength")
 internal class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetailsState> {
     override val values: Sequence<TrackDetailsState> = sequenceOf(
         TrackDetailsState.Pending,
@@ -282,7 +286,7 @@ internal class TrackDetailsStateProvider : PreviewParameterProvider<TrackDetails
                 track = Track(
                     id = "49defd14-ae28-4705-9334-59761914de0c",
                     name = "Тестовый трек 1",
-                    description = "Описание",
+                    description = "Отличный маршрут с продуманными сложностями. Награда за усилия — панорамные виды, ради которых стоит идти. Комфортная тропа, удобные места для привалов. Получил массу впечатлений и прекрасные фотографии. Отличный способ провести выходные с пользой!",
                     start = 1757038748000,
                     duration = 78.seconds,
                     end = 1757038758000,
@@ -419,40 +423,48 @@ private fun TrackDetailsContent(
     onShowDeleteDialog: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    Column(
+    Card(
         modifier = modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 8.dp)
             .verticalScroll(scrollState)
     ) {
-
-        TrackDetailsList(detailedTrack = detailedTrack)
-        Spacer(modifier = Modifier.height(16.dp))
-        AltitudeChart(
-            chartData = AltitudeChartData(
-                detailedTrack.altitudeByDistance.map { ChartPoint(it.second, it.first) }
-            )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        SpeedChart(
-            chartData = SpeedChartData(detailedTrack.speedByDistance.map {
-                SpeedChartPoint(
-                    it.second,
-                    it.first
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            TrackDetailsList(detailedTrack = detailedTrack)
+            Spacer(modifier = Modifier.height(16.dp))
+            AltitudeChart(
+                chartData = AltitudeChartData(
+                    detailedTrack.altitudeByDistance.map { ChartPoint(it.second, it.first) }
                 )
-            })
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TrackDetailsMap(
-            track = detailedTrack,
-            mapViewFactory = mapViewFactory,
-            onTrackMapSelected = onTrackMapSelected,
-            onShowTrack = onShowTrack,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        ButtonDeleteTrack(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            onDelete = onShowDeleteDialog,
-        )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SpeedChart(
+                chartData = SpeedChartData(detailedTrack.speedByDistance.map {
+                    SpeedChartPoint(
+                        it.second,
+                        it.first
+                    )
+                })
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.feature_track_details_label_map),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            TrackDetailsMap(
+                track = detailedTrack,
+                mapViewFactory = mapViewFactory,
+                onTrackMapSelected = onTrackMapSelected,
+                onShowTrack = onShowTrack,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            ButtonDeleteTrack(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onDelete = onShowDeleteDialog,
+            )
+        }
     }
 }
 
@@ -501,15 +513,18 @@ private fun TrackDetailsMap(
 private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: DetailedTrack) {
     val track = detailedTrack.track
     Column(modifier = modifier) {
-        TrackPropertyItem(
-            "${stringResource(R.string.feature_track_details_label_name)} ${
-                track.name.ifBlank { stringResource(R.string.feature_track_details_no_name) }
-            }"
+        Text(
+            text = track.name.ifBlank { stringResource(R.string.feature_track_details_no_name) },
+            style = MaterialTheme.typography.titleMedium
         )
-        TrackPropertyItem(
-            "${stringResource(R.string.feature_track_details_label_description)} ${
-                track.description.ifBlank { stringResource(R.string.feature_track_details_no_description) }
-            }"
+        Text(
+            text = track.description.ifBlank { stringResource(R.string.feature_track_details_no_description) },
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.feature_track_details_label_data),
+            style = MaterialTheme.typography.titleMedium
         )
         TrackPropertyItem(
             stringResource(
@@ -570,8 +585,7 @@ private fun TrackDetailsList(modifier: Modifier = Modifier, detailedTrack: Detai
 
 @Composable
 private fun TrackPropertyItem(text: String) {
-    Spacer(modifier = Modifier.height(4.dp))
-    Text(text = text)
+    Text(text = text, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable

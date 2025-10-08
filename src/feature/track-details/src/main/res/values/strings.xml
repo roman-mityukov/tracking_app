@@ -12,11 +12,13 @@
     <string name="feature_track_details_speed_chart_axis_speed">Скорость, м/с</string>
     <string name="feature_track_details_speed_chart_axis_distance">Расстояние, м</string>
     <string name="feature_track_details_label_name">Название</string>
+    <string name="feature_track_details_label_data">Данные</string>
+    <string name="feature_track_details_label_map">Карта</string>
     <string name="feature_track_details_label_description">Описание</string>
     <string name="feature_track_details_label_start">Старт</string>
     <string name="feature_track_details_label_finish">Финиш</string>
     <string name="feature_track_details_no_name">-</string>
-    <string name="feature_track_details_no_description">-</string>
+    <string name="feature_track_details_no_description">Нет описания</string>
     <string name="feature_track_details_start">Старт %1$s</string>
     <string name="feature_track_details_finish">Финиш %1$s</string>
     <string name="feature_track_details_duration">Продолжительность %1$s</string>

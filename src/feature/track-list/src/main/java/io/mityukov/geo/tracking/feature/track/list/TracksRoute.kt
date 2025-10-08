@@ -3,15 +3,20 @@ package io.mityukov.geo.tracking.feature.track.list
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +26,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -96,7 +102,6 @@ fun TrackList(
                                 onClick = onClick,
                                 onLongPress = onLongPress,
                             )
-                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
                 }
@@ -124,9 +129,11 @@ private fun TrackItem(
     onLongPress: (String) -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
-    ListItem(
+    Card(
         modifier = modifier
             .testTag(AppTestTag.TRACK_ITEM)
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             .combinedClickable(
                 enabled = true,
                 onClick = {
@@ -136,11 +143,28 @@ private fun TrackItem(
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     onLongPress(track.id)
                 }
-            ),
-        headlineContent = {
+            )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = track.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium
+            )
+            if (track.description.isNotBlank()) {
+                Text(
+                    text = track.description,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             CompletedTrackHeadline(startTime = track.start)
-        },
-        supportingContent = {
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
             TrackProperties(
                 duration = track.duration,
                 distance = track.distance,
@@ -148,8 +172,8 @@ private fun TrackItem(
                 altitudeDown = track.altitudeDown,
                 speed = track.averageSpeed,
             )
-        },
-    )
+        }
+    }
 }
 
 
@@ -161,7 +185,7 @@ fun CompletedTrackHeadline(
     val formattedStartTime =
         TimeUtils.getFormattedLocalFromUTC(startTime, UiProps.DEFAULT_DATE_TIME_FORMATTER)
 
-    Text(modifier = modifier, text = formattedStartTime)
+    Text(modifier = modifier, text = formattedStartTime, style = MaterialTheme.typography.bodySmall)
 }
 
 @Preview
@@ -174,6 +198,7 @@ fun TrackListPreview(@PreviewParameter(TracksStateProvider::class) state: Tracks
     )
 }
 
+@Suppress("MaxLineLength")
 class TracksStateProvider : PreviewParameterProvider<TracksState> {
     override val values: Sequence<TracksState> = sequenceOf(
         TracksState.Data(
@@ -181,7 +206,7 @@ class TracksStateProvider : PreviewParameterProvider<TracksState> {
                 Track(
                     id = "49defd14-ae28-4705-9334-59761914de0c",
                     name = "Тестовый трек 1",
-                    description = "Описание",
+                    description = "Отличный маршрут с продуманными сложностями. Награда за усилия — панорамные виды, ради которых стоит идти. Комфортная тропа, удобные места для привалов. Получил массу впечатлений и прекрасные фотографии. Отличный способ провести выходные с пользой!",
                     start = 1757038748000,
                     duration = 78.seconds,
                     end = 1757038758000,
@@ -196,8 +221,8 @@ class TracksStateProvider : PreviewParameterProvider<TracksState> {
                 ),
                 Track(
                     id = "87f958b4-9d10-400f-8c12-19f650bc7db4",
-                    name = "Тестовый трек 2",
-                    description = "Описание",
+                    name = "Тестовый трек 2 с очень длинным названием",
+                    description = "",
                     start = 1757038798000,
                     duration = 135.seconds,
                     end = 1757038858000,

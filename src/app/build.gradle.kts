@@ -44,8 +44,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 65
-        versionName = "0.54.0"
+        versionCode = 66
+        versionName = "0.55.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

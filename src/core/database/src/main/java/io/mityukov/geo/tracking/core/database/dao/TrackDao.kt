@@ -19,7 +19,7 @@ interface TrackDao {
     fun getTrack(id: String): TrackEntity
 
     @Query("SELECT * FROM track WHERE id=:id")
-    fun getTrackUpdates(id: String): Flow<TrackEntity>
+    fun getTrackUpdates(id: String): Flow<TrackEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTrack(trackEntity: TrackEntity)

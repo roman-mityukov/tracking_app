@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":core:common"))
     api(project(":core:database"))
     api(project(":core:datastore"))
+    api(project(":core:gpx"))
     implementation(project(":core:log"))
     implementation(project(":core:model"))
     implementation(libs.androidx.lifecycle.service)

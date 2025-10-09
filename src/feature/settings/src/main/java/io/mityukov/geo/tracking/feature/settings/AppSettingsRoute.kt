@@ -25,7 +25,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun AppSettingsRoute(
+internal fun AppSettingsRoute(
     geolocationUpdatesIntervalViewModel: GeolocationUpdatesIntervalViewModel = hiltViewModel(),
     onInstructionsSelected: () -> Unit,
     onBack: () -> Unit,
@@ -48,7 +48,7 @@ fun AppSettingsRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppSettingsScreen(
+internal fun AppSettingsScreen(
     geolocationUpdatesIntervalState: GeolocationUpdatesIntervalState,
     onInstructionsSelect: () -> Unit,
     onIntervalSelect: (Duration) -> Unit,
@@ -81,7 +81,7 @@ fun AppSettingsScreen(
 
 @Preview
 @Composable
-fun AppSettingsPreview() {
+internal fun AppSettingsPreview() {
     AppSettingsScreen(
         geolocationUpdatesIntervalState = GeolocationUpdatesIntervalState.Data(
             interval = 3.seconds,

@@ -14,11 +14,11 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-sealed interface GeolocationUpdatesIntervalEvent {
+internal sealed interface GeolocationUpdatesIntervalEvent {
     data class SelectInterval(val interval: Duration) : GeolocationUpdatesIntervalEvent
 }
 
-sealed interface GeolocationUpdatesIntervalState {
+internal sealed interface GeolocationUpdatesIntervalState {
     data object Pending : GeolocationUpdatesIntervalState
     data class Data(
         val interval: Duration,
@@ -34,7 +34,7 @@ sealed interface GeolocationUpdatesIntervalState {
 }
 
 @HiltViewModel
-class GeolocationUpdatesIntervalViewModel @Inject constructor(
+internal class GeolocationUpdatesIntervalViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
     val stateFlow = appSettingsRepository.appSettings.map { localAppSettings ->

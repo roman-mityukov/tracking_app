@@ -42,7 +42,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TracksRoute(
+internal fun TracksRoute(
     viewModel: TracksViewModel = hiltViewModel(),
     onNavigateToTrack: (String) -> Unit,
     onNavigateToTracksEditing: (String) -> Unit,
@@ -62,7 +62,7 @@ fun TracksRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackList(
+internal fun TrackList(
     modifier: Modifier = Modifier,
     state: TracksState,
     onClick: (String) -> Unit,
@@ -178,7 +178,7 @@ private fun TrackItem(
 
 
 @Composable
-fun CompletedTrackHeadline(
+internal fun CompletedTrackHeadline(
     modifier: Modifier = Modifier,
     startTime: Long,
 ) {
@@ -190,7 +190,7 @@ fun CompletedTrackHeadline(
 
 @Preview
 @Composable
-fun TrackListPreview(@PreviewParameter(TracksStateProvider::class) state: TracksState) {
+internal fun TrackListPreview(@PreviewParameter(TracksStateProvider::class) state: TracksState) {
     TrackList(
         state = state,
         onClick = {},
@@ -199,7 +199,7 @@ fun TrackListPreview(@PreviewParameter(TracksStateProvider::class) state: Tracks
 }
 
 @Suppress("MaxLineLength")
-class TracksStateProvider : PreviewParameterProvider<TracksState> {
+internal class TracksStateProvider : PreviewParameterProvider<TracksState> {
     override val values: Sequence<TracksState> = sequenceOf(
         TracksState.Data(
             listOf(

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-sealed interface TracksState {
+internal sealed interface TracksState {
     data object Pending : TracksState
     data class Data(
         val tracks: List<Track>,
@@ -20,7 +20,7 @@ sealed interface TracksState {
 }
 
 @HiltViewModel
-class TracksViewModel @Inject constructor(tracksRepository: TracksRepository) : ViewModel() {
+internal class TracksViewModel @Inject constructor(tracksRepository: TracksRepository) : ViewModel() {
     val stateFlow =
         tracksRepository.tracks
             .map { tracks ->

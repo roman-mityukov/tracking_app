@@ -14,7 +14,7 @@ import io.mityukov.geo.tracking.core.test.AppTestTag
 import io.mityukov.geo.tracking.feature.settings.R
 
 @Composable
-fun InstructionsView(onInstructionsSelected: () -> Unit) {
+internal fun InstructionsView(onInstructionsSelected: () -> Unit) {
     ListItem(
         modifier = Modifier
             .testTag(AppTestTag.BUTTON_INSTRUCTIONS)

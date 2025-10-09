@@ -15,12 +15,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface TracksEditingEvent {
+internal sealed interface TracksEditingEvent {
     data object Delete : TracksEditingEvent
     data class ChangeSelection(val trackId: String) : TracksEditingEvent
 }
 
-sealed interface TracksEditingState {
+internal sealed interface TracksEditingState {
     data object Pending : TracksEditingState
     data class Data(
         val allTracks: List<Track>,
@@ -31,7 +31,7 @@ sealed interface TracksEditingState {
 }
 
 @HiltViewModel
-class TracksEditingViewModel @Inject constructor(
+internal class TracksEditingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val tracksRepository: TracksRepository,
 ) :

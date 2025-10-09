@@ -19,12 +19,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface MapEvent {
+internal sealed interface MapEvent {
     data object PauseCurrentLocationUpdate : MapEvent
     data object ResumeCurrentLocationUpdate : MapEvent
 }
 
-sealed interface MapState {
+internal sealed interface MapState {
     data object PendingLocationUpdates : MapState
     data class CurrentLocation(
         val data: Geolocation,
@@ -35,7 +35,7 @@ sealed interface MapState {
 }
 
 @HiltViewModel
-class MapViewModel @Inject constructor(
+internal class MapViewModel @Inject constructor(
     private val geolocationUpdatesRepository: GeolocationUpdatesRepository,
 ) :
     ViewModel() {

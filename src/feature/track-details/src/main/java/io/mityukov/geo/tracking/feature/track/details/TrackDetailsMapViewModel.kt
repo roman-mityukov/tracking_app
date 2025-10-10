@@ -15,13 +15,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-sealed interface TrackDetailsMapState {
+internal sealed interface TrackDetailsMapState {
     data object Pending : TrackDetailsMapState
     data class Data(val data: DetailedTrack) : TrackDetailsMapState
 }
 
 @HiltViewModel
-class TrackDetailsMapViewModel @Inject constructor(
+internal class TrackDetailsMapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     tracksRepository: TracksRepository,
 ) : ViewModel() {

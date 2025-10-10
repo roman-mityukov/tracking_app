@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface TrackEditingEvent {
+internal sealed interface TrackEditingEvent {
     data class Save(val track: Track) : TrackEditingEvent
     data object ConsumeSaveCompleted : TrackEditingEvent
 }
 
-sealed interface TrackEditingState {
+internal sealed interface TrackEditingState {
     data object Initial : TrackEditingState
     data object SaveCompleted : TrackEditingState
     data class SaveFailed(val trackValidationResult: TrackValidationResult.Invalid) :
@@ -26,7 +26,7 @@ sealed interface TrackEditingState {
 }
 
 @HiltViewModel
-class TrackEditingViewModel @Inject constructor(
+internal class TrackEditingViewModel @Inject constructor(
     private val trackValidator: TrackValidator,
     private val tracksRepository: TracksRepository,
 ) : ViewModel() {

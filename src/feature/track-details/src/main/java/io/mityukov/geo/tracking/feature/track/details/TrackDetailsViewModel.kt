@@ -16,20 +16,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface TrackDetailsEvent {
+internal sealed interface TrackDetailsEvent {
     data object Delete : TrackDetailsEvent
     data object Share : TrackDetailsEvent
     data object ConsumeShare : TrackDetailsEvent
 }
 
-sealed interface TrackDetailsState {
+internal sealed interface TrackDetailsState {
     data object Pending : TrackDetailsState
     data class Data(val detailedTrack: DetailedTrack) : TrackDetailsState
     data object DeleteCompleted : TrackDetailsState
 }
 
 @HiltViewModel
-class TrackDetailsViewModel @Inject constructor(
+internal class TrackDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val tracksRepository: TracksRepository,
     private val trackShareService: TrackShareService,

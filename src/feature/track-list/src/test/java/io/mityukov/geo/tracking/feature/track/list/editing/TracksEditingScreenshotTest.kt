@@ -67,7 +67,7 @@ class TracksEditingScreenshotTest {
     }
 
     @Composable
-    fun TracksEditingScreenUnderTest(state: TracksEditingState) {
+    private fun TracksEditingScreenUnderTest(state: TracksEditingState) {
         TracksEditingScreen(
             state = state,
             onChangeSelection = {},

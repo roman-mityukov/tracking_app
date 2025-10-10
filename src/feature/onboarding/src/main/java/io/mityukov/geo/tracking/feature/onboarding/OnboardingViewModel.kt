@@ -10,17 +10,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface OnboardingEvent {
+internal sealed interface OnboardingEvent {
     data object ConsumeOnboarding : OnboardingEvent
 }
 
-sealed interface OnboardingState {
+internal sealed interface OnboardingState {
     data object Pending : OnboardingState
     data object OnboardingConsumed : OnboardingState
 }
 
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(
+internal class OnboardingViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
     private val mutableStateFlow = MutableStateFlow<OnboardingState>(OnboardingState.Pending)

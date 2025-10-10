@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface AboutEvent {
+internal sealed interface AboutEvent {
     data object ShareLogs : AboutEvent
     data object ConsumeLogs : AboutEvent
 }
 
 @HiltViewModel
-class AboutViewModel @Inject constructor(
+internal class AboutViewModel @Inject constructor(
     private val logSharingService: LogSharingService,
     val appInfo: AppInfo,
 ) :

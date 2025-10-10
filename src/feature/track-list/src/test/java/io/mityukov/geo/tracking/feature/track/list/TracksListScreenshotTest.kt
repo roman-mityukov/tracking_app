@@ -52,7 +52,7 @@ class TracksListScreenshotTest {
     }
 
     @Composable
-    fun TrackListUnderTest(state: TracksState) {
+    private fun TrackListUnderTest(state: TracksState) {
         TrackList(
             state = state,
             onClick = {},

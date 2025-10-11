@@ -125,9 +125,7 @@ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-pl
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detektPlugin" }
-hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 roborazzi-gradlePlugin = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
-kotlinx-serialization-gradlePlugin = { group = "org.jetbrains.kotlin.plugin.serialization", name = "org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -153,3 +151,4 @@ geo-tracking-android-room = { id = "geo.tracking.android.room" }
 geo-tracking-hilt = { id = "geo.tracking.hilt" }
 geo-tracking-jvm-library = { id = "geo.tracking.jvm.library" }
 geo-tracking-lint = { id = "geo.tracking.lint" }
+geo-tracking-root = { id = "geo.tracking.root" }

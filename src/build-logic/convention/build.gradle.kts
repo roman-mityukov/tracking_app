@@ -19,12 +19,9 @@ dependencies {
     compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
-    implementation(libs.ksp.gradlePlugin)
-    implementation(libs.ksp.gradlePlugin)
-    implementation(libs.hilt.gradlePlugin)
-    implementation(libs.room.gradlePlugin)
-    implementation(libs.roborazzi.gradlePlugin)
-    implementation(libs.kotlinx.serialization.gradlePlugin)
+    compileOnly(libs.ksp.gradlePlugin)
+    compileOnly(libs.room.gradlePlugin)
+    compileOnly(libs.roborazzi.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)
 }
 
@@ -65,6 +62,10 @@ gradlePlugin {
         register("lint") {
             id = libs.plugins.geo.tracking.lint.get().pluginId
             implementationClass = "AndroidLintConventionPlugin"
+        }
+        register("root") {
+            id = libs.plugins.geo.tracking.root.get().pluginId
+            implementationClass = "RootPlugin"
         }
     }
 }

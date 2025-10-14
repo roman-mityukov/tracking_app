@@ -11,7 +11,7 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:data-api"))
-    implementation(project(":core:database"))
+    implementation(project(":core:database-room"))
     implementation(project(":core:model"))
     implementation(libs.androidx.material3)
     androidTestImplementation(project(":core:testing"))

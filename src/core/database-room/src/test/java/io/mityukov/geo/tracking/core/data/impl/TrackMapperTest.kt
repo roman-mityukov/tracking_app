@@ -1,13 +1,10 @@
-package io.mityukov.geo.tracking.core.data.repository.track
+package io.mityukov.geo.tracking.core.data.impl
 
 import io.mityukov.geo.tracking.core.database.model.TrackEntity
 import io.mityukov.geo.tracking.core.model.track.Track
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
 
-@RunWith(RobolectricTestRunner::class)
 class TrackMapperTest {
     private val trackMapper = TrackMapper()
     private val trackEntity = TrackEntity(

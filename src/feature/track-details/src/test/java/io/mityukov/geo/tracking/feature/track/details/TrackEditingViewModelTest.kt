@@ -21,7 +21,6 @@ class TrackEditingViewModelTest {
     private lateinit var viewModel: TrackEditingViewModel
     private lateinit var mockTrackValidator: TrackValidator
 
-
     @Before
     fun setUp() {
         tracksRepository = mock<TracksRepository>()

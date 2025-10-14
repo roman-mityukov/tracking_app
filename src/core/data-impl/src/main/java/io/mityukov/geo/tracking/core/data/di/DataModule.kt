@@ -19,8 +19,6 @@ import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRep
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepositoryImpl
-import io.mityukov.geo.tracking.core.data.repository.track.TracksLocalDataSource
-import io.mityukov.geo.tracking.core.data.repository.track.TracksLocalDataSourceImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepositoryImpl
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusProvider
@@ -83,9 +81,6 @@ abstract class DataModule {
     internal abstract fun bindTrackCaptureStatusRepository(
         impl: TrackCaptureStatusRepositoryImpl
     ): TrackCaptureStatusRepository
-
-    @Binds
-    internal abstract fun bindTracksLocalDataSource(impl: TracksLocalDataSourceImpl): TracksLocalDataSource
 
     @Singleton
     @Binds

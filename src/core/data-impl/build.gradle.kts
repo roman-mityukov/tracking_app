@@ -8,7 +8,6 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:data-api"))
-    api(project(":core:database"))
     api(project(":core:datastore"))
     api(project(":core:gpx"))
     implementation(project(":core:log"))

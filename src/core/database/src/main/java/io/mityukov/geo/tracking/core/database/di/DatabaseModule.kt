@@ -7,14 +7,20 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.mityukov.geo.tracking.core.database.AppDatabase
+import io.mityukov.geo.tracking.core.database.dao.TrackDao
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+internal object DatabaseModule {
     @Singleton
     @Provides
-    fun providesDb(@ApplicationContext context: Context): AppDatabase {
+    internal fun providesDb(@ApplicationContext context: Context): AppDatabase {
         return AppDatabase.getInstance(context)
+    }
+
+    @Provides
+    internal fun providesUserTaskDao(database: AppDatabase): TrackDao {
+        return database.trackDao()
     }
 }

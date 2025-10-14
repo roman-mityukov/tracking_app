@@ -55,22 +55,19 @@ private class TestTrackCaptureController : TrackCapturerController {
 }
 
 private class TestTrackRepository : TracksRepository {
-    override val tracks: Flow<List<Track>>
-        get() = TODO("Not yet implemented")
-
-    override suspend fun getTrack(trackId: String): Track {
+    override fun readAllTracks(): Flow<List<Track>> {
         TODO("Not yet implemented")
     }
 
-    override fun getTrackUpdates(trackId: String): Flow<Track> {
+    override fun readTrack(trackId: String): Flow<Track> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDetailedTrack(trackId: String): DetailedTrack {
+    override suspend fun readDetailedTrack(trackId: String): DetailedTrack {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCapturedTrackGeolocations(): List<Geolocation> {
+    override suspend fun readCapturedTrackGeolocations(): List<Geolocation> {
         return listOf()
     }
 
@@ -78,11 +75,11 @@ private class TestTrackRepository : TracksRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun insertTrack(trackInProgress: TrackInProgress) {
+    override suspend fun createTrack(trackInProgress: TrackInProgress) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun insertTrackPoint(location: Geolocation) {
+    override suspend fun createTrackPoint(location: Geolocation) {
         TODO("Not yet implemented")
     }
 

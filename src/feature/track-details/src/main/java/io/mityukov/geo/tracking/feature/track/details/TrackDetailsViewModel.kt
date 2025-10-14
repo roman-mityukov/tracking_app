@@ -12,6 +12,7 @@ import io.mityukov.geo.tracking.feature.track.details.navigation.TrackDetailsRou
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,8 +44,8 @@ internal class TrackDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            tracksRepository.getTrackUpdates(routeTrackDetails.trackId).collect {
-                val completedTrack = tracksRepository.getDetailedTrack(routeTrackDetails.trackId)
+            tracksRepository.readTrack(routeTrackDetails.trackId).collect {
+                val completedTrack = tracksRepository.readDetailedTrack(routeTrackDetails.trackId)
                 mutableStateFlow.update {
                     TrackDetailsState.Data(completedTrack)
                 }
@@ -65,7 +66,7 @@ internal class TrackDetailsViewModel @Inject constructor(
 
             TrackDetailsEvent.Share -> {
                 viewModelScope.launch {
-                    val track = tracksRepository.getTrack(routeTrackDetails.trackId)
+                    val track = tracksRepository.readTrack(routeTrackDetails.trackId).first()
                     val path = trackShareService.prepareTrackFile(track)
                     sharingMutableStateFlow.update {
                         path

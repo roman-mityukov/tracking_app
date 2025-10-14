@@ -9,7 +9,7 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
-    implementation(project(":core:data"))
+    implementation(project(":core:data-api"))
     implementation(project(":core:log"))
     implementation(project(":core:model"))
     implementation(libs.androidx.material3)

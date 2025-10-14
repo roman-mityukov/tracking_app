@@ -114,7 +114,8 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
-    implementation(project(":core:data"))
+    implementation(project(":core:data-api"))
+    implementation(project(":core:data-impl"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:log"))
     implementation(project(":core:model"))

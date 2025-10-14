@@ -22,7 +22,7 @@ internal sealed interface TracksState {
 @HiltViewModel
 internal class TracksViewModel @Inject constructor(tracksRepository: TracksRepository) : ViewModel() {
     val stateFlow =
-        tracksRepository.tracks
+        tracksRepository.readAllTracks()
             .map { tracks ->
                 TracksState.Data(tracks = tracks)
             }

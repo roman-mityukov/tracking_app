@@ -24,10 +24,11 @@ dependencyResolutionManagement {
 rootProject.name = "GeoApp"
 include(":app")
 include(":core:log")
-include(":core:database")
+include(":core:data-api")
+include(":core:data-impl")
+include(":core:database-room")
 include(":core:datastore")
 include(":core:datastore-proto")
-include(":core:data")
 include(":core:sharing")
 include(":core:common")
 include(":core:ui")

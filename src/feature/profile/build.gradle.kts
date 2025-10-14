@@ -9,7 +9,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:data"))
+    implementation(project(":core:data-api"))
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

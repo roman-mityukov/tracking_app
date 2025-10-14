@@ -29,7 +29,7 @@ internal class TrackDetailsMapViewModel @Inject constructor(
         flow<DetailedTrack> {
             emit(
                 tracksRepository
-                    .getDetailedTrack(
+                    .readDetailedTrack(
                         savedStateHandle.toRoute<TrackDetailsMapRoute>().trackId
                     )
             )

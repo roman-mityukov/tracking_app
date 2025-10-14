@@ -43,7 +43,7 @@ internal class TracksEditingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val tracks = tracksRepository.tracks.first()
+            val tracks = tracksRepository.readAllTracks().first()
 
             mutableStateFlow.update {
                 TracksEditingState.Data(
@@ -66,7 +66,7 @@ internal class TracksEditingViewModel @Inject constructor(
                         selectedTracks.add(event.trackId)
                     }
 
-                    val tracks = tracksRepository.tracks.first()
+                    val tracks = tracksRepository.readAllTracks().first()
                     mutableStateFlow.update {
                         TracksEditingState.Data(
                             allTracks = tracks,

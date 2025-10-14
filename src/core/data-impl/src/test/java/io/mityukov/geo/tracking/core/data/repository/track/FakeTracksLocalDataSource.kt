@@ -4,8 +4,7 @@ import io.mityukov.geo.tracking.core.model.track.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-class FakeTracksLocalDataSource : TracksLocalDataSource {
-    private val tracks = mutableListOf<Track>()
+class FakeTracksLocalDataSource(val tracks: MutableList<Track>) : TracksLocalDataSource {
 
     override fun getAllTracks(): Flow<List<Track>> {
         return flowOf(tracks)
@@ -16,7 +15,7 @@ class FakeTracksLocalDataSource : TracksLocalDataSource {
     }
 
     override fun getTrackUpdates(trackId: String): Flow<Track?> {
-        TODO("Not yet implemented")
+        return flowOf(tracks.firstOrNull { it.id == trackId })
     }
 
     override fun insertTrack(track: Track) {

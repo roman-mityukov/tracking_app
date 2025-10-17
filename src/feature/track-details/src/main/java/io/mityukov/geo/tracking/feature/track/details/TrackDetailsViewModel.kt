@@ -26,7 +26,9 @@ internal sealed interface TrackDetailsEvent {
 internal sealed interface TrackDetailsState {
     data object Pending : TrackDetailsState
     data class Data(val detailedTrack: DetailedTrack) : TrackDetailsState
+    data object Failure : TrackDetailsState
     data object DeleteCompleted : TrackDetailsState
+    data object DeleteFailed : TrackDetailsState
 }
 
 @HiltViewModel
@@ -45,10 +47,16 @@ internal class TrackDetailsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             tracksRepository.readTrack(routeTrackDetails.trackId).collect {
-                val completedTrack = tracksRepository.readDetailedTrack(routeTrackDetails.trackId)
-                mutableStateFlow.update {
-                    TrackDetailsState.Data(completedTrack)
-                }
+                tracksRepository.readDetailedTrack(routeTrackDetails.trackId)
+                    .onSuccess { detailedTrack ->
+                        mutableStateFlow.update {
+                            TrackDetailsState.Data(detailedTrack)
+                        }
+                    }.onFailure {
+                        mutableStateFlow.update {
+                            TrackDetailsState.Failure
+                        }
+                    }
             }
         }
     }
@@ -58,9 +66,17 @@ internal class TrackDetailsViewModel @Inject constructor(
             TrackDetailsEvent.Delete -> {
                 viewModelScope.launch {
                     tracksRepository.deleteTrack(routeTrackDetails.trackId)
-                    mutableStateFlow.update {
-                        TrackDetailsState.DeleteCompleted
-                    }
+                        .onSuccess {
+                            mutableStateFlow.update {
+                                TrackDetailsState.DeleteCompleted
+                            }
+                        }
+                        .onFailure {
+                            mutableStateFlow.update {
+                                TrackDetailsState.DeleteFailed
+                            }
+                        }
+
                 }
             }
 

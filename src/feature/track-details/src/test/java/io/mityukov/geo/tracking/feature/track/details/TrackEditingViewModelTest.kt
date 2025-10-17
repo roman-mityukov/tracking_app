@@ -1,6 +1,7 @@
 package io.mityukov.geo.tracking.feature.track.details
 
 import app.cash.turbine.test
+import io.mityukov.geo.tracking.core.data.repository.RepositoryResult
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.validation.TrackValidationResult
 import io.mityukov.geo.tracking.core.data.validation.TrackValidator
@@ -31,6 +32,7 @@ class TrackEditingViewModelTest {
     @Test
     fun saveValidTrackUpdatesTrackInRepository() = runTest {
         `when`(mockTrackValidator.validate(any())).thenReturn(TrackValidationResult.Valid)
+        `when`(tracksRepository.updateTrack(any())).thenReturn(RepositoryResult.Success(Unit))
         viewModel.stateFlow.test {
             assert(TrackEditingState.Initial == awaitItem())
             viewModel.add(TrackEditingEvent.Save(track))
@@ -45,7 +47,7 @@ class TrackEditingViewModelTest {
         viewModel.stateFlow.test {
             assert(TrackEditingState.Initial == awaitItem())
             viewModel.add(TrackEditingEvent.Save(track))
-            assert(TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Name) == awaitItem())
+            assert(TrackEditingState.ValidationFailed(TrackValidationResult.Invalid.Name) == awaitItem())
             verifyNoInteractions(tracksRepository)
         }
     }
@@ -56,7 +58,7 @@ class TrackEditingViewModelTest {
         viewModel.stateFlow.test {
             assert(TrackEditingState.Initial == awaitItem())
             viewModel.add(TrackEditingEvent.Save(track))
-            assert(TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Description) == awaitItem())
+            assert(TrackEditingState.ValidationFailed(TrackValidationResult.Invalid.Description) == awaitItem())
             verifyNoInteractions(tracksRepository)
         }
     }

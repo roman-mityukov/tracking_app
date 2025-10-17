@@ -1,6 +1,8 @@
 package io.mityukov.geo.tracking.feature.track.capture
 
 import app.cash.turbine.test
+import io.mityukov.geo.tracking.core.data.repository.RepositoryFailure
+import io.mityukov.geo.tracking.core.data.repository.RepositoryResult
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
@@ -63,29 +65,30 @@ private class TestTrackRepository : TracksRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun readDetailedTrack(trackId: String): DetailedTrack {
+    override suspend fun readDetailedTrack(trackId: String): RepositoryResult<DetailedTrack> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun readCapturedTrackGeolocations(): List<Geolocation> {
-        return listOf()
+    override suspend fun readCapturedTrackGeolocations(): RepositoryResult<List<Geolocation>> {
+        return RepositoryResult.Success(listOf())
     }
 
-    override suspend fun deleteTrack(trackId: String) {
+    override suspend fun deleteTrack(trackId: String): RepositoryResult<Unit> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun createTrack(trackInProgress: TrackInProgress) {
+    override suspend fun createTrack(trackInProgress: TrackInProgress): RepositoryResult<Unit> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun createTrackPoint(location: Geolocation) {
+    override suspend fun createTrackPoint(geolocation: Geolocation): RepositoryResult<Unit> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateTrack(track: Track) {
+    override suspend fun updateTrack(track: Track): RepositoryResult<Unit> {
         TODO("Not yet implemented")
     }
+
 }
 
 class TrackCaptureViewModelTest {

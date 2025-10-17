@@ -68,12 +68,12 @@ import io.mityukov.geo.tracking.core.ui.FontScalePreviews
 import io.mityukov.geo.tracking.core.ui.UiProps
 import io.mityukov.geo.tracking.core.yandexmap.MapViewHolder
 import io.mityukov.geo.tracking.feature.track.editing.TrackEditingRoute
-import io.mityukov.geo.tracking.feature.track.editing.TrackEditingViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
+import io.mityukov.geo.tracking.core.ui.R as coreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -130,7 +130,7 @@ internal fun TrackDetailsRoute(
             } catch (_: ActivityNotFoundException) {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(
-                        message = resources.getString(io.mityukov.geo.tracking.core.ui.R.string.core_ui_error_sharing)
+                        message = resources.getString(coreUiR.string.core_ui_error_sharing)
                     )
                 }
             } finally {
@@ -140,6 +140,13 @@ internal fun TrackDetailsRoute(
         onDelete = {
             viewModel.add(TrackDetailsEvent.Delete)
             onBack()
+        },
+        onDeleteFailed = {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = resources.getString(R.string.feature_track_details_delete_data_failure)
+                )
+            }
         },
         onBack = onBack,
         onShowTrack = { geolocations ->
@@ -158,6 +165,7 @@ internal fun TrackDetailsScreen(
     onShowTrack: (List<Geolocation>) -> Unit,
     onTrackMapSelected: (String) -> Unit,
     onDelete: () -> Unit,
+    onDeleteFailed: () -> Unit,
     onPrepareShare: () -> Unit,
     onShare: (String) -> Unit,
     onBack: () -> Unit,
@@ -172,9 +180,32 @@ internal fun TrackDetailsScreen(
     val openEditSheet = remember { mutableStateOf(false) }
 
     when (state) {
+        TrackDetailsState.DeleteFailed -> {
+            onDeleteFailed()
+        }
+
         TrackDetailsState.DeleteCompleted -> {
             LaunchedEffect(Unit) {
                 onBack()
+            }
+        }
+
+        TrackDetailsState.Failure -> {
+            Scaffold(
+                topBar = {
+                    TrackEmptyTopBar(onBack = onBack)
+                },
+            ) { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                ) {
+                    Text(
+                        modifier = Modifier.align(alignment = Alignment.Center),
+                        text = stringResource(R.string.feature_track_details_read_data_failure),
+                    )
+                }
             }
         }
 
@@ -271,6 +302,7 @@ internal fun TrackDetailsScreenPreview(@PreviewParameter(TrackDetailsStateProvid
         onShowTrack = {},
         onTrackMapSelected = {},
         onDelete = {},
+        onDeleteFailed = {},
         onPrepareShare = {},
         onShare = {},
         onBack = {},

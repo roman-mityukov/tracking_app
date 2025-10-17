@@ -25,7 +25,7 @@ fun NavGraphBuilder.tracksScreenNavigation(
         tracksScreen(onTrackSelected, onEditTracks)
         trackDetailsScreen(onTrackMapSelected, onBack, snackbarHostState)
         trackDetailsMapScreen(onBack)
-        tracksEditingScreen(onBack)
+        tracksEditingScreen(snackbarHostState, onBack)
     }
 }
 

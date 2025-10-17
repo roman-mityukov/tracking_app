@@ -2,6 +2,7 @@ package io.mityukov.geo.tracking.feature.track.details
 
 import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
@@ -26,17 +27,7 @@ class TrackDetailsScreenshotTest {
     @Test
     fun pendingState() {
         composeTestRule.setContent {
-            TrackDetailsScreen(
-                state = TrackDetailsState.Pending,
-                sharingState = null,
-                mapViewFactory = { View(it) },
-                onShowTrack = {},
-                onTrackMapSelected = {},
-                onDelete = {},
-                onPrepareShare = {},
-                onShare = {},
-                onBack = {},
-            )
+            TrackDetailsScreenUnderTest(TrackDetailsState.Pending)
         }
         composeTestRule.onRoot().captureRoboImage()
     }
@@ -44,18 +35,10 @@ class TrackDetailsScreenshotTest {
     @Test
     fun dataState() {
         composeTestRule.setContent {
-            TrackDetailsScreen(
-                state = TrackDetailsStateProvider().values.first {
+            TrackDetailsScreenUnderTest(
+                TrackDetailsStateProvider().values.first {
                     it is TrackDetailsState.Data && it.detailedTrack.geolocations.isNotEmpty()
                 },
-                sharingState = null,
-                mapViewFactory = { View(it) },
-                onShowTrack = {},
-                onTrackMapSelected = {},
-                onDelete = {},
-                onPrepareShare = {},
-                onShare = {},
-                onBack = {},
             )
         }
         composeTestRule.onRoot().captureRoboImage()
@@ -64,18 +47,10 @@ class TrackDetailsScreenshotTest {
     @Test
     fun dataEmptyState() {
         composeTestRule.setContent {
-            TrackDetailsScreen(
-                state = TrackDetailsStateProvider().values.first {
+            TrackDetailsScreenUnderTest(
+                TrackDetailsStateProvider().values.first {
                     it is TrackDetailsState.Data && it.detailedTrack.geolocations.isEmpty()
                 },
-                sharingState = null,
-                mapViewFactory = { View(it) },
-                onShowTrack = {},
-                onTrackMapSelected = {},
-                onDelete = {},
-                onPrepareShare = {},
-                onShare = {},
-                onBack = {},
             )
         }
         composeTestRule.onRoot().captureRoboImage()
@@ -101,7 +76,7 @@ class TrackDetailsScreenshotTest {
         composeTestRule.setContent {
             TrackEditingSheet(
                 track = track,
-                viewModelState = TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Name),
+                viewModelState = TrackEditingState.ValidationFailed(TrackValidationResult.Invalid.Name),
                 onSave = {},
                 onSaveCompleted = {},
                 onDismiss = {}
@@ -116,7 +91,7 @@ class TrackDetailsScreenshotTest {
         composeTestRule.setContent {
             TrackEditingSheet(
                 track = track,
-                viewModelState = TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Description),
+                viewModelState = TrackEditingState.ValidationFailed(TrackValidationResult.Invalid.Description),
                 onSave = {},
                 onSaveCompleted = {},
                 onDismiss = {}
@@ -124,5 +99,21 @@ class TrackDetailsScreenshotTest {
         }
 
         composeTestRule.onRoot().captureRoboImage()
+    }
+
+    @Composable
+    private fun TrackDetailsScreenUnderTest(state: TrackDetailsState) {
+        TrackDetailsScreen(
+            state = state,
+            sharingState = null,
+            mapViewFactory = { View(it) },
+            onShowTrack = {},
+            onTrackMapSelected = {},
+            onDelete = {},
+            onDeleteFailed = {},
+            onPrepareShare = {},
+            onShare = {},
+            onBack = {},
+        )
     }
 }

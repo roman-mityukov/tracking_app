@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.common.CommonAppProps
+import io.mityukov.geo.tracking.core.data.repository.RepositoryResult
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCapturerController
@@ -37,8 +38,12 @@ class TrackCaptureViewModel @Inject constructor(
                 TrackCaptureStatus.Error -> TrackCaptureState(it)
                 TrackCaptureStatus.Idle -> TrackCaptureState(it)
                 is TrackCaptureStatus.Run -> {
-                    val geolocations = tracksRepository.readCapturedTrackGeolocations()
-                    TrackCaptureState(it, geolocations)
+                    val result = tracksRepository.readCapturedTrackGeolocations()
+                    if (result is RepositoryResult.Success) {
+                        TrackCaptureState(it, result.data)
+                    } else {
+                        TrackCaptureState(TrackCaptureStatus.Error)
+                    }
                 }
             }
             state

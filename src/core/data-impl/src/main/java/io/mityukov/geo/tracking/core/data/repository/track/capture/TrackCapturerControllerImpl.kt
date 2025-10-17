@@ -140,7 +140,13 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                     timerSubscriptionJob = null
                     stopForegroundService()
                     tracksRepository.createTrack(captureStatus.trackInProgress)
-                    trackCaptureStatusRepository.update(TrackCaptureStatus.Idle)
+                        .onSuccess {
+                            trackCaptureStatusRepository.update(TrackCaptureStatus.Idle)
+                        }
+                        .onFailure {
+                            trackCaptureStatusRepository.update(TrackCaptureStatus.Error)
+                        }
+                    Unit
                 }
             }
         }

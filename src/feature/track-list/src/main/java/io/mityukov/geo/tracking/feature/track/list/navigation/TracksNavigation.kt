@@ -1,5 +1,6 @@
 package io.mityukov.geo.tracking.feature.track.list.navigation
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -30,9 +31,10 @@ fun NavGraphBuilder.tracksScreen(
 }
 
 fun NavGraphBuilder.tracksEditingScreen(
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
 ) {
     composable<TracksEditingRoute> {
-        TracksEditingRoute(onBack = onBack)
+        TracksEditingRoute(snackbarHostState = snackbarHostState, onBack = onBack)
     }
 }

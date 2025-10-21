@@ -1,16 +1,52 @@
 @file:Suppress("NestedBlockDepth")
-package io.mityukov.geo.tracking.core.gpx
+package io.mityukov.geo.tracking.core.data.repository.track
 
 import io.mityukov.geo.tracking.core.common.time.TimeUtils
+import io.mityukov.geo.tracking.core.data.di.TracksDirectory
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import javax.inject.Inject
 
-class GpxHelper @Inject constructor() {
-    fun convertToGpx(inputFile: File, outputFile: File) {
+class TracksRawLocalDataSourceImpl @Inject constructor(
+    @param:TracksDirectory private val tracksDirectory: File,
+) : TracksRawLocalDataSource {
+    companion object {
+        const val TEMP_FILE_NAME = "temp.csv"
+    }
+    private val tempFile: File = File(tracksDirectory, TEMP_FILE_NAME)
+
+    override fun clear() {
+        tempFile.writeText("")
+    }
+
+    override fun writeGeolocation(geolocation: Geolocation) {
+        val string = "point,${geolocation.latitude},${geolocation.longitude}," +
+                "${geolocation.altitude},${geolocation.speed},${geolocation.time}\n"
+        tempFile.writer().use {
+            it.write(string)
+        }
+    }
+
+    override fun readCapturedGeolocations(): List<Geolocation> {
+        val listStrings = tempFile.readLines()
+        return listStrings.map {
+            val parts = it.split(",")
+            Geolocation(
+                latitude = parts[1].toDouble(),
+                longitude = parts[2].toDouble(),
+                altitude = parts[3].toDouble(),
+                speed = parts[4].toFloat(),
+                time = parts[5].toLong(),
+            )
+        }
+    }
+
+    override fun writeCapturedGeolocationsAsTrack(fileName: String): String {
+        val outputGpxFile = File(tracksDirectory, fileName)
         val gpxBuilder = StringBuilder()
+        val writer = outputGpxFile.bufferedWriter()
         // GPX Header
         gpxBuilder.append("""<?xml version="1.0" encoding="UTF-8"?>""")
         gpxBuilder.append("\n<gpx version=\"1.1\" creator=\"Tracking app\" ")
@@ -25,9 +61,9 @@ class GpxHelper @Inject constructor() {
         gpxBuilder.append("  <trk>\n")
         gpxBuilder.append("    <name>name</name>\n")
         gpxBuilder.append("    <trkseg>\n")
-        outputFile.writeText(gpxBuilder.toString())
+        writer.write(gpxBuilder.toString())
 
-        inputFile.useLines { lines ->
+        tempFile.useLines { lines ->
             lines.forEach {
                 val parts = it.split(",")
                 if (parts[0] == "point") {
@@ -37,7 +73,7 @@ class GpxHelper @Inject constructor() {
                     gpxBuilder.append("        <time>${TimeUtils.getFormattedUtcTime(parts[5].toLong())}</time>\n")
                     gpxBuilder.append("        <extensions speed=\"${parts[4]}\"/>\n")
                     gpxBuilder.append("      </trkpt>\n")
-                    outputFile.appendText(gpxBuilder.toString())
+                    writer.write(gpxBuilder.toString())
                 }
             }
         }
@@ -47,16 +83,18 @@ class GpxHelper @Inject constructor() {
         gpxBuilder.append("    </trkseg>\n")
         gpxBuilder.append("  </trk>\n")
         gpxBuilder.append("</gpx>")
-        outputFile.appendText(gpxBuilder.toString())
+        writer.write(gpxBuilder.toString())
+        writer.close()
+        return outputGpxFile.absolutePath
     }
 
-    fun geolocationsFromGpx(file: File): List<Geolocation> {
+    override fun readTrackGeolocations(trackFile: File): List<Geolocation> {
         val points = mutableListOf<Geolocation>()
         val factory = XmlPullParserFactory.newInstance()
         factory.isNamespaceAware = true
-        val inputStream = file.inputStream()
+        val reader = trackFile.bufferedReader()
         val parser = factory.newPullParser()
-        parser.setInput(inputStream, null)
+        parser.setInput(reader)
 
         var eventType = parser.eventType
         while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -92,7 +130,7 @@ class GpxHelper @Inject constructor() {
             }
             eventType = parser.next()
         }
-        inputStream.close()
+        reader.close()
         return points
     }
 }

@@ -124,7 +124,7 @@ internal fun TrackEditingSheetContent(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.feature_track_details_label_name)) },
             state = nameState,
-            isError = (viewModelState as? TrackEditingState.SaveFailed)?.trackValidationResult
+            isError = (viewModelState as? TrackEditingState.ValidationFailed)?.trackValidationResult
                     == TrackValidationResult.Invalid.Name,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
@@ -133,7 +133,7 @@ internal fun TrackEditingSheetContent(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.feature_track_details_label_description)) },
             state = descriptionState,
-            isError = (viewModelState as? TrackEditingState.SaveFailed)?.trackValidationResult
+            isError = (viewModelState as? TrackEditingState.ValidationFailed)?.trackValidationResult
                     == TrackValidationResult.Invalid.Description,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             onKeyboardAction = {
@@ -165,7 +165,7 @@ internal fun TrackEditingSheetContent(
 
 @Composable
 internal fun TrackValidationFailed(viewModelState: TrackEditingState) {
-    if (viewModelState is TrackEditingState.SaveFailed) {
+    if (viewModelState is TrackEditingState.ValidationFailed) {
         Spacer(Modifier.height(16.dp))
         val textError = when (viewModelState.trackValidationResult) {
             TrackValidationResult.Invalid.Name -> {
@@ -221,7 +221,7 @@ internal fun PreviewTrackEditingSheetContent(
 internal class TrackEditingStateProvider : PreviewParameterProvider<TrackEditingState> {
     override val values: Sequence<TrackEditingState> = sequenceOf(
         TrackEditingState.Initial,
-        TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Name),
-        TrackEditingState.SaveFailed(TrackValidationResult.Invalid.Description),
+        TrackEditingState.ValidationFailed(TrackValidationResult.Invalid.Name),
+        TrackEditingState.ValidationFailed(TrackValidationResult.Invalid.Description),
     )
 }

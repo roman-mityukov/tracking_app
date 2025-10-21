@@ -28,6 +28,7 @@ internal sealed interface TracksEditingState {
     ) : TracksEditingState
 
     data object DeletionComplete : TracksEditingState
+    data object DeletionFailed : TracksEditingState
 }
 
 @HiltViewModel
@@ -82,8 +83,14 @@ internal class TracksEditingViewModel @Inject constructor(
 
             TracksEditingEvent.Delete -> {
                 viewModelScope.launch {
-                    selectedTracks.forEach {
+                    val deletionSuccess = selectedTracks.map {
                         tracksRepository.deleteTrack(it)
+                    }.all { it.isSuccess }
+
+                    if (deletionSuccess.not()) {
+                        mutableStateFlow.update {
+                            TracksEditingState.DeletionFailed
+                        }
                     }
 
                     mutableStateFlow.update {

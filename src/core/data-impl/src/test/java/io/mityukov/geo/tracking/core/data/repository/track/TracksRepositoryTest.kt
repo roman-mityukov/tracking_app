@@ -1,53 +1,39 @@
 package io.mityukov.geo.tracking.core.data.repository.track
 
 import app.cash.turbine.test
-import io.mityukov.geo.tracking.core.common.time.TimeUtils
-import io.mityukov.geo.tracking.core.gpx.GpxHelper
+import io.mityukov.geo.tracking.core.data.repository.RepositoryFailure
+import io.mityukov.geo.tracking.core.data.repository.RepositoryResult
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
+import io.mityukov.geo.tracking.core.model.track.DetailedTrack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import java.io.File
-import java.time.format.DateTimeFormatter
+import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 class TracksRepositoryTest {
     private lateinit var tracksLocalDataSource: TracksLocalDataSource
+    private lateinit var tracksRawLocalDataSource: TracksRawLocalDataSource
     private lateinit var tracksRepository: TracksRepository
-    private val tracksDirectory = File("./")
-    private val tempFile = File(tracksDirectory, TracksRepositoryImpl.TEMP_TRACK_FILE_NAME)
-    private val gpxFile = File(tracksDirectory, track.filePath)
-    private val createdGpxFile = File(
-        tracksDirectory,
-        "${
-            TimeUtils.getFormattedLocalFromUTC(
-                trackInProgress.start,
-                DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
-            )
-        }.gpx"
-    )
 
     @Before
     fun setUp() {
         tracksLocalDataSource = FakeTracksLocalDataSource(mutableListOf(track))
+        tracksRawLocalDataSource = mock()
         tracksRepository = TracksRepositoryImpl(
-            gpxHelper = GpxHelper(),
             tracksLocalDataSource = tracksLocalDataSource,
-            tracksDirectory = tracksDirectory,
+            tracksRawLocalDataSource = tracksRawLocalDataSource,
             coroutineDispatcher = Dispatchers.IO,
         )
-    }
-
-    @After
-    fun tearDown() {
-        tempFile.delete()
-        gpxFile.delete()
-        createdGpxFile.delete()
     }
 
     @Test
@@ -71,27 +57,59 @@ class TracksRepositoryTest {
 
     @Test
     fun readDetailedTrackReturnsDetailedTrack() = runTest {
-        gpxFile.writeText(gpxFileContent)
-        val detailedTrack = tracksRepository.readDetailedTrack(track.id)
-        assert(detailedTrack.track == track)
-        assert(detailedTrack.geolocations.size == 2)
+        `when`(tracksRawLocalDataSource.readTrackGeolocations(any())).thenReturn(listOf(Geolocation.empty()))
+        val result = tracksRepository.readDetailedTrack(track.id)
+        assert(result.isSuccess)
+        assert((result as RepositoryResult.Success<DetailedTrack>).data.track == track)
+        assert(result.data.geolocations.size == 1)
+        assert(result.data.geolocations.first() == Geolocation.empty())
+    }
+
+    @Test
+    fun readDetailedTrackFailedWithIoException() = runTest {
+        `when`(tracksRawLocalDataSource.readTrackGeolocations(any())).doAnswer {
+            throw IOException()
+        }
+        val result = tracksRepository.readDetailedTrack(track.id)
+        assert(result.isFailure)
+        assert((result as RepositoryResult.Failure<*>).cause == RepositoryFailure.IO)
     }
 
     @Test
     fun readCapturedTrackGeolocationsReturnsGeolocationsFromTempFile() = runTest {
-        tempFile.writeText(TEMP_FILE_CONTENT)
-        val geolocations = tracksRepository.readCapturedTrackGeolocations()
-        assert(geolocations.size == 2)
+        `when`(tracksRawLocalDataSource.readCapturedGeolocations()).thenReturn(listOf(Geolocation.empty()))
+        val result = tracksRepository.readCapturedTrackGeolocations()
+        assert(result.isSuccess)
+        assert((result as RepositoryResult.Success<List<Geolocation>>).data.size == 1)
+        assert(result.data.first() == Geolocation.empty())
+    }
+
+    @Test
+    fun readCapturedTrackGeolocationsFailedWithIoException() = runTest {
+        `when`(tracksRawLocalDataSource.readCapturedGeolocations()).doAnswer {
+            throw IOException()
+        }
+        val result = tracksRepository.readCapturedTrackGeolocations()
+        assert(result.isFailure)
+        assert((result as RepositoryResult.Failure<*>).cause == RepositoryFailure.IO)
     }
 
     @Test
     fun createTrack() = runTest {
-        tempFile.writeText(TEMP_FILE_CONTENT)
+        `when`(tracksRawLocalDataSource.writeCapturedGeolocationsAsTrack(any())).thenReturn("someFile")
         tracksRepository.createTrack(trackInProgress)
-        assert(tempFile.readText() == "")
         val tracks = tracksRepository.readAllTracks().first()
         assert(tracks.size == 2)
-        assert(createdGpxFile.exists())
+    }
+
+    @Test
+    fun createTrackFailedWithIoException() = runTest {
+        `when`(tracksRawLocalDataSource.writeCapturedGeolocationsAsTrack(any())).doAnswer {
+            throw IOException()
+        }
+        val result = tracksRepository.createTrack(trackInProgress)
+        assert(result.isFailure)
+        assert((result as RepositoryResult.Failure<*>).cause == RepositoryFailure.IO)
     }
 
     @Test
@@ -99,9 +117,18 @@ class TracksRepositoryTest {
         val geolocation = Geolocation.empty()
         tracksRepository.createTrackPoint(geolocation)
 
-        val fileContent = tempFile.readText()
-        println(fileContent)
-        assert(fileContent == "point,0.0,0.0,0.0,0.0,0\n")
+        verify(tracksRawLocalDataSource).writeGeolocation(any())
+    }
+
+    @Test
+    fun createTrackPointFailedWithIoException() = runTest {
+        `when`(tracksRawLocalDataSource.writeGeolocation(any())).doAnswer {
+            throw IOException()
+        }
+        val geolocation = Geolocation.empty()
+        val result = tracksRepository.createTrackPoint(geolocation)
+        assert(result.isFailure)
+        assert((result as RepositoryResult.Failure<*>).cause == RepositoryFailure.IO)
     }
 
     @Test

@@ -8,6 +8,8 @@
     <string name="feature_track_details_edit_title">Редактирование трека</string>
     <string name="feature_track_details_edit_error_name">Имя трека не может быть длиной больше %1$d знаков</string>
     <string name="feature_track_details_edit_error_desctiption">Описание трека не может быть длиной больше %1$d знаков</string>
+    <string name="feature_track_details_delete_data_failure">Ошибка удаления трека</string>
+    <string name="feature_track_details_read_data_failure">Ошибка чтения данных трека</string>
     <string name="feature_track_details_speed_chart_title">График скорости</string>
     <string name="feature_track_details_speed_chart_axis_speed">Скорость, м/с</string>
     <string name="feature_track_details_speed_chart_axis_distance">Расстояние, м</string>

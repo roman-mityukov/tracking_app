@@ -26,12 +26,7 @@ class TracksEditingScreenshotTest {
     @Test
     fun pending() {
         composeTestRule.setContent {
-            TracksEditingScreen (
-                state = TracksEditingState.Pending,
-                onChangeSelection = {},
-                onDeleteConfirm = {},
-                onBack = {},
-            )
+            TracksEditingScreenUnderTest(state = TracksEditingState.Pending)
         }
 
         composeTestRule.onRoot().captureRoboImage()
@@ -44,7 +39,7 @@ class TracksEditingScreenshotTest {
                 it is TracksEditingState.Data && it.selectedTracks.isNotEmpty()
             }
         composeTestRule.setContent {
-            TracksEditingScreenUnderTest (state = state)
+            TracksEditingScreenUnderTest(state = state)
         }
 
         composeTestRule.onRoot().captureRoboImage()
@@ -57,7 +52,7 @@ class TracksEditingScreenshotTest {
                 it is TracksEditingState.Data && it.selectedTracks.isNotEmpty()
             }
         composeTestRule.setContent {
-            TracksEditingScreenUnderTest (state = state)
+            TracksEditingScreenUnderTest(state = state)
         }
 
         composeTestRule.onNodeWithTag(AppTestTag.BUTTON_DELETE).performClick()
@@ -72,6 +67,7 @@ class TracksEditingScreenshotTest {
             state = state,
             onChangeSelection = {},
             onDeleteConfirm = {},
+            onDeleteFailed = {},
             onBack = {},
         )
     }

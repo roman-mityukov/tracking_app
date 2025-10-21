@@ -21,7 +21,8 @@ internal sealed interface TrackEditingEvent {
 internal sealed interface TrackEditingState {
     data object Initial : TrackEditingState
     data object SaveCompleted : TrackEditingState
-    data class SaveFailed(val trackValidationResult: TrackValidationResult.Invalid) :
+    data object SaveFailed : TrackEditingState
+    data class ValidationFailed(val trackValidationResult: TrackValidationResult.Invalid) :
         TrackEditingState
 }
 
@@ -41,12 +42,19 @@ internal class TrackEditingViewModel @Inject constructor(
 
                     if (trackValidationResult is TrackValidationResult.Valid) {
                         tracksRepository.updateTrack(track = event.track)
-                        mutableStateFlow.update {
-                            TrackEditingState.SaveCompleted
-                        }
+                            .onSuccess {
+                                mutableStateFlow.update {
+                                    TrackEditingState.SaveCompleted
+                                }
+                            }
+                            .onFailure {
+                                mutableStateFlow.update {
+                                    TrackEditingState.SaveFailed
+                                }
+                            }
                     } else {
                         mutableStateFlow.update {
-                            TrackEditingState.SaveFailed(trackValidationResult as TrackValidationResult.Invalid)
+                            TrackEditingState.ValidationFailed(trackValidationResult as TrackValidationResult.Invalid)
                         }
                     }
                 }

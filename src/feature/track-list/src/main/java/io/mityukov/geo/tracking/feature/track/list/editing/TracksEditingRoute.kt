@@ -22,13 +22,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,21 +48,31 @@ import io.mityukov.geo.tracking.core.test.AppTestTag
 import io.mityukov.geo.tracking.core.ui.TrackProperties
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.R
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TracksEditingRoute(
     viewModel: TracksEditingViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
 ) {
-
+    val coroutineScope = rememberCoroutineScope()
+    val resources = LocalResources.current
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
     TracksEditingScreen(
         state = state.value,
         onDeleteConfirm = {
             viewModel.add(TracksEditingEvent.Delete)
+        },
+        onDeleteFailed = {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = resources.getString(R.string.feature_track_list_delete_data_failure)
+                )
+            }
         },
         onChangeSelection = { id ->
             viewModel.add(TracksEditingEvent.ChangeSelection(id))
@@ -72,6 +85,7 @@ internal fun TracksEditingRoute(
 internal fun TracksEditingScreen(
     state: TracksEditingState,
     onDeleteConfirm: () -> Unit,
+    onDeleteFailed: () -> Unit,
     onChangeSelection: (String) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -131,10 +145,7 @@ internal fun TracksEditingScreen(
         TracksEditingState.Pending -> {
             Scaffold(
                 topBar = {
-                    TracksEditingTopBar(
-                        onDeleteInit = null,
-                        onBack = onBack,
-                    )
+                    TracksEditingTopBar(onDeleteInit = null, onBack = onBack)
                 },
             ) { paddingValues ->
                 Box(
@@ -146,6 +157,10 @@ internal fun TracksEditingScreen(
                     CircularProgressIndicator()
                 }
             }
+        }
+
+        TracksEditingState.DeletionFailed -> {
+            onDeleteFailed()
         }
     }
 }
@@ -238,7 +253,13 @@ private fun TrackItem(
 @Preview
 @Composable
 private fun TracksEditingScreenPreview(@PreviewParameter(TracksEditingStateProvider::class) state: TracksEditingState) {
-    TracksEditingScreen(state = state, onDeleteConfirm = {}, onChangeSelection = {}, onBack = {})
+    TracksEditingScreen(
+        state = state,
+        onDeleteConfirm = {},
+        onDeleteFailed = {},
+        onChangeSelection = {},
+        onBack = {},
+    )
 }
 
 internal class TracksEditingStateProvider : PreviewParameterProvider<TracksEditingState> {

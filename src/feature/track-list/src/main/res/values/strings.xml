@@ -3,6 +3,7 @@
     <string name="feature_track_list_content_description_checked">Выбранный</string>
     <string name="feature_track_list_content_description_delete">Удалить</string>
     <string name="feature_track_list_title">Треки</string>
+    <string name="feature_track_list_delete_data_failure">Ошибка удаления трека</string>
     <string name="feature_track_list_empty_list_message">Пока не записано ни одного трека</string>
     <string name="feature_track_list_editing_title">Редактирование</string>
     <string name="feature_track_list_editing_delete_dialog_title">Внимание!</string>

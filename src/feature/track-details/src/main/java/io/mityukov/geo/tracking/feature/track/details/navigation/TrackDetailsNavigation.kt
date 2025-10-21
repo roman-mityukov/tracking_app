@@ -5,7 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
-import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapScreen
+import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapRoute
 import io.mityukov.geo.tracking.feature.track.details.TrackDetailsRoute
 import kotlinx.serialization.Serializable
 
@@ -43,6 +43,6 @@ fun NavGraphBuilder.trackDetailsScreen(
 
 fun NavGraphBuilder.trackDetailsMapScreen(onBack: () -> Unit) {
     composable<TrackDetailsMapRoute> {
-        TrackDetailsMapScreen(onBack = onBack)
+        TrackDetailsMapRoute(onBack = onBack)
     }
 }

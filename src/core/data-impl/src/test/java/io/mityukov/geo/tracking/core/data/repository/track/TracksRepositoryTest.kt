@@ -3,6 +3,7 @@ package io.mityukov.geo.tracking.core.data.repository.track
 import app.cash.turbine.test
 import io.mityukov.geo.tracking.core.data.repository.RepositoryFailure
 import io.mityukov.geo.tracking.core.data.repository.RepositoryResult
+import io.mityukov.geo.tracking.core.data.repository.track.TracksRawLocalDataSourceImpl.Companion.TEMP_FILE_NAME
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
 import io.mityukov.geo.tracking.core.model.track.DetailedTrack
 import kotlinx.coroutines.Dispatchers
@@ -15,8 +16,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import java.io.File
 import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
@@ -114,10 +115,24 @@ class TracksRepositoryTest {
 
     @Test
     fun createTrackPointWritesToTempFile() = runTest {
+        val tracksDirectory = File("./")
+        val rawDataSource = TracksRawLocalDataSourceImpl(tracksDirectory)
+        val repository = TracksRepositoryImpl(
+            tracksLocalDataSource = tracksLocalDataSource,
+            tracksRawLocalDataSource = rawDataSource,
+            coroutineDispatcher = Dispatchers.IO,
+        )
         val geolocation = Geolocation.empty()
-        tracksRepository.createTrackPoint(geolocation)
+        repository.createTrackPoint(geolocation)
+        repository.createTrackPoint(geolocation)
 
-        verify(tracksRawLocalDataSource).writeGeolocation(any())
+        val tempFile = File(tracksDirectory, TEMP_FILE_NAME)
+        val tempFileText = tempFile.readText()
+        tempFile.delete()
+        assert(
+            tempFileText == "point,0.0,0.0,0.0,0.0,0\n" +
+                    "point,0.0,0.0,0.0,0.0,0\n"
+        )
     }
 
     @Test

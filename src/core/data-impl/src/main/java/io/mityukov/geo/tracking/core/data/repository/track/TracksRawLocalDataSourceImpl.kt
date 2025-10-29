@@ -1,4 +1,5 @@
 @file:Suppress("NestedBlockDepth")
+
 package io.mityukov.geo.tracking.core.data.repository.track
 
 import io.mityukov.geo.tracking.core.common.time.TimeUtils
@@ -15,6 +16,7 @@ class TracksRawLocalDataSourceImpl @Inject constructor(
     companion object {
         const val TEMP_FILE_NAME = "temp.csv"
     }
+
     private val tempFile: File = File(tracksDirectory, TEMP_FILE_NAME)
 
     override fun clear() {
@@ -24,9 +26,7 @@ class TracksRawLocalDataSourceImpl @Inject constructor(
     override fun writeGeolocation(geolocation: Geolocation) {
         val string = "point,${geolocation.latitude},${geolocation.longitude}," +
                 "${geolocation.altitude},${geolocation.speed},${geolocation.time}\n"
-        tempFile.writer().use {
-            it.write(string)
-        }
+        tempFile.appendText(string)
     }
 
     override fun readCapturedGeolocations(): List<Geolocation> {

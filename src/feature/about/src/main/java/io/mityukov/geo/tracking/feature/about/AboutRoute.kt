@@ -5,7 +5,6 @@ package io.mityukov.geo.tracking.feature.about
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,12 +26,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,9 +39,14 @@ import androidx.core.net.MailTo
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import io.mityukov.geo.tracking.core.designsystem.component.ButtonBack
 import io.mityukov.geo.tracking.core.model.AppInfo
 import io.mityukov.geo.tracking.core.test.AppTestTag
-import io.mityukov.geo.tracking.core.designsystem.component.ButtonBack
 import io.mityukov.geo.tracking.core.ui.FontScalePreviews
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -121,7 +126,6 @@ private fun AboutContent(
         verticalArrangement = Arrangement.Center
     ) {
         AppIcon()
-        Spacer(modifier = Modifier.height(16.dp))
         AppInfo(appInfo = appInfo)
         Spacer(modifier = Modifier.height(16.dp))
         ContactButton(onClick = onSendEmail)
@@ -141,11 +145,20 @@ private fun AppInfo(modifier: Modifier = Modifier, appInfo: AppInfo) {
 
 @Composable
 private fun AppIcon(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier,
-        painter = painterResource(R.drawable.feature_about_ic_launcher_round),
-        contentDescription = stringResource(R.string.feature_about_content_description_app_icon),
+    val composition by rememberLottieComposition(
+        spec = LottieCompositionSpec.RawRes(R.raw.feature_about_app_icon_animation)
     )
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = 1,
+        clipSpec = LottieClipSpec.Progress(min = 0f, max = 0.5f)
+    )
+    Box(modifier = modifier.size(256.dp)) {
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+        )
+    }
 }
 
 @Composable

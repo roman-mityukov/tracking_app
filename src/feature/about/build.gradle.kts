@@ -14,4 +14,5 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:sharing"))
     implementation(libs.androidx.material3)
+    implementation(libs.lottie)
 }

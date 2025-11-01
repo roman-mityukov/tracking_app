@@ -44,8 +44,8 @@ android {
         applicationId = "io.mityukov.geo.tracking"
         minSdk = 29
         targetSdk = 36
-        versionCode = 71
-        versionName = "0.58.0"
+        versionCode = 72
+        versionName = "0.58.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -79,6 +79,7 @@ android {
     }
     buildTypes {
         debug {
+            isProfileable = true
         }
         release {
             isMinifyEnabled = true

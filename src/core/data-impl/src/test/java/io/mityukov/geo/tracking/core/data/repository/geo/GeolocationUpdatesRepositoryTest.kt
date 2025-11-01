@@ -40,7 +40,8 @@ class GeolocationUpdatesRepositoryTest {
             locationSettingsRepository = locationSettingsRepository,
             geolocationProvider = geolocationProvider,
             permissionChecker = permissionChecker,
-            coroutineDispatcher = Dispatchers.Main
+            ioDispatcher = Dispatchers.Main,
+            defaultDispatcher = Dispatchers.Default,
         )
 
         locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager

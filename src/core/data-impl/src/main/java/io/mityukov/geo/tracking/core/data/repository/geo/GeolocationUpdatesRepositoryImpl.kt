@@ -1,6 +1,7 @@
 package io.mityukov.geo.tracking.core.data.repository.geo
 
 import android.annotation.SuppressLint
+import io.mityukov.geo.tracking.core.common.di.DispatcherDefault
 import io.mityukov.geo.tracking.core.common.di.DispatcherIO
 import io.mityukov.geo.tracking.core.data.permission.PermissionChecker
 import io.mityukov.geo.tracking.core.data.repository.settings.app.LocationSettingsRepository
@@ -9,13 +10,15 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class GeolocationUpdatesRepositoryImpl @Inject constructor(
     private val locationSettingsRepository: LocationSettingsRepository,
     private val geolocationProvider: GeolocationProvider,
-    @param:DispatcherIO private val coroutineDispatcher: CoroutineDispatcher,
+    @param:DispatcherIO private val ioDispatcher: CoroutineDispatcher,
+    @param:DispatcherDefault private val defaultDispatcher: CoroutineDispatcher,
     private val permissionChecker: PermissionChecker,
 ) : GeolocationUpdatesRepository {
     @SuppressLint("MissingPermission")
@@ -39,9 +42,13 @@ internal class GeolocationUpdatesRepositoryImpl @Inject constructor(
             emit(lastKnownLocation.toGeolocationUpdateResult())
 
             geolocationProvider.locationUpdates(10000.milliseconds)
-                .flowOn(coroutineDispatcher)
+                .flowOn(ioDispatcher)
+                .map {
+                    it.toGeolocationUpdateResult()
+                }
+                .flowOn(defaultDispatcher)
                 .collect {
-                    emit(it.toGeolocationUpdateResult())
+                    emit(it)
                 }
         }
     }

@@ -35,7 +35,12 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 "implementation"(project(":core:test"))
 
                 "implementation"(libsExt.findLibrary("androidx.hilt.navigation.compose").get())
-                "implementation"(libsExt.findLibrary("androidx.navigation.compose").get())
+                "implementation"(libsExt.findLibrary("androidx.navigation3.runtime").get())
+                "implementation"(libsExt.findLibrary("androidx.navigation3.ui").get())
+                "implementation"(
+                    libsExt.findLibrary("androidx.lifecycle.viewmodel.navigation3").get()
+                )
+
                 "implementation"(libsExt.findLibrary("androidx.tracing.ktx").get())
                 "implementation"(libsExt.findLibrary("kotlinx.serialization.json").get())
 
@@ -46,7 +51,6 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 "testImplementation"(libsExt.findLibrary("roborazzi").get())
                 "testImplementation"(libsExt.findLibrary("roborazzi.compose").get())
                 "testImplementation"(libsExt.findLibrary("roborazzi.rule").get())
-                "testImplementation"(libsExt.findLibrary("androidx.navigation.testing").get())
                 "testImplementation"(libsExt.findLibrary("androidx.compose.bom").get())
                 "testImplementation"(libsExt.findLibrary("androidx.ui.test.junit4").get())
 

@@ -2,6 +2,7 @@
 
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.devtools.ksp.KspExperimental
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,12 +20,6 @@ detekt {
     buildUponDefaultConfig = true
     allRules = false
     config.setFrom("../detekt/detekt.yml")
-}
-hilt {
-    enableAggregatingTask = false
-}
-ksp {
-    useKsp2 = true
 }
 tracer {
     create("defaultConfig") {
@@ -99,8 +94,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
     }
     buildFeatures {
         buildConfig = true
@@ -135,8 +132,9 @@ dependencies {
     implementation(project(":feature:track-details"))
     implementation(project(":feature:track-list"))
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(platform(libs.firebase.bom))

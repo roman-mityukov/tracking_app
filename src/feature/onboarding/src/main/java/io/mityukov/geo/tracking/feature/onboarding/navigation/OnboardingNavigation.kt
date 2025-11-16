@@ -1,17 +1,17 @@
 package io.mityukov.geo.tracking.feature.onboarding.navigation
 
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import io.mityukov.geo.tracking.feature.onboarding.OnboardingRoute
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavKey
+import io.mityukov.geo.tracking.feature.onboarding.OnboardingPane
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object OnboardingRoute
+data object OnboardingRoute : NavKey
 
-fun NavGraphBuilder.onboardingScreen(
+
+@Composable
+fun OnboardingHost(
     onNext: () -> Unit,
 ) {
-    composable<OnboardingRoute> {
-        OnboardingRoute(onNext = onNext)
-    }
+    OnboardingPane(onNext = onNext)
 }

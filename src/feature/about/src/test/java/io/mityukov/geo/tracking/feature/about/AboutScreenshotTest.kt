@@ -23,7 +23,7 @@ class AboutScreenshotTest {
     @Test
     fun initialState() {
         composeTestRule.setContent {
-            AboutScreen(
+            AboutContent(
                 appInfo = AppInfo(versionName = "0.40.1", versionCode = 50),
                 onBack = {},
                 onShareLogs = {},

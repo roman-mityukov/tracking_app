@@ -53,7 +53,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun AboutRoute(
+internal fun AboutPane(
     viewModel: AboutViewModel = hiltViewModel(),
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -71,7 +71,7 @@ internal fun AboutRoute(
 
     val appInfo = viewModel.appInfo
 
-    AboutScreen(
+    AboutContent(
         modifier = Modifier.testTag(AppTestTag.ABOUT_SCREEN),
         appInfo = appInfo,
         onBack = onBack,
@@ -85,7 +85,7 @@ internal fun AboutRoute(
 }
 
 @Composable
-internal fun AboutScreen(
+internal fun AboutContent(
     modifier: Modifier = Modifier,
     appInfo: AppInfo,
     onBack: () -> Unit,
@@ -104,33 +104,19 @@ internal fun AboutScreen(
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
-            AboutContent(
-                appInfo = appInfo,
-                onShareLogs = onShareLogs,
-                onSendEmail = onSendEmail,
-            )
+            Column(
+                modifier = modifier.width(IntrinsicSize.Max),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                AppIcon()
+                AppInfo(appInfo = appInfo)
+                Spacer(modifier = Modifier.height(16.dp))
+                ContactButton(onClick = onSendEmail)
+                Spacer(modifier = Modifier.height(8.dp))
+                ShareLogsButton(onShareLogs = onShareLogs)
+            }
         }
-    }
-}
-
-@Composable
-private fun AboutContent(
-    modifier: Modifier = Modifier,
-    appInfo: AppInfo,
-    onShareLogs: () -> Unit,
-    onSendEmail: () -> Unit,
-) {
-    Column(
-        modifier = modifier.width(IntrinsicSize.Max),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        AppIcon()
-        AppInfo(appInfo = appInfo)
-        Spacer(modifier = Modifier.height(16.dp))
-        ContactButton(onClick = onSendEmail)
-        Spacer(modifier = Modifier.height(8.dp))
-        ShareLogsButton(onShareLogs = onShareLogs)
     }
 }
 
@@ -178,8 +164,8 @@ private fun ShareLogsButton(modifier: Modifier = Modifier, onShareLogs: () -> Un
 @Preview
 @FontScalePreviews
 @Composable
-private fun AboutScreenPreview() {
-    AboutScreen(
+private fun AboutContentPreview() {
+    AboutContent(
         appInfo = AppInfo(versionName = "0.40.1", versionCode = 50),
         onBack = {},
         onSendEmail = {},

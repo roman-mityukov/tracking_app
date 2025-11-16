@@ -48,21 +48,26 @@ import io.mityukov.geo.tracking.core.test.AppTestTag
 import io.mityukov.geo.tracking.core.ui.TrackProperties
 import io.mityukov.geo.tracking.feature.track.list.CompletedTrackHeadline
 import io.mityukov.geo.tracking.feature.track.list.R
+import io.mityukov.geo.tracking.feature.track.list.navigation.TracksEditingRoute
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TracksEditingRoute(
-    viewModel: TracksEditingViewModel = hiltViewModel(),
+internal fun TracksEditingPane(
+    navKey: TracksEditingRoute,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
 ) {
+    val viewModel: TracksEditingViewModel =
+        hiltViewModel<TracksEditingViewModel, TracksEditingViewModel.Factory>(
+            creationCallback = { factory -> factory.create(navKey) }
+        )
     val coroutineScope = rememberCoroutineScope()
     val resources = LocalResources.current
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
 
-    TracksEditingScreen(
+    TracksEditingContent(
         state = state.value,
         onDeleteConfirm = {
             viewModel.add(TracksEditingEvent.Delete)
@@ -82,7 +87,7 @@ internal fun TracksEditingRoute(
 }
 
 @Composable
-internal fun TracksEditingScreen(
+internal fun TracksEditingContent(
     state: TracksEditingState,
     onDeleteConfirm: () -> Unit,
     onDeleteFailed: () -> Unit,
@@ -252,8 +257,8 @@ private fun TrackItem(
 
 @Preview
 @Composable
-private fun TracksEditingScreenPreview(@PreviewParameter(TracksEditingStateProvider::class) state: TracksEditingState) {
-    TracksEditingScreen(
+private fun TracksEditingContentPreview(@PreviewParameter(TracksEditingStateProvider::class) state: TracksEditingState) {
+    TracksEditingContent(
         state = state,
         onDeleteConfirm = {},
         onDeleteFailed = {},

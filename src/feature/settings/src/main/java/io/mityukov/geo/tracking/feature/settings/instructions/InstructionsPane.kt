@@ -21,7 +21,7 @@ import io.mityukov.geo.tracking.feature.settings.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun InstructionsScreen(onBack: () -> Unit) {
+internal fun InstructionsPane(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -56,6 +56,6 @@ internal fun InstructionsScreen(onBack: () -> Unit) {
 
 @Preview
 @Composable
-internal fun InstructionsScreenPreview() {
-    InstructionsScreen {  }
+internal fun InstructionsPanePreview() {
+    InstructionsPane {  }
 }

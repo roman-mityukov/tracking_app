@@ -22,7 +22,7 @@ class ProfileScreenshotTest {
     @Test
     fun initialState() {
         composeTestRule.setContent {
-            ProfileScreen({},{})
+            ProfilePane({},{})
         }
         composeTestRule.onRoot().captureRoboImage()
     }

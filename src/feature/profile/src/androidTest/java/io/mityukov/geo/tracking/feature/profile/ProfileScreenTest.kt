@@ -29,7 +29,7 @@ class ProfileScreenTest {
     @Test
     fun initialState() {
         composeTestRule.setContent {
-            ProfileScreen(
+            ProfilePane(
                 onSettingsSelected = mockOnSettingsSelected,
                 onAboutSelected = mockOnAboutSelected,
             )
@@ -42,7 +42,7 @@ class ProfileScreenTest {
     @Test
     fun clickButtonSettings_onSettingCalled() {
         composeTestRule.setContent {
-            ProfileScreen(
+            ProfilePane(
                 onSettingsSelected = mockOnSettingsSelected,
                 onAboutSelected = mockOnAboutSelected,
             )
@@ -56,7 +56,7 @@ class ProfileScreenTest {
     @Test
     fun clickButtonAbout_onAboutCalled() {
         composeTestRule.setContent {
-            ProfileScreen(
+            ProfilePane(
                 onSettingsSelected = mockOnSettingsSelected,
                 onAboutSelected = mockOnAboutSelected,
             )

@@ -25,7 +25,7 @@ import io.mityukov.geo.tracking.core.test.AppTestTag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ProfileScreen(
+internal fun ProfilePane(
     onSettingsSelected: () -> Unit,
     onAboutSelected: () -> Unit,
 ) {
@@ -40,13 +40,13 @@ internal fun ProfileScreen(
                 .padding(top = paddingValues.calculateTopPadding())
                 .consumeWindowInsets(paddingValues)
         ) {
-            ProfileScreenItem(
+            ProfilePaneItem(
                 Modifier
                     .clickable { onSettingsSelected() }
                     .testTag(AppTestTag.BUTTON_SETTINGS),
                 stringResource(R.string.feature_profile_settings_label),
             )
-            ProfileScreenItem(
+            ProfilePaneItem(
                 Modifier
                     .clickable { onAboutSelected() }
                     .testTag(AppTestTag.BUTTON_ABOUT),
@@ -57,7 +57,7 @@ internal fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileScreenItem(modifier: Modifier = Modifier, label: String) {
+private fun ProfilePaneItem(modifier: Modifier = Modifier, label: String) {
     ListItem(
         modifier = modifier,
         headlineContent = {
@@ -74,6 +74,6 @@ private fun ProfileScreenItem(modifier: Modifier = Modifier, label: String) {
 
 @Preview
 @Composable
-private fun ProfileScreenPreview() {
-    ProfileScreen({}, {})
+private fun ProfilePanePreview() {
+    ProfilePane({}, {})
 }

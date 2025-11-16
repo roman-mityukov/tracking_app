@@ -27,14 +27,14 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatus
 import io.mityukov.geo.tracking.core.yandexmap.MapViewHolder
-import io.mityukov.geo.tracking.feature.track.capture.TrackCapture
+import io.mityukov.geo.tracking.feature.track.capture.TrackCapturePane
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureEvent
 import io.mityukov.geo.tracking.feature.track.capture.TrackCaptureViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-internal fun MapRoute(
+internal fun MapPane(
     mapViewModel: MapViewModel = hiltViewModel(),
     trackCaptureViewModel: TrackCaptureViewModel = hiltViewModel(),
     snackbarHostState: SnackbarHostState,
@@ -149,7 +149,7 @@ internal fun MapRoute(
             },
             currentGeolocation = currentLocationState.value,
         )
-        TrackCapture(
+        TrackCapturePane(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(start = 16.dp, end = 16.dp, bottom = 48.dp),

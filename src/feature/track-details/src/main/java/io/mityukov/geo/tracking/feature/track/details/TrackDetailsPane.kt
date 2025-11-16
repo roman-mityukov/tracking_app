@@ -67,6 +67,7 @@ import io.mityukov.geo.tracking.core.test.AppTestTag
 import io.mityukov.geo.tracking.core.ui.FontScalePreviews
 import io.mityukov.geo.tracking.core.ui.UiProps
 import io.mityukov.geo.tracking.core.yandexmap.MapViewHolder
+import io.mityukov.geo.tracking.feature.track.details.navigation.TrackDetailsRoute
 import io.mityukov.geo.tracking.feature.track.editing.TrackEditingRoute
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -77,12 +78,16 @@ import io.mityukov.geo.tracking.core.ui.R as coreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TrackDetailsRoute(
-    viewModel: TrackDetailsViewModel = hiltViewModel(),
+internal fun TrackDetailsHost(
+    navKey: TrackDetailsRoute,
     onTrackMapSelected: (String) -> Unit,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
+    val viewModel: TrackDetailsViewModel =
+        hiltViewModel<TrackDetailsViewModel, TrackDetailsViewModel.Factory>(
+            creationCallback = { factory -> factory.create(navKey) }
+        )
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
     val uriStringState = viewModel.sharingStateFlow.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -99,7 +104,7 @@ internal fun TrackDetailsRoute(
         },
         onResume = {}
     )
-    TrackDetailsScreen(
+    TrackDetailsPane(
         state = state.value,
         sharingState = uriStringState.value,
         mapViewFactory = { _ ->
@@ -158,7 +163,7 @@ internal fun TrackDetailsRoute(
 
 // TODO Длинный - порефакторить
 @Composable
-internal fun TrackDetailsScreen(
+internal fun TrackDetailsPane(
     state: TrackDetailsState,
     sharingState: String?,
     mapViewFactory: (Context) -> View,
@@ -239,7 +244,7 @@ internal fun TrackDetailsScreen(
                         )
                     },
                 ) { paddingValues ->
-                    TrackDetailsContent(
+                    TrackDetailsPane(
                         modifier = Modifier.padding(paddingValues),
                         detailedTrack = detailedTrack,
                         mapViewFactory = mapViewFactory,
@@ -294,8 +299,8 @@ internal fun TrackDetailsScreen(
 @Preview
 @FontScalePreviews
 @Composable
-internal fun TrackDetailsScreenPreview(@PreviewParameter(TrackDetailsStateProvider::class) state: TrackDetailsState) {
-    TrackDetailsScreen(
+internal fun PreviewTrackDetailsPane(@PreviewParameter(TrackDetailsStateProvider::class) state: TrackDetailsState) {
+    TrackDetailsPane(
         state = state,
         sharingState = null,
         mapViewFactory = { View(it) },
@@ -446,7 +451,7 @@ private fun TrackEmptyContent(
 }
 
 @Composable
-private fun TrackDetailsContent(
+private fun TrackDetailsPane(
     modifier: Modifier = Modifier,
     detailedTrack: DetailedTrack,
     mapViewFactory: (Context) -> View,

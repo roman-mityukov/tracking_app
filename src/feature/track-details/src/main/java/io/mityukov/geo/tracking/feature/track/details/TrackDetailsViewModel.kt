@@ -1,9 +1,10 @@
 package io.mityukov.geo.tracking.feature.track.details
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.DetailedTrack
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 internal sealed interface TrackDetailsEvent {
     data object Delete : TrackDetailsEvent
@@ -31,13 +31,16 @@ internal sealed interface TrackDetailsState {
     data object DeleteFailed : TrackDetailsState
 }
 
-@HiltViewModel
-internal class TrackDetailsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = TrackDetailsViewModel.Factory::class)
+internal class TrackDetailsViewModel @AssistedInject constructor(
+    @Assisted private val route: TrackDetailsRoute,
     private val tracksRepository: TracksRepository,
     private val trackShareService: TrackShareService,
 ) : ViewModel() {
-    private val routeTrackDetails = savedStateHandle.toRoute<TrackDetailsRoute>()
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: TrackDetailsRoute): TrackDetailsViewModel
+    }
     private val mutableStateFlow = MutableStateFlow<TrackDetailsState>(TrackDetailsState.Pending)
     val stateFlow = mutableStateFlow.asStateFlow()
 
@@ -46,8 +49,8 @@ internal class TrackDetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            tracksRepository.readTrack(routeTrackDetails.trackId).collect {
-                tracksRepository.readDetailedTrack(routeTrackDetails.trackId)
+            tracksRepository.readTrack(route.trackId).collect {
+                tracksRepository.readDetailedTrack(route.trackId)
                     .onSuccess { detailedTrack ->
                         mutableStateFlow.update {
                             TrackDetailsState.Data(detailedTrack)
@@ -65,7 +68,7 @@ internal class TrackDetailsViewModel @Inject constructor(
         when (event) {
             TrackDetailsEvent.Delete -> {
                 viewModelScope.launch {
-                    tracksRepository.deleteTrack(routeTrackDetails.trackId)
+                    tracksRepository.deleteTrack(route.trackId)
                         .onSuccess {
                             mutableStateFlow.update {
                                 TrackDetailsState.DeleteCompleted
@@ -82,7 +85,7 @@ internal class TrackDetailsViewModel @Inject constructor(
 
             TrackDetailsEvent.Share -> {
                 viewModelScope.launch {
-                    val track = tracksRepository.readTrack(routeTrackDetails.trackId).first()
+                    val track = tracksRepository.readTrack(route.trackId).first()
                     val path = trackShareService.prepareTrackFile(track)
                     sharingMutableStateFlow.update {
                         path

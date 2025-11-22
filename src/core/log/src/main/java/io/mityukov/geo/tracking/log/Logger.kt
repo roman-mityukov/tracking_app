@@ -5,7 +5,6 @@ import android.util.Log
 import fr.bipi.treessence.file.FileLoggerTree
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -16,6 +15,7 @@ object Logger {
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val lock = Any()
     private const val TAG: String = "GEO_APP"
+
     @SuppressLint("LogNotTimber")
     fun logd(message: String) {
         if (isInitialized) {
@@ -58,10 +58,14 @@ object Logger {
     }
 }
 
-fun logd(message: String) {
-    Logger.logd(message)
+fun Any.logd(message: String) {
+    Logger.logd(composeMessage(this::class.java, message))
 }
 
-fun logw(message: String) {
-    Logger.logw(message)
+fun Any.logw(message: String) {
+    Logger.logw(composeMessage(this::class.java, message))
+}
+
+private fun composeMessage(clazz: Class<*>, message: String): String {
+    return "${clazz.simpleName} $message"
 }

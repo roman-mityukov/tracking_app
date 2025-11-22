@@ -77,7 +77,7 @@ internal class MapViewModel @Inject constructor(
                                 } else {
                                     MapState.NoLocation(cause = currentLocation.error)
                                 }
-                                logd("MapViewModel state $state")
+                                this@MapViewModel.logd("state $state")
                                 state
                             }.collect { mapState ->
                                 mutableStateFlow.update {

@@ -69,11 +69,10 @@ class ForegroundTrackCaptureService : LifecycleService() {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            logw("ForegroundGeolocationService no permissions - stopSelf")
+            logw("no permissions - stopSelf")
             stopSelf()
             return
         } else {
-            logd("trackCapturerController $trackCapturerController")
             ServiceCompat.startForeground(
                 this@ForegroundTrackCaptureService,
                 1,

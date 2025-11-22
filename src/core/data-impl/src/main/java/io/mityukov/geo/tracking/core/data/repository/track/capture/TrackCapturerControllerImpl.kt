@@ -183,8 +183,8 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                     geolocationUpdatesMinDistance,
                 )
                     .collect { result ->
-                        logd(
-                            "TrackCapturerControllerImpl locationCallback geolocation" +
+                        this@TrackCapturerControllerImpl.logd(
+                            "locationCallback geolocation" +
                                     " ${result.location} error ${result.error}"
                         )
                         val captureStatus = trackCaptureStatusRepository.status.first()
@@ -286,10 +286,10 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                     )
                 }
                 trackCaptureStatusRepository.update(TrackCaptureStatus.Run(newTrackInProgress))
-                logd("TrackCapturerControllerImpl accept location $newTrackInProgress")
+                logd("accept location $newTrackInProgress")
             } else {
                 logw(
-                    "TrackCapturerControllerImpl don\'t accept location $currentLocation " +
+                    "don\'t accept location $currentLocation " +
                             " isAcceptableAccuracy $isAcceptableAccuracy ${currentLocation.accuracy}" +
                             " isAcceptableDistance $isAcceptableDistance $distance" +
                             " isAcceptableTime $isAcceptableTime system ${System.currentTimeMillis()} " +

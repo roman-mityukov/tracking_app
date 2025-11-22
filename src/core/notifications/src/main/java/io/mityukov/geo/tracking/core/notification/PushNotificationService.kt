@@ -20,7 +20,7 @@ private const val NEWS_NOTIFICATION_ID = 987
 internal class PushNotificationService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         logd(
-            "PushNotificationsService onMessageReceived RemoteMessage " +
+            "onMessageReceived RemoteMessage " +
                     "\nnotification ${message.notification}" +
                     "\ndata ${message.data}"
         )

@@ -22,7 +22,7 @@ class OnboardingScreenshotTest {
     @Test
     fun initialState() {
         composeTestRule.setContent {
-            OnboardingScreen {  }
+            OnboardingContent {  }
         }
         composeTestRule.onRoot().captureRoboImage()
     }

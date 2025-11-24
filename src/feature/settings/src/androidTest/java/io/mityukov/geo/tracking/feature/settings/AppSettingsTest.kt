@@ -76,7 +76,7 @@ class AppSettingsTest {
 
     @Composable
     fun AppSettingsScreenUnderTest(modifier: Modifier = Modifier) {
-        AppSettingsScreen(
+        AppSettingsContent(
             geolocationUpdatesIntervalState = GeolocationUpdatesIntervalState.Data(
                 3.seconds,
                 listOf(3.seconds, 4.seconds)

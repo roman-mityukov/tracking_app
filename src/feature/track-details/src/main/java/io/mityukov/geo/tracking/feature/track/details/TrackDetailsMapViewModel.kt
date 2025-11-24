@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.common.CommonAppProps
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
@@ -20,16 +23,21 @@ internal sealed interface TrackDetailsMapState {
     data object Failure : TrackDetailsMapState
 }
 
-@HiltViewModel
-internal class TrackDetailsMapViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = TrackDetailsMapViewModel.Factory::class)
+internal class TrackDetailsMapViewModel @AssistedInject constructor(
+    @Assisted route: TrackDetailsMapRoute,
     tracksRepository: TracksRepository,
 ) : ViewModel() {
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: TrackDetailsMapRoute): TrackDetailsMapViewModel
+    }
+
     val stateFlow =
         flow<TrackDetailsMapState> {
             tracksRepository
                 .readDetailedTrack(
-                    savedStateHandle.toRoute<TrackDetailsMapRoute>().trackId
+                    route.trackId
                 ).onSuccess {
                     emit(TrackDetailsMapState.Data(it))
                 }.onFailure {

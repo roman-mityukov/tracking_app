@@ -1,9 +1,10 @@
 package io.mityukov.geo.tracking.feature.track.list.editing
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.track.Track
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 internal sealed interface TracksEditingEvent {
     data object Delete : TracksEditingEvent
@@ -31,14 +31,17 @@ internal sealed interface TracksEditingState {
     data object DeletionFailed : TracksEditingState
 }
 
-@HiltViewModel
-internal class TracksEditingViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = TracksEditingViewModel.Factory::class)
+internal class TracksEditingViewModel @AssistedInject constructor(
+    @Assisted navKey: TracksEditingRoute,
     private val tracksRepository: TracksRepository,
-) :
-    ViewModel() {
-    private val routeTracksEditing = savedStateHandle.toRoute<TracksEditingRoute>()
-    private val selectedTracks = mutableListOf(routeTracksEditing.trackId)
+) : ViewModel() {
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: TracksEditingRoute): TracksEditingViewModel
+    }
+
+    private val selectedTracks = mutableListOf(navKey.trackId)
     private val mutableStateFlow = MutableStateFlow<TracksEditingState>(TracksEditingState.Pending)
     val stateFlow = mutableStateFlow.asStateFlow()
 

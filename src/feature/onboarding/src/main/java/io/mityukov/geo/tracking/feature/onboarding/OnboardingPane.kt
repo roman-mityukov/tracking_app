@@ -28,7 +28,7 @@ import io.mityukov.geo.tracking.core.ui.FontScalePreviews
 import io.mityukov.geo.tracking.core.ui.NightModePreview
 
 @Composable
-internal fun OnboardingRoute(viewModel: OnboardingViewModel = hiltViewModel(), onNext: () -> Unit) {
+internal fun OnboardingPane(viewModel: OnboardingViewModel = hiltViewModel(), onNext: () -> Unit) {
     val state = viewModel.stateFlow.collectAsStateWithLifecycle()
     if (state.value is OnboardingState.OnboardingConsumed) {
         LaunchedEffect(Unit) {
@@ -36,7 +36,7 @@ internal fun OnboardingRoute(viewModel: OnboardingViewModel = hiltViewModel(), o
         }
     }
 
-    OnboardingScreen(
+    OnboardingContent(
         onConsumeOnboarding = {
             viewModel.add(OnboardingEvent.ConsumeOnboarding)
         },
@@ -44,7 +44,7 @@ internal fun OnboardingRoute(viewModel: OnboardingViewModel = hiltViewModel(), o
 }
 
 @Composable
-internal fun OnboardingScreen(
+internal fun OnboardingContent(
     modifier: Modifier = Modifier,
     onConsumeOnboarding: () -> Unit,
 ) {
@@ -91,8 +91,8 @@ internal fun OnboardingScreen(
 @FontScalePreviews
 @NightModePreview
 @Composable
-private fun OnboardingScreenPreview() {
-    OnboardingScreen(
+private fun OnboardingContentPreview() {
+    OnboardingContent(
         onConsumeOnboarding = {}
     )
 }

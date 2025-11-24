@@ -103,7 +103,7 @@ class TrackDetailsScreenshotTest {
 
     @Composable
     private fun TrackDetailsScreenUnderTest(state: TrackDetailsState) {
-        TrackDetailsScreen(
+        TrackDetailsPane(
             state = state,
             sharingState = null,
             mapViewFactory = { View(it) },

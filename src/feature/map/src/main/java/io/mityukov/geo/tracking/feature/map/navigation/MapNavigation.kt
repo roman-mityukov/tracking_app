@@ -1,16 +1,15 @@
 package io.mityukov.geo.tracking.feature.map.navigation
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import io.mityukov.geo.tracking.feature.map.MapRoute
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavKey
+import io.mityukov.geo.tracking.feature.map.MapPane
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object MapRoute
+data object MapRoute : NavKey
 
-fun NavGraphBuilder.mapScreen(snackbarHostState: SnackbarHostState) {
-    composable<MapRoute> {
-        MapRoute(snackbarHostState = snackbarHostState)
-    }
+@Composable
+fun MapHost(snackbarHostState: SnackbarHostState) {
+    MapPane(snackbarHostState = snackbarHostState)
 }

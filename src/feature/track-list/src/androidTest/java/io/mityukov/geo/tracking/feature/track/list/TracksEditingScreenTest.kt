@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import io.mityukov.geo.tracking.core.test.AppTestTag
-import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingScreen
+import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingContent
 import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingState
 import io.mityukov.geo.tracking.feature.track.list.editing.TracksEditingStateProvider
 import org.junit.Before
@@ -91,7 +91,7 @@ class TracksEditingScreenTest {
 
     @Composable
     fun TracksEditingScreenUnderTest(state: TracksEditingState) {
-        TracksEditingScreen(
+        TracksEditingContent(
             state = state,
             onChangeSelection = mockOnChangeSelection,
             onDeleteConfirm = mockOnDeleteConfirm,

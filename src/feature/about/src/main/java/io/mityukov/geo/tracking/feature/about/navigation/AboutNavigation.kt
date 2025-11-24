@@ -1,24 +1,19 @@
 package io.mityukov.geo.tracking.feature.about.navigation
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import io.mityukov.geo.tracking.feature.about.AboutRoute
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import io.mityukov.geo.tracking.feature.about.AboutPane
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object AboutRoute
+data object AboutRoute : NavKey
 
-fun NavController.navigateToAbout() {
-    navigate(AboutRoute)
-}
-
-fun NavGraphBuilder.aboutScreen(
-    onBack: () -> Unit,
+fun EntryProviderScope<Any>.aboutNavigation(
     snackbarHostState: SnackbarHostState,
+    onBack: () -> Unit,
 ) {
-    composable<AboutRoute> {
-        AboutRoute(onBack = onBack, snackbarHostState = snackbarHostState)
+    entry<AboutRoute> {
+        AboutPane(snackbarHostState = snackbarHostState, onBack = onBack)
     }
 }

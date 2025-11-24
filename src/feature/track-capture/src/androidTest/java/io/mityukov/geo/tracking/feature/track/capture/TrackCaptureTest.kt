@@ -232,7 +232,7 @@ class TrackCaptureTest {
 
     @Composable
     fun TrackCaptureControlsUnderTest(state: TrackCaptureState) {
-        TrackCapture(
+        TrackCapturePane(
             trackCaptureState = state,
             onStartCapture = mockOnStart,
             onStopCapture = mockOnStop,

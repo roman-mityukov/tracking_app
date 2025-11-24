@@ -82,7 +82,7 @@ class TrackCaptureScreenshotTest {
     @Composable
     private fun TrackCaptureControlsUnderTest(state: TrackCaptureState) {
         GeoAppTheme {
-            TrackCapture(
+            TrackCapturePane(
                 trackCaptureState = state,
                 onStartCapture = {},
                 onStopCapture = {},

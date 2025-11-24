@@ -1,39 +1,25 @@
 package io.mityukov.geo.tracking.feature.settings.navigation
 
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import io.mityukov.geo.tracking.feature.settings.AppSettingsRoute
-import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsScreen
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import io.mityukov.geo.tracking.feature.settings.AppSettingsPane
+import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsPane
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object AppSettingsRoute
+data object AppSettingsRoute : NavKey
 
 @Serializable
-data object InstructionsRoute
+data object InstructionsRoute : NavKey
 
-fun NavController.navigateToAppSettings() {
-    navigate(AppSettingsRoute)
-}
-
-fun NavController.navigateToInstructions() {
-    navigate(InstructionsRoute)
-}
-
-fun NavGraphBuilder.appSettingsScreen(
+fun EntryProviderScope<Any>.settingsNavigation(
     onInstructionsSelected: () -> Unit,
-    onBack: () -> Unit,
+    onBack: () -> Unit
 ) {
-    composable<AppSettingsRoute> {
-        AppSettingsRoute(onInstructionsSelected = onInstructionsSelected, onBack = onBack)
+    entry<AppSettingsRoute> {
+        AppSettingsPane(onInstructionsSelected = onInstructionsSelected, onBack = onBack)
     }
-}
-
-fun NavGraphBuilder.instructionsScreen(
-    onBack: () -> Unit,
-) {
-    composable<InstructionsRoute> {
-        InstructionsScreen(onBack = onBack)
+    entry<InstructionsRoute> {
+        InstructionsPane(onBack = onBack)
     }
 }

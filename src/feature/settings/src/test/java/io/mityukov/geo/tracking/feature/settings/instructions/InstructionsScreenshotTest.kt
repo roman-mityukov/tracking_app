@@ -22,7 +22,7 @@ class InstructionsScreenshotTest {
     @Test
     fun initialState() {
         composeTestRule.setContent {
-            InstructionsScreen { }
+            InstructionsPane { }
         }
 
         composeTestRule.onRoot().captureRoboImage()

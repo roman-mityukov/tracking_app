@@ -15,16 +15,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.compose.rememberNavController
 import io.mityukov.geo.tracking.R
 import io.mityukov.geo.tracking.core.designsystem.icon.AppIcons
 import io.mityukov.geo.tracking.feature.map.navigation.MapRoute
+import io.mityukov.geo.tracking.feature.profile.navigation.ProfileHostRoute
+import io.mityukov.geo.tracking.feature.track.list.navigation.TracksHostRoute
 
 private data class HomeNavigationItem(
     val route: Any,
@@ -42,13 +44,13 @@ private fun buildNavigationItems(): List<HomeNavigationItem> {
             label = R.string.home_navigation_map,
         ),
         HomeNavigationItem(
-            route = TracksParentRoute,
+            route = TracksHostRoute,
             selectedIcon = AppIcons.HomeTrackFilled,
             unselectedIcon = AppIcons.HomeTrackOutlined,
             label = R.string.home_navigation_user_tracks,
         ),
         HomeNavigationItem(
-            route = ProfileParentRoute,
+            route = ProfileHostRoute,
             selectedIcon = AppIcons.HomeProfileFilled,
             unselectedIcon = AppIcons.HomeProfileOutlined,
             label = R.string.home_navigation_user_profile,
@@ -56,16 +58,19 @@ private fun buildNavigationItems(): List<HomeNavigationItem> {
     )
 }
 
+@Suppress("ForbiddenComment")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(currentSelectedItem: Any) {
-    val navController = rememberNavController()
+    val backStack = remember {
+        mutableStateListOf<Any>(
+            MapRoute
+        )
+    }
 
     val navigationItems = buildNavigationItems()
-
     val routes = navigationItems.map { it.route }
     var selectedItem by rememberSaveable { mutableIntStateOf(routes.indexOf(currentSelectedItem)) }
-    var oldItem = selectedItem
 
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
@@ -89,24 +94,16 @@ fun HomeScreen(currentSelectedItem: Any) {
                         label = { Text(stringResource(item.label)) },
                         selected = selectedItem == index,
                         onClick = {
-                            if (selectedItem == index) {
-                                navController.navigate(routes[selectedItem]) {
-                                    popUpTo(routes[selectedItem]) {
-                                        inclusive = true
-                                    }
-                                }
-                            } else {
-                                oldItem = selectedItem
+                            // TODO: Здесь нужно уходить из приложения с того экрана, который первый
+                            //  открылся на старте
+                            if (selectedItem != index) {
                                 selectedItem = index
 
-                                navController.navigate(routes[selectedItem]) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                    popUpTo(routes[oldItem]) {
-                                        inclusive = true
-                                        saveState = true
-                                    }
+                                if (backStack.contains(routes[selectedItem])) {
+                                    backStack.remove(routes[selectedItem])
                                 }
+
+                                backStack.add(routes[selectedItem])
                             }
                         }
                     )
@@ -120,7 +117,15 @@ fun HomeScreen(currentSelectedItem: Any) {
                 .padding(bottom = bottomPadding)
                 .consumeWindowInsets(PaddingValues(bottom = bottomPadding))
         ) {
-            HomeNavHost(navController, snackbarHostState)
+            HomeNavHost(
+                backStack = backStack,
+                snackbarHostState = snackbarHostState,
+                onBack = {
+                    backStack.removeLastOrNull()
+                    val topNavKey = backStack.last()
+                    selectedItem = routes.indexOf(topNavKey)
+                },
+            )
         }
     }
 }

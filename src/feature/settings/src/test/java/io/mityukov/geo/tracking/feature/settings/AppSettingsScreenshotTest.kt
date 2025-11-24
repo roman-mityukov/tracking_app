@@ -22,7 +22,7 @@ class AppSettingsScreenshotTest {
     @Test
     fun initialState() {
         composeTestRule.setContent {
-            AppSettingsScreen(
+            AppSettingsContent(
                 geolocationUpdatesIntervalState = GeolocationUpdatesIntervalState.Data(
                     interval = 3.seconds,
                     availableIntervals = listOf(),

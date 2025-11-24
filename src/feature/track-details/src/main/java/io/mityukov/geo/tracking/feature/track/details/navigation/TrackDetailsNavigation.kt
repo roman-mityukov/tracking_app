@@ -1,48 +1,38 @@
 package io.mityukov.geo.tracking.feature.track.details.navigation
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapRoute
-import io.mityukov.geo.tracking.feature.track.details.TrackDetailsRoute
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import io.mityukov.geo.tracking.feature.track.details.TrackDetailsMapPane
+import io.mityukov.geo.tracking.feature.track.details.TrackDetailsHost
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TrackDetailsRoute(val trackId: String)
+data class TrackDetailsRoute(val trackId: String) : NavKey
 
 @Serializable
-data class TrackDetailsMapRoute(val trackId: String)
+data class TrackDetailsMapRoute(val trackId: String) : NavKey
 
-fun NavController.navigateToTrackDetails(trackId: String) {
-    navigate(TrackDetailsRoute(trackId))
-}
-
-fun NavController.navigateToTrackDetailsMap(trackId: String) {
-    navigate(TrackDetailsMapRoute(trackId))
-}
-
-fun NavGraphBuilder.trackDetailsScreen(
-    onTrackMapSelected: (String) -> Unit,
-    onBack: () -> Unit,
+fun EntryProviderScope<Any>.trackDetailsNavigation(
     snackbarHostState: SnackbarHostState,
+    backStack: NavBackStack<NavKey>,
 ) {
-    composable<TrackDetailsRoute>(
-        deepLinks = listOf(navDeepLink {
-            uriPattern = "geoapp://track/{trackId}"
-        })
-    ) {
-        TrackDetailsRoute(
+    val onBack = {
+        backStack.removeLastOrNull()
+        Unit
+    }
+    entry<TrackDetailsRoute> { navKey ->
+        TrackDetailsHost(
+            navKey = navKey,
             onBack = onBack,
-            onTrackMapSelected = onTrackMapSelected,
+            onTrackMapSelected = { trackId ->
+                backStack.add(TrackDetailsMapRoute(trackId))
+            },
             snackbarHostState = snackbarHostState
         )
     }
-}
-
-fun NavGraphBuilder.trackDetailsMapScreen(onBack: () -> Unit) {
-    composable<TrackDetailsMapRoute> {
-        TrackDetailsMapRoute(onBack = onBack)
+    entry<TrackDetailsMapRoute> { navKey ->
+        TrackDetailsMapPane(navKey = navKey, onBack = onBack)
     }
 }

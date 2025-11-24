@@ -33,22 +33,26 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yandex.mapkit.mapview.MapView
 import io.mityukov.geo.tracking.core.designsystem.icon.AppIcons
 import io.mityukov.geo.tracking.core.yandexmap.showTrack
+import io.mityukov.geo.tracking.feature.track.details.navigation.TrackDetailsMapRoute
 import io.mityukov.geo.tracking.core.designsystem.R as designSystemResources
 
 @Composable
-internal fun TrackDetailsMapRoute(
-    viewModel: TrackDetailsMapViewModel = hiltViewModel(),
+internal fun TrackDetailsMapPane(
+    navKey: TrackDetailsMapRoute,
     onBack: () -> Unit,
 ) {
+    val viewModel: TrackDetailsMapViewModel =
+        hiltViewModel<TrackDetailsMapViewModel, TrackDetailsMapViewModel.Factory>(
+            creationCallback = { factory -> factory.create(navKey) }
+        )
     Scaffold(contentWindowInsets = WindowInsets.safeContent) { paddingValues ->
         val viewModelState = viewModel.stateFlow.collectAsStateWithLifecycle()
-
-        TrackDetailsMapScreen(paddingValues, viewModelState.value, onBack)
+        TrackDetailsMapContent(paddingValues, viewModelState.value, onBack)
     }
 }
 
 @Composable
-private fun TrackDetailsMapScreen(
+private fun TrackDetailsMapContent(
     paddingValues: PaddingValues,
     viewModelState: TrackDetailsMapState,
     onBack: () -> Unit,
@@ -127,10 +131,10 @@ private fun TrackDetailsMapScreen(
 
 @Preview
 @Composable
-private fun PreviewTrackDetailsMapScreen(
+private fun PreviewTrackDetailsMapContent(
     @PreviewParameter(provider = TrackDetailsMapStateProvider::class) state: TrackDetailsMapState
 ) {
-    TrackDetailsMapScreen(PaddingValues.Zero, state, {})
+    TrackDetailsMapContent(PaddingValues.Zero, state, {})
 }
 
 private class TrackDetailsMapStateProvider : PreviewParameterProvider<TrackDetailsMapState> {

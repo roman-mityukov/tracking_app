@@ -45,7 +45,7 @@ import io.mityukov.geo.tracking.core.ui.TrackProperties
 import io.mityukov.geo.tracking.core.ui.UiProps
 
 @Composable
-fun TrackCapture(
+fun TrackCapturePane(
     modifier: Modifier = Modifier,
     trackCaptureState: TrackCaptureState,
     onStartCapture: () -> Unit,
@@ -230,8 +230,8 @@ private fun CurrentTrackError(modifier: Modifier = Modifier) {
 @Preview
 @FontScalePreviews
 @Composable
-fun TrackCaptureControlsPreview(@PreviewParameter(TrackCaptureStateProvider::class) state: TrackCaptureState) {
-    TrackCapture(
+fun TrackCapturePaneControlsPreview(@PreviewParameter(TrackCaptureStateProvider::class) state: TrackCaptureState) {
+    TrackCapturePane(
         trackCaptureState = state,
         onStartCapture = {},
         onStopCapture = {},

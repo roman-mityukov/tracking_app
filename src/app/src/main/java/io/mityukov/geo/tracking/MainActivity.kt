@@ -29,8 +29,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        logd("MainActivity::onCreate savedInstanceState $savedInstanceState")
-
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 

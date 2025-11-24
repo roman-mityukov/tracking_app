@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.random.Random
 import kotlin.time.Duration
 
 internal class HardwareGeolocationProviderImpl @Inject constructor(
@@ -25,11 +24,6 @@ internal class HardwareGeolocationProviderImpl @Inject constructor(
 ) :
     GeolocationProvider {
     private val locationManager = context.getSystemService<LocationManager>() as LocationManager
-    private val random = Random.nextLong()
-
-    init {
-        logd("Init HardwareGeolocationProvider id $random")
-    }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override suspend fun getLastKnownLocation(): PlatformLocationUpdateResult =
@@ -45,6 +39,7 @@ internal class HardwareGeolocationProviderImpl @Inject constructor(
                     )
                 )
             } else {
+                this@HardwareGeolocationProviderImpl.logd("lastKnownLocation is null")
                 continuation.resume(
                     PlatformLocationUpdateResult(
                         location = null,
@@ -62,7 +57,7 @@ internal class HardwareGeolocationProviderImpl @Inject constructor(
         callbackFlow {
             val locationListener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
-                    logd("HardwareGeolocationProvider $random emit location $location")
+                    this@HardwareGeolocationProviderImpl.logd("emit location $location")
                     trySendBlocking(
                         PlatformLocationUpdateResult(
                             location = location,
@@ -91,7 +86,6 @@ internal class HardwareGeolocationProviderImpl @Inject constructor(
                 Looper.getMainLooper()
             )
             awaitClose {
-                logd("Deinit HardwareGeolocationProvider id $random")
                 locationManager.removeUpdates(locationListener)
             }
         }

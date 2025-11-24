@@ -257,7 +257,9 @@ private fun TrackItem(
 
 @Preview
 @Composable
-private fun TracksEditingContentPreview(@PreviewParameter(TracksEditingStateProvider::class) state: TracksEditingState) {
+private fun TracksEditingContentPreview(
+    @PreviewParameter(TracksEditingStateProvider::class) state: TracksEditingState
+) {
     TracksEditingContent(
         state = state,
         onDeleteConfirm = {},

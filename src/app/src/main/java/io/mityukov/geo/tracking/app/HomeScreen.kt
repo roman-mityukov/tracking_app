@@ -58,6 +58,7 @@ private fun buildNavigationItems(): List<HomeNavigationItem> {
     )
 }
 
+@Suppress("ForbiddenComment")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(currentSelectedItem: Any) {

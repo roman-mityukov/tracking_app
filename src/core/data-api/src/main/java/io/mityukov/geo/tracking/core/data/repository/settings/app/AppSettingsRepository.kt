@@ -6,6 +6,8 @@ import kotlin.time.Duration
 interface AppSettingsRepository {
     suspend fun switchOnboarding()
     suspend fun setGeolocationUpdatesRate(duration: Duration)
+    suspend fun setAcceptableGeolocationAccuracy(value: Int)
+    suspend fun setAcceptableDeviceSpeed(value: Int)
     suspend fun resetToDefaults()
     val appSettings: Flow<AppSettings>
 }

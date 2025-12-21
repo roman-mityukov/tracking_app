@@ -6,8 +6,14 @@ import kotlin.time.Duration.Companion.seconds
 data class AppSettings(
     val showOnboarding: Boolean,
     val geolocationUpdatesInterval: Duration,
+    val geolocationUpdatesDistance: Int,
+    val acceptableDeviceVelocity: Int,
+    val acceptableLocationAccuracy: Int,
 ) {
     companion object Defaults {
-        val GEOLOCATION_UPDATES_INTERVAL: Duration = 3.seconds
+        val DEFAULT_GEOLOCATION_UPDATES_INTERVAL: Duration = 3.seconds
+        val DEFAULT_GEOLOCATION_UPDATES_DISTANCE: Int = 0 // meters
+        val DEFAULT_ACCEPTABLE_DEVICE_SPEED: Int  = 90 // kilometers per hour
+        val DEFAULT_ACCEPTABLE_LOCATION_ACCURACY: Int = 50 // meters
     }
 }

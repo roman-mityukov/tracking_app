@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import io.mityukov.geo.tracking.core.test.AppTestTag
-import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationUpdatesIntervalState
+import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationSettingsState
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -77,7 +77,7 @@ class AppSettingsTest {
     @Composable
     fun AppSettingsScreenUnderTest(modifier: Modifier = Modifier) {
         AppSettingsContent(
-            geolocationUpdatesIntervalState = GeolocationUpdatesIntervalState.Data(
+            geolocationSettingsState = GeolocationSettingsState.Data(
                 3.seconds,
                 listOf(3.seconds, 4.seconds)
             ),

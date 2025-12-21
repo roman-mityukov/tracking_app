@@ -173,9 +173,9 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                 }
             }
 
-            val geolocationUpdatesInterval =
-                appSettingsRepository.appSettings.first().geolocationUpdatesInterval
-            val geolocationUpdatesMinDistance = 10f
+            val appSettings = appSettingsRepository.appSettings.first()
+            val geolocationUpdatesInterval = appSettings.geolocationUpdatesInterval
+            val geolocationUpdatesMinDistance = appSettings.geolocationUpdatesDistance.toFloat()
 
             geolocationSubscription = coroutineScope.launch {
                 geolocationProvider.locationUpdates(
@@ -235,10 +235,13 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                 if (trackInProgress.lastLocation != null) trackInProgress.lastLocation!!.distanceTo(
                     currentLocation
                 ) else 0f
+
+            val appSettings = appSettingsRepository.appSettings.first()
+
             val isAcceptableDistance =
-                if (lastLocation != null) distance < ((currentLocation.time - lastLocation.time) / 1000) * 15 else true
+                if (lastLocation != null) distance < (currentLocation.time - lastLocation.time).toSeconds() * appSettings.acceptableDeviceVelocity.toMetersPerSeconds() else true
             val isAcceptableAccuracy =
-                currentLocation.hasAccuracy() && currentLocation.accuracy < 50
+                currentLocation.hasAccuracy() && currentLocation.accuracy < appSettings.acceptableLocationAccuracy
             val isAcceptableTime = (System.currentTimeMillis() - currentLocation.time) < 60 * 1000
             val isAcceptable = isAcceptableDistance && isAcceptableAccuracy && isAcceptableTime
 
@@ -286,7 +289,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                     )
                 }
                 trackCaptureStatusRepository.update(TrackCaptureStatus.Run(newTrackInProgress))
-                logd("accept location $newTrackInProgress")
+                logd("accept location $newTrackInProgress accuracy ${currentLocation.accuracy} speed ${currentLocation.speed}")
             } else {
                 logw(
                     "don\'t accept location $currentLocation " +
@@ -298,6 +301,14 @@ internal class TrackCapturerControllerImpl @Inject constructor(
             }
         }
     }
+}
+
+private fun Long.toSeconds(): Float {
+    return this / 1000f
+}
+
+private fun Int.toMetersPerSeconds(): Float {
+    return this * 1000f / 3600f
 }
 
 private fun Location.toDomainGeolocation(): Geolocation {

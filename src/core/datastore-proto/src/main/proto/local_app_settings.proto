@@ -6,4 +6,7 @@ option java_multiple_files = true;
 message ProtoLocalAppSettings {
   int32 showOnboarding = 1;
   int32 geolocationUpdatesRateSeconds = 2;
+  int32 geolocationUpdatesDistance = 3;
+  int32 acceptableDeviceSpeed = 4;
+  int32 acceptableLocationAccuracy = 5;
 }

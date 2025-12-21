@@ -41,7 +41,7 @@ class AppSettingsRepositoryTest {
         appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding)
-            assert(localAppSettings.geolocationUpdatesInterval == AppSettings.Defaults.GEOLOCATION_UPDATES_INTERVAL)
+            assert(localAppSettings.geolocationUpdatesInterval == AppSettings.Defaults.DEFAULT_GEOLOCATION_UPDATES_INTERVAL)
         }
     }
 
@@ -51,7 +51,7 @@ class AppSettingsRepositoryTest {
         appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding.not())
-            assert(localAppSettings.geolocationUpdatesInterval == AppSettings.Defaults.GEOLOCATION_UPDATES_INTERVAL)
+            assert(localAppSettings.geolocationUpdatesInterval == AppSettings.Defaults.DEFAULT_GEOLOCATION_UPDATES_INTERVAL)
         }
     }
 
@@ -80,7 +80,7 @@ class AppSettingsRepositoryTest {
         appSettingsRepository.appSettings.test {
             val localAppSettings = awaitItem()
             assert(localAppSettings.showOnboarding)
-            assert(localAppSettings.geolocationUpdatesInterval == AppSettings.Defaults.GEOLOCATION_UPDATES_INTERVAL)
+            assert(localAppSettings.geolocationUpdatesInterval == AppSettings.Defaults.DEFAULT_GEOLOCATION_UPDATES_INTERVAL)
         }
     }
 }

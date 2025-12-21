@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
+import android.os.PowerManager
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -16,16 +17,19 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [28])
 class HardwareGeolocationProviderTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
     private lateinit var provider: HardwareGeolocationProviderImpl
     private lateinit var locationManager: LocationManager
+    private lateinit var powerManager: PowerManager
     private lateinit var context: Context
     private val interval = 1.seconds
     private val minDistance = 10f
@@ -35,6 +39,7 @@ class HardwareGeolocationProviderTest {
         context = ApplicationProvider.getApplicationContext()
         provider = HardwareGeolocationProviderImpl(context)
         locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     }
 
     @Test
@@ -103,7 +108,7 @@ class HardwareGeolocationProviderTest {
 
         val job = launch {
             provider.locationUpdates(interval, minDistance)
-                .collect {  }
+                .collect { }
         }
         advanceTimeBy(100)
         assert(shadowLocationManager.getRequestLocationUpdateListeners().size == 1)

@@ -93,6 +93,7 @@ internal fun AppSettingsContent(
 
 @Preview
 @Composable
+@Suppress("MagicNumber")
 internal fun AppSettingsContentPreview() {
     AppSettingsContent(
         geolocationSettingsState = GeolocationSettingsState.Data(

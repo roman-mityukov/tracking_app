@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package io.mityukov.geo.tracking.feature.settings.geolocation
 
 import androidx.lifecycle.ViewModel

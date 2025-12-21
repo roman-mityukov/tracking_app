@@ -12,8 +12,8 @@ data class AppSettings(
 ) {
     companion object Defaults {
         val DEFAULT_GEOLOCATION_UPDATES_INTERVAL: Duration = 3.seconds
-        val DEFAULT_GEOLOCATION_UPDATES_DISTANCE: Int = 0 // meters
-        val DEFAULT_ACCEPTABLE_DEVICE_SPEED: Int  = 90 // kilometers per hour
-        val DEFAULT_ACCEPTABLE_LOCATION_ACCURACY: Int = 50 // meters
+        const val DEFAULT_GEOLOCATION_UPDATES_DISTANCE: Int = 0 // meters
+        const val DEFAULT_ACCEPTABLE_DEVICE_SPEED: Int  = 90 // kilometers per hour
+        const val DEFAULT_ACCEPTABLE_LOCATION_ACCURACY: Int = 50 // meters
     }
 }

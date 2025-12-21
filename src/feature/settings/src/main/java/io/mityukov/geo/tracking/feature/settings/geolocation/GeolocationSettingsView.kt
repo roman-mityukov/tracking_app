@@ -39,138 +39,92 @@ internal fun GeolocationSettingsView(
                 text = stringResource(R.string.feature_settings_geolocation_alert_label),
                 color = Color.Red,
             )
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.feature_settings_geolocation_updates_rate_label)
-                    )
-                },
-                trailingContent = {
-                    val selectedInterval = state.interval
-                    val availableIntervals = state.availableIntervals
-                    var expanded by remember { mutableStateOf(false) }
-
-                    Box(
-                        modifier = Modifier
-                            .wrapContentSize(Alignment.TopStart)
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = selectedInterval.inWholeSeconds.toString(),
-                            modifier = Modifier
-                                .testTag(AppTestTag.DROPDOWN_GEOLOCATIONS_UPDATES_INTERVAL)
-                                .clickable { expanded = true }
-                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                                .padding(8.dp)
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            availableIntervals.forEach { interval ->
-                                DropdownMenuItem(
-                                    modifier = Modifier.testTag(AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_UPDATES_INTERVAL),
-                                    text = { Text(interval.inWholeSeconds.toString()) },
-                                    onClick = {
-                                        expanded = false
-                                        onIntervalSelect(interval)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
+            GeolocationSettingDropdownMenu(
+                label = stringResource(R.string.feature_settings_geolocation_updates_rate_label),
+                parentTestTag = AppTestTag.DROPDOWN_GEOLOCATIONS_UPDATES_INTERVAL,
+                itemTestTag = AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_UPDATES_INTERVAL,
+                currentValue = state.interval,
+                availableValues = state.availableIntervals,
+                onSelect = { value ->
+                    onIntervalSelect(value)
+                }
             )
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.feature_settings_geolocation_acceptable_accuracy_label)
-                    )
-                },
-                trailingContent = {
-                    val selectedAccuracy = state.accuracy
-                    val availableAccuracy = state.availableAccuracy
-                    var expanded by remember { mutableStateOf(false) }
-
-                    Box(
-                        modifier = Modifier
-                            .wrapContentSize(Alignment.TopStart)
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = selectedAccuracy.toString(),
-                            modifier = Modifier
-                                .testTag(AppTestTag.DROPDOWN_GEOLOCATIONS_ACCURACY)
-                                .clickable { expanded = true }
-                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                                .padding(8.dp)
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            availableAccuracy.forEach { accuracy ->
-                                DropdownMenuItem(
-                                    modifier = Modifier.testTag(AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_ACCURACY),
-                                    text = { Text(accuracy.toString()) },
-                                    onClick = {
-                                        expanded = false
-                                        onAcceptableAccuracySelect(accuracy)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
+            GeolocationSettingDropdownMenu(
+                label = stringResource(R.string.feature_settings_geolocation_acceptable_accuracy_label),
+                parentTestTag = AppTestTag.DROPDOWN_GEOLOCATIONS_ACCURACY,
+                itemTestTag = AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_ACCURACY,
+                currentValue = state.accuracy,
+                availableValues = state.availableAccuracy,
+                onSelect = { value ->
+                    onAcceptableAccuracySelect(value)
+                }
             )
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.feature_settings_geolocation_acceptable_speed_label)
-                    )
-                },
-                trailingContent = {
-                    var expanded by remember { mutableStateOf(false) }
-
-                    Box(
-                        modifier = Modifier
-                            .wrapContentSize(Alignment.TopStart)
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = state.acceptableSpeed.toString(),
-                            modifier = Modifier
-                                .testTag(AppTestTag.DROPDOWN_GEOLOCATIONS_SPEED)
-                                .clickable { expanded = true }
-                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                                .padding(8.dp)
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            state.availableAcceptableSpeed.forEach { speed ->
-                                DropdownMenuItem(
-                                    modifier = Modifier.testTag(AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_SPEED),
-                                    text = { Text(speed.toString()) },
-                                    onClick = {
-                                        expanded = false
-                                        onAcceptableSpeedSelect(speed)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
+            GeolocationSettingDropdownMenu(
+                label = stringResource(R.string.feature_settings_geolocation_acceptable_speed_label),
+                parentTestTag = AppTestTag.DROPDOWN_GEOLOCATIONS_SPEED,
+                itemTestTag = AppTestTag.DROPDOWN_ITEM_GEOLOCATIONS_SPEED,
+                currentValue = state.acceptableSpeed,
+                availableValues = state.availableAcceptableSpeed,
+                onSelect = { value ->
+                    onAcceptableSpeedSelect(value)
+                }
             )
-
         }
 
         GeolocationSettingsState.Pending -> {
             // no op
         }
     }
+}
+
+@Composable
+private fun <T> GeolocationSettingDropdownMenu(
+    label: String,
+    parentTestTag: String,
+    itemTestTag: String,
+    currentValue: T,
+    availableValues: List<T>,
+    onSelect: (T) -> Unit,
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = label
+            )
+        },
+        trailingContent = {
+            var expanded by remember { mutableStateOf(false) }
+
+            Box(
+                modifier = Modifier
+                    .wrapContentSize(Alignment.TopStart)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = currentValue.toString(),
+                    modifier = Modifier
+                        .testTag(parentTestTag)
+                        .clickable { expanded = true }
+                        .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                        .padding(8.dp)
+                )
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    availableValues.forEach { value ->
+                        DropdownMenuItem(
+                            modifier = Modifier.testTag(itemTestTag),
+                            text = { Text(value.toString()) },
+                            onClick = {
+                                expanded = false
+                                onSelect(value)
+                            }
+                        )
+                    }
+                }
+            }
+        },
+    )
 }

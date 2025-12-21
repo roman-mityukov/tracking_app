@@ -16,30 +16,38 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.mityukov.geo.tracking.core.designsystem.component.ButtonBack
-import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationUpdatesIntervalEvent
-import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationUpdatesIntervalState
-import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationUpdatesIntervalView
-import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationUpdatesIntervalViewModel
+import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationSettingsEvent
+import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationSettingsState
+import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationSettingsView
+import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationSettingsViewModel
 import io.mityukov.geo.tracking.feature.settings.instructions.InstructionsView
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun AppSettingsPane(
-    geolocationUpdatesIntervalViewModel: GeolocationUpdatesIntervalViewModel = hiltViewModel(),
+    geolocationSettingsViewModel: GeolocationSettingsViewModel = hiltViewModel(),
     onInstructionsSelected: () -> Unit,
     onBack: () -> Unit,
 ) {
     val geolocationUpdatesIntervalState =
-        geolocationUpdatesIntervalViewModel.stateFlow.collectAsStateWithLifecycle()
+        geolocationSettingsViewModel.stateFlow.collectAsStateWithLifecycle()
     AppSettingsContent(
-        geolocationUpdatesIntervalState = geolocationUpdatesIntervalState.value,
+        geolocationSettingsState = geolocationUpdatesIntervalState.value,
         onInstructionsSelect = onInstructionsSelected,
         onIntervalSelect = { interval ->
-            geolocationUpdatesIntervalViewModel.add(
-                GeolocationUpdatesIntervalEvent.SelectInterval(
-                    interval
-                )
+            geolocationSettingsViewModel.add(
+                GeolocationSettingsEvent.SelectInterval(interval)
+            )
+        },
+        onAccuracySelect = { accuracy ->
+            geolocationSettingsViewModel.add(
+                GeolocationSettingsEvent.SelectAccuracy(accuracy)
+            )
+        },
+        onSpeedSelect = { velocity ->
+            geolocationSettingsViewModel.add(
+                GeolocationSettingsEvent.SelectSpeed(velocity)
             )
         },
         onBack = onBack,
@@ -49,9 +57,11 @@ internal fun AppSettingsPane(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AppSettingsContent(
-    geolocationUpdatesIntervalState: GeolocationUpdatesIntervalState,
+    geolocationSettingsState: GeolocationSettingsState,
     onInstructionsSelect: () -> Unit,
     onIntervalSelect: (Duration) -> Unit,
+    onAccuracySelect: (Int) -> Unit,
+    onSpeedSelect: (Int) -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -71,9 +81,11 @@ internal fun AppSettingsContent(
                 .consumeWindowInsets(paddingValues)
         ) {
             InstructionsView(onInstructionsSelect)
-            GeolocationUpdatesIntervalView(
-                state = geolocationUpdatesIntervalState,
-                onIntervalSelect = onIntervalSelect
+            GeolocationSettingsView(
+                state = geolocationSettingsState,
+                onIntervalSelect = onIntervalSelect,
+                onAcceptableAccuracySelect = onAccuracySelect,
+                onAcceptableSpeedSelect = onSpeedSelect,
             )
         }
     }
@@ -81,14 +93,21 @@ internal fun AppSettingsContent(
 
 @Preview
 @Composable
+@Suppress("MagicNumber")
 internal fun AppSettingsContentPreview() {
     AppSettingsContent(
-        geolocationUpdatesIntervalState = GeolocationUpdatesIntervalState.Data(
+        geolocationSettingsState = GeolocationSettingsState.Data(
             interval = 3.seconds,
-            availableIntervals = listOf(3.seconds, 5.seconds)
+            availableIntervals = listOf(3.seconds, 5.seconds),
+            accuracy = 0,
+            availableAccuracy = listOf(0, 10),
+            acceptableSpeed = 10,
+            availableAcceptableSpeed = listOf(0, 10),
         ),
         onInstructionsSelect = {},
         onIntervalSelect = {},
+        onAccuracySelect = {},
+        onSpeedSelect = {},
         onBack = {}
     )
 }

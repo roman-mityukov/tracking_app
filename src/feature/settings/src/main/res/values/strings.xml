@@ -5,5 +5,10 @@
     <string name="feature_settings_instructions_title">Инструкции</string>
     <string name="feature_settings_instructions_description">Настройка стабильной работы геолокации</string>
     <string name="feature_settings_instructions_content">1. Дайте для этого приложения разрешение \"Местоположение\". Это позволит получать геолокацию устройства и записывать трек. \n\n2. Отключите для приложения оптимизации батареи - система не будет ограничивать работу приложения и трек будет записываться точнее.</string>
+
+    <string name="feature_settings_geolocation_alert_label">Будут применены только для новой записи трека</string>
     <string name="feature_settings_geolocation_updates_rate_label">Интервал обновления трека, секунды</string>
+    <string name="feature_settings_geolocation_updates_distance_label">Минимальный интервал обновления трека, метры</string>
+    <string name="feature_settings_geolocation_acceptable_accuracy_label">Минимальная допустимая точность определения геолокации, метры</string>
+    <string name="feature_settings_geolocation_acceptable_speed_label">Максимальная скорость устройства, километры в час</string>
 </resources>

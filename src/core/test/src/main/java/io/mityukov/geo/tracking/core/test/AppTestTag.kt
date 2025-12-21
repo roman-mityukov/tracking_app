@@ -21,7 +21,11 @@ object AppTestTag {
     const val BUTTON_DELETE = "ButtonDelete"
     const val BUTTON_INSTRUCTIONS = "ButtonInstructions"
     const val DROPDOWN_GEOLOCATIONS_UPDATES_INTERVAL = "DropdownGeolocationsUpdatesInterval"
+    const val DROPDOWN_GEOLOCATIONS_ACCURACY = "DropdownGeolocationsAccuracy"
+    const val DROPDOWN_GEOLOCATIONS_SPEED = "DropdownGeolocationsVelocity"
     const val DROPDOWN_ITEM_GEOLOCATIONS_UPDATES_INTERVAL = "DropdownItemGeolocationsUpdatesInterval"
+    const val DROPDOWN_ITEM_GEOLOCATIONS_ACCURACY = "DropdownItemGeolocationsAccuracy"
+    const val DROPDOWN_ITEM_GEOLOCATIONS_SPEED = "DropdownItemGeolocationsVelocity"
     const val DIALOG_DELETE = "DialogDelete"
     const val TRACK_ITEM = "TrackItem"
 }

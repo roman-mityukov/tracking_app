@@ -12,6 +12,7 @@ import io.mityukov.geo.tracking.core.common.di.DispatcherIO
 import io.mityukov.geo.tracking.core.data.permission.PermissionChecker
 import io.mityukov.geo.tracking.core.data.repository.geo.GeolocationProvider
 import io.mityukov.geo.tracking.core.data.repository.geo.PlatformLocationUpdateResult
+import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettings
 import io.mityukov.geo.tracking.core.data.repository.settings.app.AppSettingsRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.model.geo.Geolocation
@@ -31,6 +32,47 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
+interface LocationChecker {
+    fun isAcceptableLocation(
+        appSettings: AppSettings,
+        currentLocation: Location,
+        trackInProgress: TrackInProgress
+    ): Boolean
+}
+
+class LocationCheckerImpl @Inject constructor() : LocationChecker {
+    override fun isAcceptableLocation(
+        appSettings: AppSettings,
+        currentLocation: Location,
+        trackInProgress: TrackInProgress
+    ): Boolean {
+        val lastLocation = trackInProgress.lastLocation
+        return if (lastLocation == null) {
+            true
+        } else {
+            val distance = lastLocation.distanceTo(currentLocation)
+            val acceptableDistance = (currentLocation.time - lastLocation.time).toSeconds() *
+                    appSettings.acceptableDeviceVelocity.toMetersPerSeconds()
+
+            val isAcceptableDistance = distance < acceptableDistance
+            val isAcceptableAccuracy =
+                currentLocation.hasAccuracy() && currentLocation.accuracy < appSettings.acceptableLocationAccuracy
+            val isAcceptableTime = (System.currentTimeMillis() - currentLocation.time) < 60 * 1000
+            val isAcceptable = isAcceptableDistance && isAcceptableAccuracy && isAcceptableTime
+
+            logw(
+                "isAcceptableLocation $isAcceptable location $currentLocation" +
+                        " isAcceptableAccuracy $isAcceptableAccuracy ${currentLocation.accuracy}" +
+                        " isAcceptableDistance $isAcceptableDistance fact $distance acceptable $acceptableDistance" +
+                        " isAcceptableTime $isAcceptableTime system ${System.currentTimeMillis()} " +
+                        "location ${currentLocation.time}"
+            )
+
+            isAcceptable
+        }
+    }
+}
+
 internal class TrackCapturerControllerImpl @Inject constructor(
     @param:ApplicationContext private val applicationContext: Context,
     @param:DispatcherIO private val coroutineContext: CoroutineDispatcher,
@@ -39,6 +81,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
     private val geolocationProvider: GeolocationProvider,
     private val appSettingsRepository: AppSettingsRepository,
     private val permissionChecker: PermissionChecker,
+    private val locationChecker: LocationChecker,
 ) : TrackCapturerController {
     override val status: Flow<TrackCaptureStatus> = trackCaptureStatusRepository.status
 
@@ -53,6 +96,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
     )
     override suspend fun bind() = withContext(coroutineContext) {
         mutex.withLock {
+            this@TrackCapturerControllerImpl.logd("bind")
             val captureStatus = trackCaptureStatusRepository.status.first()
             if (captureStatus is TrackCaptureStatus.Run && geolocationSubscription == null) {
                 launchTrackCapture()
@@ -66,6 +110,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun start() = withContext(coroutineContext) {
         mutex.withLock {
+            this@TrackCapturerControllerImpl.logd("start")
             val captureStatus = trackCaptureStatusRepository.status.first()
 
             when (captureStatus) {
@@ -82,6 +127,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
 
     override suspend fun resume() = withContext(coroutineContext) {
         mutex.withLock {
+            this@TrackCapturerControllerImpl.logd("resume")
             val captureStatus = trackCaptureStatusRepository.status.first()
             when (captureStatus) {
                 TrackCaptureStatus.Error, TrackCaptureStatus.Idle -> {
@@ -104,6 +150,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
 
     override suspend fun pause() = withContext(coroutineContext) {
         mutex.withLock {
+            this@TrackCapturerControllerImpl.logd("pause")
             val captureStatus = trackCaptureStatusRepository.status.first()
             when (captureStatus) {
                 TrackCaptureStatus.Error, TrackCaptureStatus.Idle -> {
@@ -126,6 +173,7 @@ internal class TrackCapturerControllerImpl @Inject constructor(
 
     override suspend fun stop() = withContext(coroutineContext) {
         mutex.withLock {
+            this@TrackCapturerControllerImpl.logd("stop")
             val captureStatus = trackCaptureStatusRepository.status.first()
             when (captureStatus) {
                 TrackCaptureStatus.Idle, TrackCaptureStatus.Error -> {
@@ -173,9 +221,9 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                 }
             }
 
-            val geolocationUpdatesInterval =
-                appSettingsRepository.appSettings.first().geolocationUpdatesInterval
-            val geolocationUpdatesMinDistance = 10f
+            val appSettings = appSettingsRepository.appSettings.first()
+            val geolocationUpdatesInterval = appSettings.geolocationUpdatesInterval
+            val geolocationUpdatesMinDistance = appSettings.geolocationUpdatesDistance.toFloat()
 
             geolocationSubscription = coroutineScope.launch {
                 geolocationProvider.locationUpdates(
@@ -183,10 +231,12 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                     geolocationUpdatesMinDistance,
                 )
                     .collect { result ->
-                        this@TrackCapturerControllerImpl.logd(
-                            "locationCallback geolocation" +
-                                    " ${result.location} error ${result.error}"
-                        )
+                        if (result.error != null) {
+                            this@TrackCapturerControllerImpl.logw(
+                                "locationCallback geolocation" + " ${result.location} error ${result.error}"
+                            )
+                        }
+
                         val captureStatus = trackCaptureStatusRepository.status.first()
 
                         if (captureStatus is TrackCaptureStatus.Run) {
@@ -231,16 +281,9 @@ internal class TrackCapturerControllerImpl @Inject constructor(
         update.location?.let { currentLocation ->
             val lastLocation = trackInProgress.lastLocation
             val isFirstPoint = lastLocation == null
-            val distance =
-                if (trackInProgress.lastLocation != null) trackInProgress.lastLocation!!.distanceTo(
-                    currentLocation
-                ) else 0f
-            val isAcceptableDistance =
-                if (lastLocation != null) distance < ((currentLocation.time - lastLocation.time) / 1000) * 15 else true
-            val isAcceptableAccuracy =
-                currentLocation.hasAccuracy() && currentLocation.accuracy < 50
-            val isAcceptableTime = (System.currentTimeMillis() - currentLocation.time) < 60 * 1000
-            val isAcceptable = isAcceptableDistance && isAcceptableAccuracy && isAcceptableTime
+
+            val appSettings = appSettingsRepository.appSettings.first()
+            val isAcceptable = locationChecker.isAcceptableLocation(appSettings, currentLocation, trackInProgress)
 
             if (isFirstPoint || isAcceptable) {
                 tracksRepository.createTrackPoint(currentLocation.toDomainGeolocation())
@@ -286,18 +329,19 @@ internal class TrackCapturerControllerImpl @Inject constructor(
                     )
                 }
                 trackCaptureStatusRepository.update(TrackCaptureStatus.Run(newTrackInProgress))
-                logd("accept location $newTrackInProgress")
-            } else {
-                logw(
-                    "don\'t accept location $currentLocation " +
-                            " isAcceptableAccuracy $isAcceptableAccuracy ${currentLocation.accuracy}" +
-                            " isAcceptableDistance $isAcceptableDistance $distance" +
-                            " isAcceptableTime $isAcceptableTime system ${System.currentTimeMillis()} " +
-                            "location ${currentLocation.time}"
-                )
             }
         }
     }
+}
+
+private fun Long.toSeconds(): Float {
+    return this / 1000f
+}
+
+private fun Int.toMetersPerSeconds(): Float {
+    val secondsInHour = 3600
+    val metersInKilometers = 1000
+    return this.toFloat() * metersInKilometers / secondsInHour
 }
 
 private fun Location.toDomainGeolocation(): Geolocation {

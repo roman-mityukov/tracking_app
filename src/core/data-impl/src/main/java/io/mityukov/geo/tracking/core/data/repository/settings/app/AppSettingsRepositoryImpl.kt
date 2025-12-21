@@ -23,10 +23,21 @@ internal class AppSettingsRepositoryImpl @Inject constructor(
         AppSettings(
             showOnboarding = proto.showOnboarding == 0,
             geolocationUpdatesInterval = if (proto.geolocationUpdatesRateSeconds == 0) {
-                AppSettings.Defaults.GEOLOCATION_UPDATES_INTERVAL
+                AppSettings.DEFAULT_GEOLOCATION_UPDATES_INTERVAL
             } else {
                 proto.geolocationUpdatesRateSeconds.seconds
             },
+            geolocationUpdatesDistance = proto.geolocationUpdatesDistance,
+            acceptableDeviceVelocity = if (proto.acceptableDeviceSpeed == 0) {
+                AppSettings.DEFAULT_ACCEPTABLE_DEVICE_SPEED
+            } else {
+                proto.acceptableDeviceSpeed
+            },
+            acceptableLocationAccuracy = if (proto.acceptableLocationAccuracy == 0) {
+                AppSettings.DEFAULT_ACCEPTABLE_LOCATION_ACCURACY
+            } else {
+                proto.acceptableLocationAccuracy
+            }
         )
     }
     private val mutex = Mutex()
@@ -70,14 +81,51 @@ internal class AppSettingsRepositoryImpl @Inject constructor(
             }
         }
 
+    override suspend fun setAcceptableDeviceSpeed(value: Int) =
+        withContext(coroutineDispatcher) {
+            mutex.withLock {
+                val proto = dataStore.data.first()
+
+                val newLocalAppSettings = ProtoLocalAppSettings
+                    .newBuilder(proto)
+                    .setAcceptableDeviceSpeed(value)
+                    .build()
+
+                dataStore.updateData {
+                    newLocalAppSettings
+                }
+                Unit
+            }
+        }
+
+    override suspend fun setAcceptableGeolocationAccuracy(value: Int) =
+        withContext(coroutineDispatcher) {
+            mutex.withLock {
+                val proto = dataStore.data.first()
+
+                val newLocalAppSettings = ProtoLocalAppSettings
+                    .newBuilder(proto)
+                    .setAcceptableLocationAccuracy(value)
+                    .build()
+
+                dataStore.updateData {
+                    newLocalAppSettings
+                }
+                Unit
+            }
+        }
+
     override suspend fun resetToDefaults() = withContext(coroutineDispatcher) {
         mutex.withLock {
             dataStore.updateData {
                 ProtoLocalAppSettings
                     .newBuilder()
                     .setShowOnboarding(0)
+                    .setAcceptableLocationAccuracy(AppSettings.DEFAULT_ACCEPTABLE_LOCATION_ACCURACY)
+                    .setAcceptableDeviceSpeed(AppSettings.DEFAULT_ACCEPTABLE_DEVICE_SPEED)
+                    .setGeolocationUpdatesDistance(AppSettings.DEFAULT_GEOLOCATION_UPDATES_DISTANCE)
                     .setGeolocationUpdatesRateSeconds(
-                        AppSettings.Defaults.GEOLOCATION_UPDATES_INTERVAL.inWholeSeconds.toInt()
+                        AppSettings.Defaults.DEFAULT_GEOLOCATION_UPDATES_INTERVAL.inWholeSeconds.toInt()
                     )
                     .build()
             }

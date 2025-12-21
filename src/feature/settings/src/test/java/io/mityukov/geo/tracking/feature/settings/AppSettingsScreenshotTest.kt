@@ -2,8 +2,10 @@ package io.mityukov.geo.tracking.feature.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
-import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationUpdatesIntervalState
+import com.github.takahirom.roborazzi.captureRoboImage
+import io.mityukov.geo.tracking.feature.settings.geolocation.GeolocationSettingsState
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,14 +25,22 @@ class AppSettingsScreenshotTest {
     fun initialState() {
         composeTestRule.setContent {
             AppSettingsContent(
-                geolocationUpdatesIntervalState = GeolocationUpdatesIntervalState.Data(
+                geolocationSettingsState = GeolocationSettingsState.Data(
                     interval = 3.seconds,
-                    availableIntervals = listOf(),
+                    availableIntervals = listOf(3.seconds, 5.seconds),
+                    accuracy = 0,
+                    availableAccuracy = listOf(0, 10),
+                    acceptableSpeed = 10,
+                    availableAcceptableSpeed = listOf(0, 10),
                 ),
-                onIntervalSelect = {},
                 onInstructionsSelect = {},
+                onIntervalSelect = {},
+                onAccuracySelect = {},
+                onSpeedSelect = {},
                 onBack = {}
             )
         }
+
+        composeTestRule.onRoot().captureRoboImage()
     }
 }

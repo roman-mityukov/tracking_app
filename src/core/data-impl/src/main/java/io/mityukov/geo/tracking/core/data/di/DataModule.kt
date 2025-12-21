@@ -23,6 +23,8 @@ import io.mityukov.geo.tracking.core.data.repository.track.TracksRawLocalDataSou
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRawLocalDataSourceImpl
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepository
 import io.mityukov.geo.tracking.core.data.repository.track.TracksRepositoryImpl
+import io.mityukov.geo.tracking.core.data.repository.track.capture.LocationChecker
+import io.mityukov.geo.tracking.core.data.repository.track.capture.LocationCheckerImpl
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusProvider
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepository
 import io.mityukov.geo.tracking.core.data.repository.track.capture.TrackCaptureStatusRepositoryImpl
@@ -71,6 +73,10 @@ abstract class DataModule {
     internal abstract fun bindTrackCaptureController(
         impl: TrackCapturerControllerImpl
     ): TrackCapturerController
+
+    @Singleton
+    @Binds
+    internal abstract fun bindLocationChecker(impl: LocationCheckerImpl): LocationChecker
 
     @Singleton
     @Binds
